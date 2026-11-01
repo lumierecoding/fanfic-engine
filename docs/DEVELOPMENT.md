@@ -88,3 +88,18 @@ Names are normalised once and remembered (`Memo` in `Search.swift`), the sidebar
 ## Releasing
 
 `./scripts/build-app.sh` produces an ad-hoc signed app that runs on the Mac that built it. Distributing a ready-made download to other people would need a Developer ID certificate and notarization (a paid Apple Developer account); until then, users build from source.
+
+## Windows and Linux version (`desktop/`)
+
+A Python + Qt (PySide6) port, labelled alpha because it is only tested on macOS. `fanficpairings.core` is a line-by-line port of `FanficCore` (same rules, same `library.json`), `fanficpairings.ui` is the Qt window (rules W1–W14 in [ui-spec-desktop.md](ui-spec-desktop.md)). PDFs are read, copied and previewed with PDFium (pypdfium2); EPUB first pages are drawn with Qt's PDF writer.
+
+```sh
+cd desktop
+uv run pytest                        # 32 tests on ../Fixtures, same expected results as the Swift tests
+uv run fanfic-pairings --library-path /tmp/test-library --import ../Fixtures
+```
+
+If the source lives in iCloud Drive, keep the environment elsewhere: `UV_PROJECT_ENVIRONMENT=~/Library/Developer/FanficPairings/desktop-venv PYTHONDONTWRITEBYTECODE=1 uv run pytest -p no:cacheprovider`.
+
+When you change a reading or search rule, change it in both `Sources/FanficCore` and `desktop/src/fanficpairings/core`, and run both test suites.
+

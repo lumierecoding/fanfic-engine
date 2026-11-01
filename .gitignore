@@ -12,3 +12,11 @@ DerivedData/
 
 # macOS
 .DS_Store
+
+# Python (desktop/)
+__pycache__/
+*.pyc
+.pytest_cache/
+.venv/
+*.egg-info/
+desktop/dist/

@@ -11,3 +11,8 @@
 .DS_Store
 # The git copy's own repository:
 /.git/
+# Python caches:
+__pycache__/
+.pytest_cache/
+.venv/
+*.egg-info/

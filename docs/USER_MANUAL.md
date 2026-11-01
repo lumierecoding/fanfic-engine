@@ -19,6 +19,7 @@ Fanfic Pairings keeps a library of the fanfics you have downloaded and lets you 
 13. [Privacy](#13-privacy)
 14. [Troubleshooting and questions](#14-troubleshooting-and-questions)
 15. [Uninstalling](#15-uninstalling)
+16. [Windows and Linux (alpha)](#16-windows-and-linux-alpha)
 
 ---
 
@@ -214,3 +215,23 @@ The app keeps the unreadable file as `library-unreadable-<date>.json` in the lib
 1. Quit the app and move **Fanfic Pairings** from Applications to the Trash.
 2. To remove your library too, delete `~/Library/Application Support/Fanfic Pairings` (this deletes the copies of your fanfics and first pages, not your originals).
 3. To remove its settings, run `defaults delete io.github.lumierecoding.fanficpairings` in Terminal.
+
+## 16. Windows and Linux (alpha)
+
+> **Alpha — not tested on Windows or Linux.** The Windows/Linux version is developed and tested on macOS only. Installation: [desktop/README.md](../desktop/README.md).
+
+It works like the Mac app described above — same reading rules, search, sidebar lists, Settings and library folder — with these differences:
+
+| Mac app | Windows / Linux version |
+| --- | --- |
+| Menus in the Mac menu bar | Menu bar inside the window: **File** (Add Files… Ctrl+O, Re-read Library, Show Library Folder, Settings… Ctrl+,, Quit Ctrl+Q) and **Help** (About) |
+| Show in Finder | **Show in Explorer** (Windows), **Show in Folder** (Linux: opens the folder) |
+| Number of fanfics under the window title | In the **status bar** at the bottom |
+| — | A **notice bar** under the toolbar says it is an alpha; × hides it until the next start |
+| Library in `~/Library/Application Support/Fanfic Pairings` | Windows `%APPDATA%\Fanfic Pairings`, Linux `~/.local/share/Fanfic Pairings` |
+| Settings in the Mac app's preferences | Windows registry `HKEY_CURRENT_USER\Software\Fanfic Pairings`; Linux `~/.config/Fanfic Pairings/Fanfic Pairings.conf` |
+
+Both versions write the same `library.json`, so a library folder can be moved between a Mac and a Windows or Linux computer. Don't open the same library folder in two apps at the same time.
+
+![The Windows/Linux version with a fandom selected (shown running on macOS)](images/desktop-fandom-search-dark.png)
+

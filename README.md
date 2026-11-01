@@ -21,6 +21,7 @@ Give it the EPUB or PDF files you downloaded (for example from AO3). It reads th
 
 - macOS 15 or later (developed and tested on macOS 27, Apple Silicon)
 - To build it: Xcode 16 or later, or its Command Line Tools (`xcode-select --install`)
+- Windows or Linux: see [Windows and Linux (Alpha)](#windows-and-linux-alpha)
 
 ## Install
 
@@ -41,6 +42,14 @@ The script builds the app, signs it for your Mac (ad-hoc, no Apple account or pa
 3. Type a pairing into the search field at the top right, or open **Fandoms**, **Characters** or **Pairings** in the sidebar by clicking their names.
 
 The [user manual](docs/USER_MANUAL.md) explains everything in detail.
+
+## Windows and Linux (Alpha)
+
+There is also a version for **Windows and Linux**, written in Python with Qt, in [`desktop/`](desktop/README.md). It reads files exactly like the Mac app and uses the same library format.
+
+> **Alpha — not tested on Windows or Linux.** It is developed and tested on macOS only. Please report problems.
+
+Install it with `uv tool install "git+https://github.com/lumierecoding/fanfic-pairings#subdirectory=desktop"` (or `pipx install …`) — details in [desktop/README.md](desktop/README.md).
 
 ## Documentation
 

@@ -1,5 +1,10 @@
 # Changelog
 
+## Windows and Linux 0.1.0a1 (alpha) — 2026-11-01
+
+- First alpha of the Windows/Linux version (Python + Qt) in `desktop/`: the same reading rules, search, sidebar lists, Settings and library format as the Mac app, checked against the same test files.
+- **Not tested on Windows or Linux** — developed and tested on macOS only. Install with `uv tool install` or `pipx` (see `desktop/README.md`).
+
 ## 1.0 — 2026-11-01
 
 First version.
