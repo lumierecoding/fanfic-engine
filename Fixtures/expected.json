@@ -1,0 +1,217 @@
+[
+  {
+    "author" : "example-author-1",
+    "fandoms" : [
+      "Harry Potter - J. K. Rowling"
+    ],
+    "file" : "The Quiet Winter.pdf",
+    "firstPageSource" : "page 1",
+    "kind" : "pdf",
+    "outcome" : "added",
+    "relationships" : [
+      "Harry Potter/Draco Malfoy"
+    ],
+    "title" : "The Quiet Winter"
+  },
+  {
+    "author" : "example-author-2",
+    "fandoms" : [
+      "Criminal Minds (US TV)"
+    ],
+    "file" : "Profilers Notes.pdf",
+    "firstPageSource" : "page 1",
+    "kind" : "pdf",
+    "outcome" : "added",
+    "relationships" : [
+      "Aaron Hotchner/Spencer Reid",
+      "Derek Morgan & Spencer Reid"
+    ],
+    "title" : "Profiler's Notes"
+  },
+  {
+    "author" : "example-author-3",
+    "fandoms" : [
+      "Harry Potter - J. K. Rowling"
+    ],
+    "file" : "Common Room Constellations.pdf",
+    "firstPageSource" : "page 1",
+    "kind" : "pdf",
+    "outcome" : "added",
+    "relationships" : [
+      "Harry Potter/Draco Malfoy",
+      "Hermione Granger/Pansy Parkinson/Ginny Weasley",
+      "Ron Weasley/Lavender Brown",
+      "Harry Potter & Ron Weasley & Hermione Granger"
+    ],
+    "title" : "Common Room Constellations"
+  },
+  {
+    "author" : "example-author-4",
+    "fandoms" : [
+      "Miraculous Ladybug"
+    ],
+    "file" : "Lucky Charm.pdf",
+    "firstPageSource" : "page 1",
+    "kind" : "pdf",
+    "outcome" : "added",
+    "relationships" : [
+      "Marinette Dupain-Cheng/Chloé Bourgeois",
+      "Adrien Agreste/Marinette Dupain-Cheng"
+    ],
+    "title" : "Lucky Charm"
+  },
+  {
+    "author" : "example-author-5",
+    "fandoms" : [
+      "Sherlock (TV)"
+    ],
+    "file" : "Baker Street Ledger.pdf",
+    "firstPageSource" : "page 1",
+    "kind" : "pdf",
+    "outcome" : "added",
+    "relationships" : [
+      "Sherlock Holmes/John Watson",
+      "Mycroft Holmes/Greg Lestrade"
+    ],
+    "title" : "Baker Street Ledger"
+  },
+  {
+    "author" : "example-author-6",
+    "fandoms" : [
+
+    ],
+    "file" : "Anthology.pdf",
+    "firstPageSource" : "page 2",
+    "kind" : "pdf",
+    "outcome" : "added",
+    "relationships" : [
+      "Remus Lupin/Sirius Black"
+    ],
+    "title" : "Winter Anthology"
+  },
+  {
+    "author" : "example-author-7",
+    "fandoms" : [
+      "Criminal Minds (US TV)"
+    ],
+    "file" : "Field Notes.pdf",
+    "firstPageSource" : "page 1",
+    "kind" : "pdf",
+    "outcome" : "addedNoPairing",
+    "relationships" : [
+
+    ],
+    "title" : "Field Notes"
+  },
+  {
+    "fandoms" : [
+
+    ],
+    "file" : "Scanned Without Text.pdf",
+    "outcome" : "unreadable",
+    "relationships" : [
+
+    ]
+  },
+  {
+    "fandoms" : [
+
+    ],
+    "file" : "Not A Real PDF.pdf",
+    "outcome" : "unreadable",
+    "relationships" : [
+
+    ]
+  },
+  {
+    "author" : "example-author-10",
+    "fandoms" : [
+      "Harry Potter - J. K. Rowling",
+      "Percy Jackson and the Olympians - Rick Riordan"
+    ],
+    "file" : "Crossroads.pdf",
+    "firstPageSource" : "page 1",
+    "kind" : "pdf",
+    "outcome" : "added",
+    "relationships" : [
+      "Draco Malfoy/Percy Jackson",
+      "Nico di Angelo & Harry Potter"
+    ],
+    "title" : "Crossroads"
+  },
+  {
+    "author" : "example-author-8",
+    "fandoms" : [
+      "魔道祖师 - 墨香铜臭 | Mo Dao Zu Shi - Mo Xiang Tong Xiu"
+    ],
+    "file" : "Untamed Hearts.epub",
+    "firstPageSource" : "OEBPS/preface.xhtml",
+    "kind" : "epub",
+    "outcome" : "added",
+    "relationships" : [
+      "Lan Zhan | Lan Wangji/Wei Ying | Wei Wuxian",
+      "Jiang Cheng & Wei Ying | Wei Wuxian",
+      "Nie Huaisang/Jiang Cheng"
+    ],
+    "title" : "Untamed Hearts"
+  },
+  {
+    "author" : "example-author-9",
+    "fandoms" : [
+
+    ],
+    "file" : "Starlight Over Grimmauld.epub",
+    "firstPageSource" : "OEBPS/preface.xhtml",
+    "kind" : "epub",
+    "outcome" : "added",
+    "relationships" : [
+      "Draco Malfoy/Harry Potter",
+      "Remus Lupin/Sirius Black"
+    ],
+    "title" : "Starlight Over Grimmauld"
+  },
+  {
+    "author" : "example-author-11",
+    "fandoms" : [
+
+    ],
+    "file" : "Westward Bound.epub",
+    "firstPageSource" : "EPUB/introduction.xhtml",
+    "kind" : "epub",
+    "outcome" : "addedNoPairing",
+    "relationships" : [
+
+    ],
+    "title" : "Westward Bound"
+  },
+  {
+    "fandoms" : [
+
+    ],
+    "file" : "Broken.epub",
+    "outcome" : "unreadable",
+    "relationships" : [
+
+    ]
+  },
+  {
+    "fandoms" : [
+
+    ],
+    "file" : "Zz Duplicate of The Quiet Winter.pdf",
+    "outcome" : "duplicate",
+    "relationships" : [
+
+    ]
+  },
+  {
+    "fandoms" : [
+
+    ],
+    "file" : "notes.txt",
+    "outcome" : "skipped",
+    "relationships" : [
+
+    ]
+  }
+]

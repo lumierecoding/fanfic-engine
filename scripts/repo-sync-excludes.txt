@@ -1,0 +1,13 @@
+# Not copied into the git copy (the repo is kept ready to go public).
+# Internal working files:
+/CLAUDE.md
+/DEVELOPMENT_PLAN.md
+/PROJECT_TRACKING.md
+/docs/gallery/
+# Build output and system files:
+.build/
+.swiftpm/
+*.app
+.DS_Store
+# The git copy's own repository:
+/.git/
