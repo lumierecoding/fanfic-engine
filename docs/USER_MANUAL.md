@@ -1,6 +1,6 @@
-# Fanfic Pairings — User manual
+# Fanfic Engine — User manual
 
-Fanfic Pairings keeps a library of the fanfics you have downloaded and lets you find them by pairing, character and fandom. It works completely offline.
+Fanfic Engine keeps a library of the fanfics you have downloaded and lets you find them by pairing, character and fandom. It works completely offline.
 
 **Contents**
 
@@ -25,7 +25,15 @@ Fanfic Pairings keeps a library of the fanfics you have downloaded and lets you 
 
 ## 1. Installing and opening the app
 
-Fanfic Pairings is built from its source code on your Mac (see the [README](../README.md#install)). After `./scripts/build-app.sh` it is in your **Applications** folder as *Fanfic Pairings*. Open it like any other app: from Applications, Launchpad, the Dock or Spotlight (⌘ Space, type "Fanfic").
+Download **Fanfic-Engine-1.0.dmg** from the [Releases page](https://github.com/lumierecoding/fanfic-engine/releases), open it and drag **Fanfic Engine** onto **Applications**. (Or build it yourself, see the [README](../README.md#build-it-yourself).) It runs on macOS 15 or later.
+
+**The first time you open a downloaded copy**, macOS says it *could not verify* "Fanfic Engine". That is because the app is not notarized by Apple (notarizing needs a paid developer account), not because something is wrong with it. To allow it once:
+
+1. Click **Done** in that message.
+2. Open **System Settings → Privacy & Security** and scroll down to *"Fanfic Engine" was blocked to protect your Mac*.
+3. Click **Open Anyway** and confirm with your password or Touch ID.
+
+From then on, open it like any other app: from Applications, Launchpad, the Dock or Spotlight (⌘ Space, type "Fanfic"). If you prefer Terminal: `xattr -dr com.apple.quarantine "/Applications/Fanfic Engine.app"` does the same.
 
 The first time it opens, the library is empty and the middle of the window says *"Drop EPUB or PDF files here, or click Add Files…"*.
 
@@ -36,7 +44,7 @@ There are four ways to add fanfics. All of them accept single files, several fil
 - **Drag** files or folders onto the window. A blue outline shows while you drag.
 - Click **+** in the toolbar, or choose **File → Add Files…** (⌘O), and pick files or folders.
 - **Drop** files onto the app's icon in the Dock.
-- In Finder, right-click a file → **Open With → Fanfic Pairings**.
+- In Finder, right-click a file → **Open With → Fanfic Engine**.
 
 For each file the app:
 
@@ -120,7 +128,7 @@ The same commands, plus **Remove from Library…**, are in the right-click menu 
 
 ## 7. Settings
 
-Open Settings with the **gear** button or **Fanfic Pairings → Settings…** (⌘,).
+Open Settings with the **gear** button or **Fanfic Engine → Settings…** (⌘,).
 
 ![Settings](images/settings.png)
 
@@ -136,7 +144,7 @@ Settings are stored in the app's preferences on your Mac.
 Click the **folder** button (or **File → Show Library in Finder**). The library folder is:
 
 ```
-~/Library/Application Support/Fanfic Pairings/
+~/Library/Application Support/Fanfic Engine/
 ├── Works/          a copy of each fanfic, named by its work ID
 ├── First Pages/    a copy of each first page (PDF), named by its first-page ID
 └── library.json    the lists
@@ -148,7 +156,7 @@ Click the **folder** button (or **File → Show Library in Finder**). The librar
 - **pairings**, **characters**, **fandoms** — each name once, A–Z;
 - **pairingIndex**, **characterIndex**, **fandomIndex** — each name with the work ID and first-page ID of every work that has it.
 
-**Backups and moving to another Mac:** quit the app and copy the whole *Fanfic Pairings* folder. To restore it, put the folder back in the same place (`~/Library/Application Support/`) before opening the app. In Finder, use **Go → Go to Folder…** (⇧⌘G) and paste `~/Library/Application Support` to get there.
+**Backups and moving to another Mac:** quit the app and copy the whole *Fanfic Engine* folder. To restore it, put the folder back in the same place (`~/Library/Application Support/`) before opening the app. In Finder, use **Go → Go to Folder…** (⇧⌘G) and paste `~/Library/Application Support` to get there.
 
 ## 9. Duplicates
 
@@ -190,7 +198,7 @@ During a big import the app saves its list at most every few seconds, so importi
 ## 14. Troubleshooting and questions
 
 **A work shows "No pairing found" but it has a pairing.**
-Its first page probably doesn't use the `Relationship:` label (common with non-AO3 files). Check the first-page copy with **Open First Page**. If it is an AO3 file and the pairing is clearly there, please [report it](https://github.com/lumierecoding/fanfic-pairings/issues) with the Relationship line from that page.
+Its first page probably doesn't use the `Relationship:` label (common with non-AO3 files). Check the first-page copy with **Open First Page**. If it is an AO3 file and the pairing is clearly there, please [report it](https://github.com/lumierecoding/fanfic-engine/issues) with the Relationship line from that page.
 
 **A pairing is read wrongly.**
 Same as above — report the Relationship line. After a fix, use **Re-read Library**; your IDs stay the same.
@@ -205,16 +213,16 @@ It was imported from two different files (see [Duplicates](#9-duplicates)); remo
 They may be folded (click their names) or hidden in Settings.
 
 **Reset the app's settings.**
-Quit the app and run in Terminal: `defaults delete io.github.lumierecoding.fanficpairings`. Your library is not affected.
+Quit the app and run in Terminal: `defaults delete io.github.lumierecoding.fanficengine`. Your library is not affected.
 
 **The app says the library file could not be read.**
 The app keeps the unreadable file as `library-unreadable-<date>.json` in the library folder and starts with an empty list; nothing is overwritten. Restore a backup of `library.json` if you have one.
 
 ## 15. Uninstalling
 
-1. Quit the app and move **Fanfic Pairings** from Applications to the Trash.
-2. To remove your library too, delete `~/Library/Application Support/Fanfic Pairings` (this deletes the copies of your fanfics and first pages, not your originals).
-3. To remove its settings, run `defaults delete io.github.lumierecoding.fanficpairings` in Terminal.
+1. Quit the app and move **Fanfic Engine** from Applications to the Trash.
+2. To remove your library too, delete `~/Library/Application Support/Fanfic Engine` (this deletes the copies of your fanfics and first pages, not your originals).
+3. To remove its settings, run `defaults delete io.github.lumierecoding.fanficengine` in Terminal.
 
 ## 16. Windows and Linux (alpha)
 
@@ -228,8 +236,8 @@ It works like the Mac app described above — same reading rules, search, sideba
 | Show in Finder | **Show in Explorer** (Windows), **Show in Folder** (Linux: opens the folder) |
 | Number of fanfics under the window title | In the **status bar** at the bottom |
 | — | A **notice bar** under the toolbar says it is an alpha; × hides it until the next start |
-| Library in `~/Library/Application Support/Fanfic Pairings` | Windows `%APPDATA%\Fanfic Pairings`, Linux `~/.local/share/Fanfic Pairings` |
-| Settings in the Mac app's preferences | Windows registry `HKEY_CURRENT_USER\Software\Fanfic Pairings`; Linux `~/.config/Fanfic Pairings/Fanfic Pairings.conf` |
+| Library in `~/Library/Application Support/Fanfic Engine` | Windows `%APPDATA%\Fanfic Engine`, Linux `~/.local/share/Fanfic Engine` |
+| Settings in the Mac app's preferences | Windows registry `HKEY_CURRENT_USER\Software\Fanfic Engine`; Linux `~/.config/Fanfic Engine/Fanfic Engine.conf` |
 
 Both versions write the same `library.json`, so a library folder can be moved between a Mac and a Windows or Linux computer. Don't open the same library folder in two apps at the same time.
 

@@ -45,7 +45,7 @@ func heading(_ t: String) -> Line { Line(text: t, bold: true, size: 18) }
 func writePDF(_ name: String, title: String?, author: String?, pages: [[Line]], drawTextless: Bool = false) throws {
     let url = out.appendingPathComponent(name)
     var box = CGRect(x: 0, y: 0, width: 595, height: 842)
-    var info: [CFString: Any] = [kCGPDFContextCreator: "Fanfic Pairings test files"]
+    var info: [CFString: Any] = [kCGPDFContextCreator: "Fanfic Engine test files"]
     if let title { info[kCGPDFContextTitle] = title }
     if let author { info[kCGPDFContextAuthor] = author }
     guard let ctx = CGContext(url as CFURL, mediaBox: &box, info as CFDictionary) else {

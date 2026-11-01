@@ -1,4 +1,4 @@
-# Fanfic Pairings — UI spec
+# Fanfic Engine — UI spec
 
 ## Change 3 (1 November 2026): click a section name to open or fold it
 
@@ -17,11 +17,11 @@
 ### What changes visually
 
 - **Toolbar:** a new **Settings** button (gear icon) to the right of the folder button, left of the search field.
-- **Settings window (new):** the standard macOS Settings window, opened by the gear button or ⌘, (Fanfic Pairings menu → Settings…). One page with four groups:
+- **Settings window (new):** the standard macOS Settings window, opened by the gear button or ⌘, (Fanfic Engine menu → Settings…). One page with four groups:
   1. **Sidebar:** Show Pairings / Show Characters / Show Fandoms (on/off, all on by default); "Sort lists by": Name or Number of fanfics (default Name).
   2. **Relationships:** "Include friendship tags (A & B)" (default on). When off, `A & B` tags are left out of the Pairings list, and people who only appear in them are left out of Characters. Searching is not affected.
   3. **Library:** where the library folder is (selectable path), **Show in Finder**, **Re-read Library**, and the counts ("3 fanfics · 3 first pages").
-  4. **Offline:** the note "Fanfic Pairings works entirely on this Mac. It never connects to the internet."
+  4. **Offline:** the note "Fanfic Engine works entirely on this Mac. It never connects to the internet."
 - **Sidebar, two new sections:** order is Library (All Works, No Pairing Found) → **Fandoms** → **Characters** → Pairings. Fandoms, Characters and Pairings start **folded**; each opens and closes with the standard disclosure arrow, and the app remembers which are open. The Library group at the top always stays open.
   - **Characters** = every person who appears in a **Relationship** tag (pairings `A/B` and friendships `A & B`), each listed once with the number of fanfics. This is **not** the separate `Characters:` field of the first page. Names are grouped ignoring case, accents and spacing. Alternate names stay separate entries: `Tom Riddle` and `Tom Riddle | Voldemort` are two entries, because merging them would be guessing.
   - **Fandoms** = every value of the first page's `Fandom:`/`Fandoms:` field, each listed once with the number of fanfics. Crossovers (`Fandoms: A, B`) count in both, and clicking either fandom lists them. The full tag is shown, e.g. "Harry Potter - J. K. Rowling". Files without the field (for example FicHub exports from other sites) have no fandom and appear only under All Works.
@@ -39,7 +39,7 @@
 ### Files
 
 - Core: `Relationships.swift` (shared field reader for Relationship and Fandom), `WorkReader.swift`, `Models.swift`, `Library.swift`.
-- App: `AppModel.swift`, `ContentView.swift`, `SidebarView.swift`, `WorkListView.swift`, `WorkDetailView.swift`, `FanficPairingsApp.swift`, new `SettingsView.swift`.
+- App: `AppModel.swift`, `ContentView.swift`, `SidebarView.swift`, `WorkListView.swift`, `WorkDetailView.swift`, `FanficEngineApp.swift`, new `SettingsView.swift`.
 - Tests and test files: a crossover PDF (`Fandoms:` with two values), a FicHub-style EPUB (`introduction.xhtml`, no fields), tests for character and fandom grouping and for the version 1 → 2 update keeping IDs.
 - `SPEC.md`, `README.md`, the gallery.
 
@@ -81,7 +81,7 @@ New app, so there are no "before" pictures. The window uses standard macOS contr
 
 ## Files
 
-`Sources/FanficPairings/` — `FanficPairingsApp.swift`, `ContentView.swift`, `SidebarView.swift`, `WorkListView.swift`, `WorkDetailView.swift`, `PDFPreview.swift`, `ImportSummaryView.swift`.
+`Sources/FanficEngine/` — `FanficEngineApp.swift`, `ContentView.swift`, `SidebarView.swift`, `WorkListView.swift`, `WorkDetailView.swift`, `PDFPreview.swift`, `ImportSummaryView.swift`.
 
 ## Layout rules
 

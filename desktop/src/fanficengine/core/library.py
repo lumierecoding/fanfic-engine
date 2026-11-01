@@ -24,14 +24,14 @@ SAVE_INTERVAL = 3.0  # seconds between saves during a batch import (and always a
 
 
 def default_root() -> Path:
-    """Windows %APPDATA%\\Fanfic Pairings, Linux ~/.local/share/Fanfic Pairings, macOS the Mac app's folder."""
+    """Windows %APPDATA%\\Fanfic Engine, Linux ~/.local/share/Fanfic Engine, macOS the Mac app's folder."""
     if sys.platform == "win32":
         base = Path(os.environ.get("APPDATA") or Path.home() / "AppData" / "Roaming")
     elif sys.platform == "darwin":
         base = Path.home() / "Library" / "Application Support"
     else:
         base = Path(os.environ.get("XDG_DATA_HOME") or Path.home() / ".local" / "share")
-    return base / "Fanfic Pairings"
+    return base / "Fanfic Engine"
 
 
 def _now() -> str:

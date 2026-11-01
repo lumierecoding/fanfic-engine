@@ -8,8 +8,8 @@ import json
 import pypdfium2 as pdfium
 
 from conftest import FIXTURES, fixture
-from fanficpairings.core.library import Library
-from fanficpairings.core.text import alphabetical_key
+from fanficengine.core.library import Library
+from fanficengine.core.text import alphabetical_key
 
 
 def files(folder):

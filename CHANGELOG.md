@@ -7,7 +7,9 @@
 
 ## 1.0 — 2026-11-01
 
-First version.
+First version of **Fanfic Engine** (called *Fanfic Pairings* during development; a library from that development version is moved to the new folder automatically on first start).
+
+- Download: `Fanfic-Engine-1.0.dmg` for macOS 15 or later, Apple Silicon and Intel (Intel built but not tested). Signed ad-hoc, not notarized: allow it once with "Open Anyway".
 
 - Import EPUB and PDF files by drag and drop, Add Files…, the Dock icon or Finder's Open With; folders are searched, including subfolders.
 - A copy of each work and of its first page (as a one-page PDF) in the library folder; an ID for every work and every first-page copy.

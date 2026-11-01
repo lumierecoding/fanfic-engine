@@ -138,7 +138,7 @@ class SettingsDialog(QDialog):
 
         offline = QGroupBox("Offline")
         off_layout = QVBoxLayout(offline)
-        off_text = QLabel("Fanfic Pairings works entirely on this computer. It never connects to the internet.")
+        off_text = QLabel("Fanfic Engine works entirely on this computer. It never connects to the internet.")
         off_text.setWordWrap(True)
         off_layout.addWidget(off_text)
         layout.addWidget(offline)
@@ -162,8 +162,8 @@ def show_folder_label() -> str:
 
 def show_about(parent: QWidget) -> None:
     box = QMessageBox(parent)
-    box.setWindowTitle("About Fanfic Pairings")
-    box.setText(f"Fanfic Pairings {__version__}")  # macOS shows this line bold; the rest is regular text
+    box.setWindowTitle("About Fanfic Engine")
+    box.setText(f"Fanfic Engine {__version__}")  # macOS shows this line bold; the rest is regular text
     box.setInformativeText(
         f"<p><b>{ALPHA_NOTE}</b> This version is developed and tested on macOS only.</p>"
         "<p>Sorts your downloaded fanfiction by pairing, character and fandom. Works entirely offline: "

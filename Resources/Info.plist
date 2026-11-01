@@ -5,13 +5,13 @@
 	<key>CFBundleDevelopmentRegion</key>
 	<string>en</string>
 	<key>CFBundleDisplayName</key>
-	<string>Fanfic Pairings</string>
+	<string>Fanfic Engine</string>
 	<key>CFBundleName</key>
-	<string>Fanfic Pairings</string>
+	<string>Fanfic Engine</string>
 	<key>CFBundleExecutable</key>
-	<string>FanficPairings</string>
+	<string>FanficEngine</string>
 	<key>CFBundleIdentifier</key>
-	<string>io.github.lumierecoding.fanficpairings</string>
+	<string>io.github.lumierecoding.fanficengine</string>
 	<key>CFBundleIconFile</key>
 	<string>AppIcon</string>
 	<key>CFBundleInfoDictionaryVersion</key>

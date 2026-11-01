@@ -1,6 +1,6 @@
-# Fanfic Pairings for Windows and Linux — Alpha
+# Fanfic Engine for Windows and Linux — Alpha
 
-> **Alpha — not tested on Windows or Linux.** This version is developed and tested on macOS only. It is written to work on Windows and Linux, but nobody has tried it there yet. Please [report problems](https://github.com/lumierecoding/fanfic-pairings/issues).
+> **Alpha — not tested on Windows or Linux.** This version is developed and tested on macOS only. It is written to work on Windows and Linux, but nobody has tried it there yet. Please [report problems](https://github.com/lumierecoding/fanfic-engine/issues).
 
 The same app as the [Mac version](../README.md): it sorts your downloaded fanfiction (EPUB and PDF, for example AO3 downloads) by **pairing**, **character** and **fandom**, completely offline. This version is written in Python with Qt, so it can run on Windows and Linux. It reads files exactly like the Mac app (it is checked against the same test files) and uses the same library format.
 
@@ -17,14 +17,14 @@ The same app as the [Mac version](../README.md): it sorts your downloaded fanfic
 The easiest way is [uv](https://docs.astral.sh/uv/) (or [pipx](https://pipx.pypa.io/)), which installs the app with its own private copy of its libraries:
 
 ```sh
-uv tool install "git+https://github.com/lumierecoding/fanfic-pairings#subdirectory=desktop"
-# or: pipx install "git+https://github.com/lumierecoding/fanfic-pairings#subdirectory=desktop"
+uv tool install "git+https://github.com/lumierecoding/fanfic-engine#subdirectory=desktop"
+# or: pipx install "git+https://github.com/lumierecoding/fanfic-engine#subdirectory=desktop"
 ```
 
 Then start it with:
 
 ```sh
-fanfic-pairings
+fanfic-engine
 ```
 
 No shortcut in the Start menu or app launcher is created yet (alpha).
@@ -33,11 +33,13 @@ Getting uv: on Windows `winget install astral-sh.uv`, on Linux `curl -LsSf https
 
 Linux note (untested): Qt needs a few system libraries for its window system plugin. If the app does not start on Debian/Ubuntu, `sudo apt install libxcb-cursor0` usually fixes it.
 
+**From the release page:** download the `.whl` file from the [Releases page](https://github.com/lumierecoding/fanfic-engine/releases) and run `uv tool install fanfic_engine-0.1.0a1-py3-none-any.whl` (or `pipx install …`) in the folder you saved it to. It still needs Python; a stand-alone Windows or Linux app doesn't exist yet.
+
 **From a downloaded copy of the repository:**
 
 ```sh
 cd desktop
-uv run fanfic-pairings
+uv run fanfic-engine
 ```
 
 ## Using it
@@ -49,9 +51,9 @@ Everything works like in the Mac app — see the [user manual](../docs/USER_MANU
 - the number of listed fanfics is in the status bar at the bottom;
 - a notice bar says that this is an alpha; × hides it until the next start.
 
-**Library folder:** Windows `%APPDATA%\Fanfic Pairings`, Linux `~/.local/share/Fanfic Pairings` (or `$XDG_DATA_HOME/Fanfic Pairings`). It has the same layout and `library.json` as the Mac app.
+**Library folder:** Windows `%APPDATA%\Fanfic Engine`, Linux `~/.local/share/Fanfic Engine` (or `$XDG_DATA_HOME/Fanfic Engine`). It has the same layout and `library.json` as the Mac app.
 
-**Settings** are stored with Qt's `QSettings`: in the registry on Windows (`HKEY_CURRENT_USER\Software\Fanfic Pairings`), in `~/.config/Fanfic Pairings/Fanfic Pairings.conf` on Linux.
+**Settings** are stored with Qt's `QSettings`: in the registry on Windows (`HKEY_CURRENT_USER\Software\Fanfic Engine`), in `~/.config/Fanfic Engine/Fanfic Engine.conf` on Linux.
 
 ## Privacy
 
@@ -60,7 +62,7 @@ The app has no network code and cannot connect to the internet. It reads only th
 ## Uninstall
 
 ```sh
-uv tool uninstall fanfic-pairings      # or: pipx uninstall fanfic-pairings
+uv tool uninstall fanfic-engine      # or: pipx uninstall fanfic-engine
 ```
 
 To remove your library too, delete the library folder above (this deletes the copies of your fanfics and first pages, not your originals).
@@ -79,7 +81,7 @@ The app itself is under the [MIT License](../LICENSE).
 ```sh
 cd desktop
 uv run pytest            # 32 tests on the shared ../Fixtures, same expected results as the Mac app
-uv run fanfic-pairings --help
+uv run fanfic-engine --help
 ```
 
-The developer launch options (`--library-path`, `--import`, `--search`, `--sidebar`, `--select-title`, `--appearance`, `--open-settings`, `--open-about`, `--preview-drop`, `--window-size`, `--set`) are described in `src/fanficpairings/ui/app.py`. Always use `--library-path` with a test folder when experimenting, so your real library is never touched. Layout rules: [docs/ui-spec-desktop.md](../docs/ui-spec-desktop.md).
+The developer launch options (`--library-path`, `--import`, `--search`, `--sidebar`, `--select-title`, `--appearance`, `--open-settings`, `--open-about`, `--preview-drop`, `--window-size`, `--set`) are described in `src/fanficengine/ui/app.py`. Always use `--library-path` with a test folder when experimenting, so your real library is never touched. Layout rules: [docs/ui-spec-desktop.md](../docs/ui-spec-desktop.md).

@@ -21,7 +21,7 @@ DEFAULTS: dict[str, object] = {
 
 class Prefs:
     def __init__(self, overrides: dict[str, str] | None = None):
-        self._settings = QSettings("Fanfic Pairings", "Fanfic Pairings")
+        self._settings = QSettings("Fanfic Engine", "Fanfic Engine")
         self._overrides = dict(overrides or {})
 
     def get(self, key: str):

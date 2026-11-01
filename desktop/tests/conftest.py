@@ -25,7 +25,7 @@ def expected() -> list[dict]:
 @pytest.fixture
 def imported(tmp_path, expected):
     """A library in a temporary folder with every test file imported in expected.json order."""
-    from fanficpairings.core.library import Library
+    from fanficengine.core.library import Library
 
     library = Library(tmp_path / "library")
     report = library.import_files([fixture(e["file"]) for e in expected])

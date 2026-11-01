@@ -18,7 +18,7 @@ struct ContentView: View {
             WorkDetailView(model: model)
                 .frame(minWidth: 340)
         }
-        .navigationTitle("Fanfic Pairings")
+        .navigationTitle("Fanfic Engine")
         .navigationSubtitle(subtitle)
         .searchable(text: $model.searchText, placement: .toolbar, prompt: "Search pairing, e.g. Harry/Draco")
         .toolbar {

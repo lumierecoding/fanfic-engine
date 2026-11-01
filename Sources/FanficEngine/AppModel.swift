@@ -44,11 +44,12 @@ final class AppModel {
 
     init() {
         let defaults = UserDefaults.standard
-        // Developer option `-libraryPath <folder>`: use another library folder (for tests and screenshots).
-        let root = defaults.string(forKey: "libraryPath").map {
-            URL(fileURLWithPath: ($0 as NSString).expandingTildeInPath, isDirectory: true)
-        } ?? Library.defaultRoot
-        library = Library(root: root)
+        let startup = Self.startup
+        library = Library(root: startup.root)
+        if case .failed(let reason) = startup.move {
+            message = AppMessage(title: "The library could not be moved",
+                                 text: "Your fanfics are still in “\(startup.root.path)”. \(reason)")
+        }
         if let problem = library.loadProblem {
             message = AppMessage(title: "The library file could not be read", text: problem)
         }
@@ -222,4 +223,62 @@ final class AppModel {
             message = AppMessage(title: "Library re-read", text: text)
         }
     }
+}
+
+// MARK: - Start: library folder and the move from the working title "Fanfic Pairings"
+
+/// Decided once at start, before the library is opened.
+struct Startup {
+    let root: URL
+    let move: Library.FolderMove
+    /// The library still has to be moved, but the old app is open: Fanfic Engine asks to quit it and closes.
+    let oldAppIsRunning: Bool
+
+    static let oldBundleID = "io.github.lumierecoding.fanficpairings"
+    /// The settings that are copied from the old app (only when not set here yet).
+    static let settingsKeys = ["fandomsExpanded", "charactersExpanded", "pairingsExpanded", "showFandoms",
+                               "showCharacters", "showPairings", "sidebarSort", "includeFriendships"]
+
+    static func decide() -> Startup {
+        let defaults = UserDefaults.standard
+        // Developer option `-libraryPath <folder>`: use another library folder (tests and screenshots); no move.
+        if let path = defaults.string(forKey: "libraryPath") {
+            let root = URL(fileURLWithPath: (path as NSString).expandingTildeInPath, isDirectory: true)
+            return Startup(root: root, move: .notNeeded, oldAppIsRunning: false)
+        }
+        let fm = FileManager.default
+        // Developer option `-appSupportPath <folder>`: rehearse the move in a test folder instead of
+        // ~/Library/Application Support (settings are then not copied; `-ignoreOldApp YES` only works with it).
+        let testBase = defaults.string(forKey: "appSupportPath").map {
+            URL(fileURLWithPath: ($0 as NSString).expandingTildeInPath, isDirectory: true)
+        }
+        let newRoot = testBase?.appendingPathComponent(Library.defaultRoot.lastPathComponent, isDirectory: true) ?? Library.defaultRoot
+        let oldRoot = testBase?.appendingPathComponent(Library.legacyRoot.lastPathComponent, isDirectory: true) ?? Library.legacyRoot
+        let movePending = fm.fileExists(atPath: oldRoot.path) && !fm.fileExists(atPath: newRoot.path)
+        let ignoreOldApp = testBase != nil && defaults.bool(forKey: "ignoreOldApp")
+        if movePending && !ignoreOldApp && !NSRunningApplication.runningApplications(withBundleIdentifier: oldBundleID).isEmpty {
+            // Open nothing real: an empty folder in the temporary directory until the app closes.
+            let scratch = fm.temporaryDirectory.appendingPathComponent("FanficEngine-\(UUID().uuidString)", isDirectory: true)
+            return Startup(root: scratch, move: .notNeeded, oldAppIsRunning: true)
+        }
+        if testBase == nil { copyOldSettings() }
+        let move = Library.moveLegacyLibrary(from: oldRoot, to: newRoot)
+        let root = (move == .moved || fm.fileExists(atPath: newRoot.path) || !movePending) ? newRoot : oldRoot
+        return Startup(root: root, move: move, oldAppIsRunning: false)
+    }
+
+    /// Copies the sidebar and relationship settings from "Fanfic Pairings", once and only where unset.
+    private static func copyOldSettings() {
+        let defaults = UserDefaults.standard
+        guard !defaults.bool(forKey: "copiedOldSettings") else { return }
+        defaults.set(true, forKey: "copiedOldSettings")
+        guard let old = UserDefaults(suiteName: oldBundleID) else { return }
+        for key in settingsKeys where defaults.object(forKey: key) == nil {
+            if let value = old.object(forKey: key) { defaults.set(value, forKey: key) }
+        }
+    }
+}
+
+extension AppModel {
+    static let startup = Startup.decide()
 }

@@ -2,8 +2,8 @@
 
 from __future__ import annotations
 
-from fanficpairings.core import search, text as T
-from fanficpairings.core.models import WorkRecord, character_groups, fandom_groups, pairing_groups, sorted_groups
+from fanficengine.core import search, text as T
+from fanficengine.core.models import WorkRecord, character_groups, fandom_groups, pairing_groups, sorted_groups
 
 
 def test_name_matching():

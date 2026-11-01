@@ -1,4 +1,4 @@
-# Fanfic Pairings for Windows and Linux (Alpha) — UI spec
+# Fanfic Engine for Windows and Linux (Alpha) — UI spec
 
 OK'd 1 November 2026, with the alpha notice bar.
 
@@ -6,10 +6,10 @@ Cross-platform version in Python + Qt (PySide6), in `desktop/`. It behaves like 
 
 ## What it looks like
 
-- **Window title:** "Fanfic Pairings (Alpha)". Opens at 1100 × 700, minimum 900 × 560. Light or dark follows the system. Qt's standard style for each system (Windows 11 style on Windows, Fusion on Linux), only system colours.
+- **Window title:** "Fanfic Engine (Alpha)". Opens at 1100 × 700, minimum 900 × 560. Light or dark follows the system. Qt's standard style for each system (Windows 11 style on Windows, Fusion on Linux), only system colours.
 - **Menu bar** (inside the window on Windows and Linux; the normal menu bar on macOS):
   - **File:** Add Files… (Ctrl+O), Re-read Library, Show Library Folder, Settings… (Ctrl+,), Quit (Ctrl+Q)
-  - **Help:** About Fanfic Pairings — version, "Alpha — not tested on Windows or Linux", "works offline", the licence and the third-party licences (Qt/PySide6 LGPL, PDFium/pypdfium2).
+  - **Help:** About Fanfic Engine — version, "Alpha — not tested on Windows or Linux", "works offline", the licence and the third-party licences (Qt/PySide6 LGPL, PDFium/pypdfium2).
 - **Toolbar:** on the left **Add Files** (plus icon), **Library Folder** (folder icon), **Settings** (gear icon); on the right the **search field** with the placeholder "Search pairing, e.g. Harry/Draco" and a clear button.
 - **Three columns** with draggable dividers:
   1. **Sidebar:** "All Works" and "No Pairing Found" with counts, then the headings **Fandoms**, **Characters**, **Pairings** — folded at first; clicking a heading (or its arrow) opens or folds it, and the app remembers which are open. Each entry shows the name and, right-aligned in grey, the number of fanfics.
@@ -22,13 +22,13 @@ Cross-platform version in Python + Qt (PySide6), in `desktop/`. It behaves like 
 - **Import summary** dialog after an import: the same headings and file lists as on the Mac, with an OK button.
 - **Settings** dialog with the same four groups as on the Mac: Sidebar (show Fandoms / Characters / Pairings, sort by Name or Number of fanfics), Relationships (include friendship tags), Library (folder, contents, Show Folder, Re-read Library), Offline (the note).
 - **Right-click** on a work: Open Fanfic, Open First Page, Show in Explorer/Folder, Remove from Library… (with a confirmation).
-- **Library folder:** Windows `%APPDATA%\Fanfic Pairings`, Linux `~/.local/share/Fanfic Pairings` (or `$XDG_DATA_HOME`), macOS the same folder as the Mac app.
+- **Library folder:** Windows `%APPDATA%\Fanfic Engine`, Linux `~/.local/share/Fanfic Engine` (or `$XDG_DATA_HOME`), macOS the same folder as the Mac app.
 
 ## Layout rules
 
 | # | Rule | How it is checked (on this Mac) |
 | --- | --- | --- |
-| W1 | Title "Fanfic Pairings (Alpha)"; 1100 × 700 at first start, minimum 900 × 560 | Screenshot, window size |
+| W1 | Title "Fanfic Engine (Alpha)"; 1100 × 700 at first start, minimum 900 × 560 | Screenshot, window size |
 | W2 | Columns at first start: sidebar 240 (200–320), works list 420 (at least 320), details the rest (at least 340) | Screenshot |
 | W3 | Toolbar: Add Files, Library Folder, Settings on the left; search field on the right with the placeholder | Screenshot |
 | W4 | Sidebar order All Works, No Pairing Found, Fandoms, Characters, Pairings; the three lists folded at first; a click on a heading toggles it; state remembered | Screenshots; restart |
@@ -45,7 +45,7 @@ Cross-platform version in Python + Qt (PySide6), in `desktop/`. It behaves like 
 
 ## Files
 
-`desktop/src/fanficpairings/ui/`: `app.py` (start, menus), `main_window.py`, `sidebar.py`, `works_list.py`, `details.py`, `dialogs.py` (import summary, settings, about), `drop_overlay.py`.
+`desktop/src/fanficengine/ui/`: `app.py` (start, menus), `main_window.py`, `sidebar.py`, `works_list.py`, `details.py`, `dialogs.py` (import summary, settings, about), `drop_overlay.py`.
 
 ## Stays the same
 

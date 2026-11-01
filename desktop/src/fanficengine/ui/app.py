@@ -1,4 +1,4 @@
-"""Start of the app: `fanfic-pairings` (or `python -m fanficpairings`).
+"""Start of the app: `fanfic-engine` (or `python -m fanficengine`).
 
 Developer options exist for screenshots and testing; normal use needs none:
 
@@ -21,7 +21,7 @@ from pathlib import Path
 
 
 def _parse(argv: list[str]) -> argparse.Namespace:
-    parser = argparse.ArgumentParser(prog="fanfic-pairings", description="Sorts downloaded fanfiction by pairing (alpha).")
+    parser = argparse.ArgumentParser(prog="fanfic-engine", description="Sorts downloaded fanfiction by pairing (alpha).")
     parser.add_argument("--library-path", type=Path)
     parser.add_argument("--import", dest="imports", type=Path, action="append", default=[])
     parser.add_argument("--search")
@@ -48,8 +48,8 @@ def main(argv: list[str] | None = None) -> int:
     from .prefs import Prefs
 
     app = QApplication(sys.argv[:1])
-    app.setApplicationName("Fanfic Pairings")
-    app.setOrganizationName("Fanfic Pairings")
+    app.setApplicationName("Fanfic Engine")
+    app.setOrganizationName("Fanfic Engine")
     if sys.platform.startswith("linux"):
         app.setStyle("Fusion")
     if args.appearance:

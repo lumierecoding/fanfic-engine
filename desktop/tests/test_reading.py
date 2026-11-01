@@ -6,7 +6,7 @@ import pypdfium2 as pdfium
 import pytest
 
 from conftest import fixture
-from fanficpairings.core import reader, text as T
+from fanficengine.core import reader, text as T
 
 
 def pdf_text(data: bytes) -> tuple[int, str]:

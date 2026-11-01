@@ -24,7 +24,7 @@ wheels = [
 ]
 
 [[package]]
-name = "fanfic-pairings"
+name = "fanfic-engine"
 version = "0.1.0a1"
 source = { editable = "." }
 dependencies = [

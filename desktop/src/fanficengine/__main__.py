@@ -1,4 +1,4 @@
-"""Start with: python -m fanficpairings"""
+"""Start with: python -m fanficengine"""
 
 from .ui.app import main
 

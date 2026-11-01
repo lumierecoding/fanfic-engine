@@ -2,7 +2,7 @@ import AppKit
 import SwiftUI
 
 @main
-struct FanficPairingsApp: App {
+struct FanficEngineApp: App {
     @NSApplicationDelegateAdaptor(AppDelegate.self) private var appDelegate
     @State private var model = AppModel.shared
 
@@ -13,7 +13,7 @@ struct FanficPairingsApp: App {
     }
 
     var body: some Scene {
-        Window("Fanfic Pairings", id: "main") {
+        Window("Fanfic Engine", id: "main") {
             ContentView(model: model)
         }
         .defaultSize(Self.windowSize)
@@ -38,6 +38,17 @@ struct FanficPairingsApp: App {
 
 final class AppDelegate: NSObject, NSApplicationDelegate {
     func applicationDidFinishLaunching(_ notification: Notification) {
+        if AppModel.startup.oldAppIsRunning {
+            // The library is still in the old app's folder and that app is open: don't move it under its feet.
+            let alert = NSAlert()
+            alert.messageText = "Please quit Fanfic Pairings first"
+            alert.informativeText = "Fanfic Engine is the new name of Fanfic Pairings. Quit Fanfic Pairings, then open Fanfic Engine again: your library and settings are moved over automatically."
+            alert.addButton(withTitle: "Quit")
+            NSApp.activate()
+            alert.runModal()
+            NSApp.terminate(nil)
+            return
+        }
         // Developer option `-appearance light|dark` (screenshots); otherwise the system setting is used.
         switch UserDefaults.standard.string(forKey: "appearance") {
         case "dark": NSApp.appearance = NSAppearance(named: .darkAqua)
@@ -50,7 +61,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 
     func applicationShouldTerminateAfterLastWindowClosed(_ sender: NSApplication) -> Bool { true }
 
-    /// Files dropped on the Dock icon or opened with "Open With → Fanfic Pairings".
+    /// Files dropped on the Dock icon or opened with "Open With → Fanfic Engine".
     func application(_ application: NSApplication, open urls: [URL]) {
         AppModel.shared.importFiles(urls)
     }

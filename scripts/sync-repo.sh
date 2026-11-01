@@ -3,7 +3,7 @@
 # Commit and push from the git copy afterwards. Internal files listed in repo-sync-excludes.txt are not copied.
 set -euo pipefail
 SRC="$(cd "$(dirname "$0")/.." && pwd)"
-DEST="${1:-$HOME/fanfic-pairings}"
+DEST="${1:-$HOME/fanfic-engine}"
 brctl download "$SRC" 2>/dev/null || true
 mkdir -p "$DEST"
 rsync -a --delete --exclude-from="$SRC/scripts/repo-sync-excludes.txt" "$SRC/" "$DEST/"

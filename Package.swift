@@ -2,16 +2,16 @@
 import PackageDescription
 
 let package = Package(
-    name: "FanficPairings",
+    name: "FanficEngine",
     platforms: [.macOS("15.0")],
     products: [
-        .executable(name: "FanficPairings", targets: ["FanficPairings"]),
+        .executable(name: "FanficEngine", targets: ["FanficEngine"]),
     ],
     targets: [
         // Reading EPUB/PDF files, first pages, pairings, IDs, the library file and search. No UI.
         .target(name: "FanficCore"),
         // The SwiftUI Mac app.
-        .executableTarget(name: "FanficPairings", dependencies: ["FanficCore"]),
+        .executableTarget(name: "FanficEngine", dependencies: ["FanficCore"]),
         .testTarget(name: "FanficCoreTests", dependencies: ["FanficCore"]),
     ]
 )

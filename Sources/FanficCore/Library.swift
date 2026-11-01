@@ -29,7 +29,33 @@ public final class Library {
 
     nonisolated public static var defaultRoot: URL {
         FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask)[0]
+            .appendingPathComponent("Fanfic Engine", isDirectory: true)
+    }
+
+    /// The library folder of the app's working title "Fanfic Pairings" (before the first release).
+    nonisolated public static var legacyRoot: URL {
+        FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask)[0]
             .appendingPathComponent("Fanfic Pairings", isDirectory: true)
+    }
+
+    public enum FolderMove: Equatable, Sendable {
+        case moved
+        case notNeeded
+        case failed(String)
+    }
+
+    /// Moves a library from the old folder to the new one, once: only when the old folder exists and the new one
+    /// doesn't. The folder is moved (renamed) as a whole, never copied, merged or deleted; the paths inside
+    /// library.json are relative, so nothing in it changes.
+    nonisolated public static func moveLegacyLibrary(from old: URL = legacyRoot, to new: URL = defaultRoot) -> FolderMove {
+        let fm = FileManager.default
+        guard fm.fileExists(atPath: old.path), !fm.fileExists(atPath: new.path) else { return .notNeeded }
+        do {
+            try fm.moveItem(at: old, to: new)
+            return .moved
+        } catch {
+            return .failed(error.localizedDescription)
+        }
     }
 
     public var worksFolder: URL { root.appendingPathComponent("Works", isDirectory: true) }

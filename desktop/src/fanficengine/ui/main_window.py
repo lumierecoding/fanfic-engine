@@ -92,7 +92,7 @@ class MainWindow(QMainWindow):
         self._reader: BackgroundReader | None = None
         self._queue: list[list[Path]] = []
 
-        self.setWindowTitle("Fanfic Pairings (Alpha)")
+        self.setWindowTitle("Fanfic Engine (Alpha)")
         self.resize(*(options.window_size or (1100, 700)))
         self.setMinimumSize(900, 560)
         self.setAcceptDrops(True)
@@ -156,7 +156,7 @@ class MainWindow(QMainWindow):
         quit_action.setMenuRole(QAction.MenuRole.QuitRole)
         file_menu.addAction(quit_action)
         help_menu = self.menuBar().addMenu("&Help")
-        about = QAction("About Fanfic Pairings", self, triggered=lambda: show_about(self))
+        about = QAction("About Fanfic Engine", self, triggered=lambda: show_about(self))
         about.setMenuRole(QAction.MenuRole.AboutRole)
         help_menu.addAction(about)
 

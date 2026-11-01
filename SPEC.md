@@ -1,4 +1,4 @@
-# Fanfic Pairings — Specification
+# Fanfic Engine — Specification
 
 A small offline Mac app that helps find fanfictions by pairing. It imports EPUB and PDF files (for example AO3 downloads), keeps a copy of each work and of its first page, reads the pairings from the work's "Relationship:" field and lets you search for them.
 
@@ -10,7 +10,7 @@ A small offline Mac app that helps find fanfictions by pairing. It imports EPUB 
 ## 2. Library folder
 
 ```
-~/Library/Application Support/Fanfic Pairings/
+~/Library/Application Support/Fanfic Engine/
 ├── Works/          <work ID>.pdf | <work ID>.epub      (copy of the original file)
 ├── First Pages/    <first-page ID>.pdf                  (copy of the first page)
 └── library.json                                         (the lists, see 4)

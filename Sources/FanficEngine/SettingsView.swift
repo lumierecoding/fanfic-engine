@@ -52,7 +52,7 @@ struct SettingsView: View {
             }
 
             Section("Offline") {
-                Label("Fanfic Pairings works entirely on this Mac. It never connects to the internet.", systemImage: "wifi.slash")
+                Label("Fanfic Engine works entirely on this Mac. It never connects to the internet.", systemImage: "wifi.slash")
             }
         }
         .formStyle(.grouped)

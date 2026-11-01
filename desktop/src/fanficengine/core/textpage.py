@@ -52,7 +52,7 @@ def pdf_from_text(text: str) -> bytes:
     writer.setResolution(72)  # 1 unit = 1 point
     writer.setPageLayout(QPageLayout(QPageSize(QPageSize.PageSizeId.A4), QPageLayout.Orientation.Portrait,
                                      QMarginsF(56, 56, 56, 56), QPageLayout.Unit.Point))
-    writer.setCreator("Fanfic Pairings")
+    writer.setCreator("Fanfic Engine")
 
     document = QTextDocument()
     document.setDocumentMargin(0)
