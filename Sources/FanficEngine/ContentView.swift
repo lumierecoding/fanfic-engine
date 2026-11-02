@@ -13,11 +13,14 @@ struct ContentView: View {
                 .navigationSplitViewColumnWidth(min: 200, ideal: 240, max: 320)
         } content: {
             WorkListView(model: model)
+                .titleBand()
                 .navigationSplitViewColumnWidth(min: 320, ideal: 420)
         } detail: {
             WorkDetailView(model: model)
+                .titleBand()
                 .frame(minWidth: 340)
         }
+        .hidingSystemTitleBand()
         .navigationTitle("Fanfic Engine")
         .navigationSubtitle(subtitle)
         .searchable(text: $model.searchText, placement: .toolbar, prompt: "Search pairing, e.g. Harry/Draco")

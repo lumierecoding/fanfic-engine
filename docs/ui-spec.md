@@ -1,5 +1,22 @@
 # Fanfic Engine — UI spec
 
+## Change 4 (1 November 2026): title band drawn by the app (owner: "try app drawn band")
+
+- **Why:** on macOS 27.2 the grey band behind the window title and toolbar, and its bottom line, start 2 pt left of the sidebar divider, so the lines don't meet (a bare three-column window has the same step, so macOS draws it). Hiding macOS's band alone is not enough: scrolled works then run under the title.
+- **What changes:** macOS's band is hidden and the app draws its own band at the top of the works list and the details columns: the same height as before (from the window top to the bottom of the toolbar), the same look as the macOS band in light and dark, a 1-px separator line at its bottom. It starts exactly at the sidebar divider and covers works that are scrolled under it.
+- **What stays the same:** the title, subtitle, buttons and search field and their places; the sidebar (its colour goes up to the window top as before); column widths; everything else.
+- **Files:** `ContentView.swift`, new `TitleBand.swift`.
+- **How (as built):** each column draws macOS's own title-bar material (`NSVisualEffectView`, `.titlebar`) from the window top to the toolbar's bottom edge, plus macOS's bottom line (one strong pixel, on Retina a faint second one). Only on macOS 27 and later, where the step was seen; earlier systems keep their own band.
+- **Known difference:** the divider between the works list and the details column now also runs up to the window top (macOS draws it above the columns, so the band can't cover it), like in Mail.
+
+| # | Rule | How it is checked |
+| --- | --- | --- |
+| U22 | The vertical divider between sidebar and works list runs straight from the window top to the bottom; band and band line start at the divider, no step | Pixel check of the corner, light and dark |
+| U23 | Band height and colour match the old macOS band (±1 pt, same colour within a few levels), separator line at its bottom across the list and details columns | Before/after pictures, pixel check |
+| U24 | Works scrolled up are hidden behind the band: the title and subtitle stay readable | Screenshot with the list scrolled, light and dark |
+
+---
+
 ## Change 3 (1 November 2026): click a section name to open or fold it
 
 - **What changes:** clicking the name of the Fandoms, Characters or Pairings section opens it if folded and folds it if open, the same as the arrow that appears on hover. The whole header line is clickable.
