@@ -1,4 +1,8 @@
-# Fanfic Engine
+<p align="center">
+  <img src="docs/images/app-icon.png" width="128" height="128" alt="The Fanfic Engine app icon: three white books and a heart on a pink-to-purple background">
+</p>
+
+<h1 align="center">Fanfic Engine</h1>
 
 A small, fully offline Mac app that sorts your downloaded fanfiction by **pairing**, **character** and **fandom**.
 
