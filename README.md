@@ -10,6 +10,26 @@ Give it the EPUB or PDF files you downloaded (for example from AO3). It reads th
 
 ![The Fanfic Engine window, half in light mode and half in dark mode: fandoms and characters in the sidebar, the works list in the middle, the first page and details on the right](docs/images/main-window-light-dark.png)
 
+<p align="center">
+  <a href="https://github.com/lumierecoding/fanfic-engine/releases/latest"><b>Download for Mac</b></a> · free and open source · works offline
+</p>
+
+## A folder full of fics and no idea which file is which?
+
+When AO3 went offline at the end of October 2026 after a security incident, with no return expected for weeks, a lot of us suddenly had only the fics we had downloaded over the years. I had hundreds of them and no idea which file was what. Fans started sharing their downloaded collections with each other, and those folders are often just as unsorted, with the same fic in them more than once.
+
+That is why I made Fanfic Engine. Drop your whole fic folder onto the window, and a few seconds later you can browse it the way you would on AO3:
+
+- **Find a pairing**: type `Harry/Draco`, `Draco/Harry` or just `Draco`.
+- **Browse by fandom and character**, crossovers included.
+- **Exact duplicates are skipped**, so a file that's in two shared folders only shows up once.
+- **No internet needed**: it works when the archive is down, and nothing you import ever leaves your computer.
+- **Free**, for Mac, with an alpha version for Windows and Linux.
+
+If you share or receive fics while AO3 is down, please respect the authors' wishes: many writers don't want their work re-posted elsewhere. When the archive is back, leave kudos and comments on the originals. Fanfic Engine only sorts files on your own computer and never shares anything.
+
+If it helps you, a ⭐ on this page helps other fans find it.
+
 ## Features
 
 - **Import** EPUB and PDF files by dragging them (or whole folders) onto the window or the Dock icon, with **Add Files…**, or with Finder's *Open With*. A summary shows what was added, skipped or could not be read.
