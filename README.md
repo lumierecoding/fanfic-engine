@@ -30,6 +30,8 @@ If you share or receive fics while AO3 is down, please respect the authors' wish
 
 If it helps you, a ⭐ on this page helps other fans find it.
 
+![A short demo: a folder of fanfics is dragged onto Fanfic Engine and imported, with a duplicate skipped; typing Draco/Harry finds the Harry/Draco fics; one fic's first page opens; a fandom is picked in the sidebar](docs/images/demo.gif)
+
 ## Features
 
 - **Import** EPUB and PDF files by dragging them (or whole folders) onto the window or the Dock icon, with **Add Files…**, or with Finder's *Open With*. A summary shows what was added, skipped or could not be read.
