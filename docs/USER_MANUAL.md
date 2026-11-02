@@ -2,6 +2,8 @@
 
 Fanfic Engine keeps a library of the fanfics you have downloaded and lets you find them by pairing, character and fandom. It works completely offline.
 
+![How Fanfic Engine works, in four steps. 1: you drag EPUB or PDF files, or whole folders, onto the window; your original files are never changed or moved. 2: the first page is saved as its own PDF and its Fandom and Relationship tags are read; A/B is a pairing, A & B a friendship. 3: a library folder keeps a copy of each fic, its first page and library.json; the same file is only added once, and every fic and first page gets its own ID. 4: you search a pairing in any order, or browse fandoms, characters and pairings, and click a fic to see its first page. Everything stays on your Mac.](images/how-it-works.png)
+
 **Contents**
 
 1. [Installing and opening the app](#1-installing-and-opening-the-app)

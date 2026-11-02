@@ -1,0 +1,87 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="600" viewBox="0 0 1200 600" font-family="-apple-system, BlinkMacSystemFont, 'Helvetica Neue', Helvetica, Arial, sans-serif" fill="#000">
+  <title>How Fanfic Engine works</title>
+  <desc>Four steps. 1: your EPUB or PDF files, or whole folders, are dragged onto the window or the Dock icon or added with Add Files; the originals are never changed or moved. 2: the app saves the first page as its own PDF and reads its Fandom and Relationship tags; A/B is a pairing, A &amp; B a friendship, and the names in them fill the Characters list. 3: it keeps a library folder with Works, First Pages and library.json; the same file is only added once, every fic and first page gets its own ID, and library.json lists every pairing, character and fandom. 4: you search a pairing in any order, so Draco/Harry finds Harry/Draco, or browse fandoms, characters and pairings in the sidebar and click a fic to see its first page. Everything stays on your Mac, with no internet and no account.</desc>
+  <rect width="1200" height="600" fill="#fff"/>
+  <text x="600.0" y="48" font-size="28" text-anchor="middle" font-weight="700">How Fanfic Engine works</text>
+  <rect x="20" y="84" width="260" height="420" rx="14" fill="#fff" stroke="#000" stroke-width="2.5"/>
+  <rect x="320" y="84" width="260" height="420" rx="14" fill="#fff" stroke="#000" stroke-width="2.5"/>
+  <rect x="620" y="84" width="260" height="420" rx="14" fill="#fff" stroke="#000" stroke-width="2.5"/>
+  <rect x="920" y="84" width="260" height="420" rx="14" fill="#fff" stroke="#000" stroke-width="2.5"/>
+  <line x1="285" y1="294.0" x2="303" y2="294.0" stroke="#000" stroke-width="2.5"/>
+  <path d="M301,286.0 L315,294.0 L301,302.0 z"/>
+  <line x1="585" y1="294.0" x2="603" y2="294.0" stroke="#000" stroke-width="2.5"/>
+  <path d="M601,286.0 L615,294.0 L601,302.0 z"/>
+  <line x1="885" y1="294.0" x2="903" y2="294.0" stroke="#000" stroke-width="2.5"/>
+  <path d="M901,286.0 L915,294.0 L901,302.0 z"/>
+  <circle cx="48" cy="84" r="16"/>
+  <text x="48" y="90" font-size="17" text-anchor="middle" font-weight="700" fill="#fff">1</text>
+  <text x="150.0" y="130" font-size="21" text-anchor="middle" font-weight="700">Your fic files</text>
+  <circle cx="348" cy="84" r="16"/>
+  <text x="348" y="90" font-size="17" text-anchor="middle" font-weight="700" fill="#fff">2</text>
+  <text x="450.0" y="130" font-size="21" text-anchor="middle" font-weight="700">Reads the tags</text>
+  <circle cx="648" cy="84" r="16"/>
+  <text x="648" y="90" font-size="17" text-anchor="middle" font-weight="700" fill="#fff">3</text>
+  <text x="750.0" y="130" font-size="21" text-anchor="middle" font-weight="700">Keeps a library</text>
+  <circle cx="948" cy="84" r="16"/>
+  <text x="948" y="90" font-size="17" text-anchor="middle" font-weight="700" fill="#fff">4</text>
+  <text x="1050.0" y="130" font-size="21" text-anchor="middle" font-weight="700">Find it again</text>
+  <rect x="41" y="174" width="28" height="16" rx="3" fill="#fff" stroke="#000" stroke-width="2"/>
+  <rect x="41" y="184" width="66" height="54" rx="5" fill="#fff" stroke="#000" stroke-width="2"/>
+  <path d="M121,168 h42 l16,16 v58 h-58 z" fill="#fff" stroke="#000" stroke-width="2"/>
+  <path d="M163,168 v16 h16" fill="none" stroke="#000" stroke-width="2"/>
+  <text x="150.0" y="215.0" font-size="13" text-anchor="middle" font-weight="700">EPUB</text>
+  <path d="M197,168 h42 l16,16 v58 h-58 z" fill="#fff" stroke="#000" stroke-width="2"/>
+  <path d="M239,168 v16 h16" fill="none" stroke="#000" stroke-width="2"/>
+  <text x="226.0" y="215.0" font-size="13" text-anchor="middle" font-weight="700">PDF</text>
+  <text x="150" y="274" font-size="15" text-anchor="middle" font-style="italic">files or whole folders</text>
+  <text x="150" y="320" font-size="15" text-anchor="middle">Drag them onto the window</text>
+  <text x="150" y="343" font-size="15" text-anchor="middle">or the Dock icon, or use</text>
+  <text x="150" y="366" font-size="15" text-anchor="middle">Add Files…</text>
+  <text x="150" y="402" font-size="15" text-anchor="middle" font-weight="700">Your original files are</text>
+  <text x="150" y="425" font-size="15" text-anchor="middle" font-weight="700">never changed or moved.</text>
+  <path d="M336,150 h208 l20,20 v104 h-228 z" fill="#fff" stroke="#000" stroke-width="2"/>
+  <path d="M544,150 v20 h20" fill="none" stroke="#000" stroke-width="2"/>
+  <text x="350" y="178" font-size="14"><tspan font-weight="700">Fandom:</tspan> Harry Potter</text>
+  <text x="350" y="206" font-size="14" font-weight="700">Relationship:</text>
+  <text x="350" y="228" font-size="14">Harry Potter/Draco Malfoy,</text>
+  <text x="350" y="250" font-size="14">Harry Potter &amp; Ron Weasley</text>
+  <text x="450" y="298" font-size="15" text-anchor="middle" font-style="italic">the first page</text>
+  <text x="450" y="326" font-size="15" text-anchor="middle">is saved as its own PDF</text>
+  <text x="450" y="349" font-size="15" text-anchor="middle">and its tags are read.</text>
+  <text x="450" y="385" font-size="15" text-anchor="middle" font-weight="700">A/B is a pairing,</text>
+  <text x="450" y="408" font-size="15" text-anchor="middle" font-weight="700">A &amp; B a friendship.</text>
+  <text x="450" y="444" font-size="15" text-anchor="middle">The names in them fill</text>
+  <text x="450" y="467" font-size="15" text-anchor="middle">the Characters list.</text>
+  <rect x="636" y="148" width="228" height="150" rx="8" fill="#fff" stroke="#000" stroke-width="2"/>
+  <text x="652" y="174" font-size="14" font-weight="700" font-family="ui-monospace, Menlo, Consolas, 'DejaVu Sans Mono', monospace">Fanfic Engine/</text>
+  <text x="652" y="197" font-size="14" font-family="ui-monospace, Menlo, Consolas, 'DejaVu Sans Mono', monospace">├─&#160;Works/</text>
+  <text x="652" y="220" font-size="14" font-family="ui-monospace, Menlo, Consolas, 'DejaVu Sans Mono', monospace">│&#160;&#160;└─&#160;6F1C….epub</text>
+  <text x="652" y="243" font-size="14" font-family="ui-monospace, Menlo, Consolas, 'DejaVu Sans Mono', monospace">├─&#160;First&#160;Pages/</text>
+  <text x="652" y="266" font-size="14" font-family="ui-monospace, Menlo, Consolas, 'DejaVu Sans Mono', monospace">│&#160;&#160;└─&#160;A93E….pdf</text>
+  <text x="652" y="289" font-size="14" font-family="ui-monospace, Menlo, Consolas, 'DejaVu Sans Mono', monospace">└─&#160;library.json</text>
+  <text x="750" y="326" font-size="15" text-anchor="middle">The same file twice?</text>
+  <text x="750" y="349" font-size="15" text-anchor="middle">It is only added once.</text>
+  <text x="750" y="385" font-size="15" text-anchor="middle">Every fic and first page</text>
+  <text x="750" y="408" font-size="15" text-anchor="middle">gets its own ID.</text>
+  <text x="750" y="444" font-size="14" text-anchor="middle" font-weight="700" font-family="ui-monospace, Menlo, Consolas, 'DejaVu Sans Mono', monospace">library.json</text>
+  <text x="750" y="467" font-size="15" text-anchor="middle">lists every pairing,</text>
+  <text x="750" y="490" font-size="15" text-anchor="middle">character and fandom.</text>
+  <rect x="936" y="148" width="228" height="38" rx="19" fill="#fff" stroke="#000" stroke-width="2"/>
+  <circle cx="958" cy="165" r="7" fill="none" stroke="#000" stroke-width="2"/>
+  <line x1="963" y1="170" x2="969" y2="176" stroke="#000" stroke-width="2.5" stroke-linecap="round"/>
+  <text x="980" y="172" font-size="15" font-weight="700" font-family="ui-monospace, Menlo, Consolas, 'DejaVu Sans Mono', monospace">Draco/Harry</text>
+  <rect x="936" y="200" width="228" height="98" rx="8" fill="#fff" stroke="#000" stroke-width="2"/>
+  <path d="M952,218 L960,223 L952,228 z"/>
+  <text x="970" y="228" font-size="15">Fandoms</text>
+  <path d="M952,246 L960,251 L952,256 z"/>
+  <text x="970" y="256" font-size="15">Characters</text>
+  <path d="M952,274 L960,279 L952,284 z"/>
+  <text x="970" y="284" font-size="15">Pairings</text>
+  <text x="1050" y="326" font-size="15" text-anchor="middle">Search a pairing in any</text>
+  <text x="1050" y="349" font-size="15" text-anchor="middle">order: Draco/Harry</text>
+  <text x="1050" y="372" font-size="15" text-anchor="middle">finds Harry/Draco too.</text>
+  <text x="1050" y="408" font-size="15" text-anchor="middle">Or browse the sidebar,</text>
+  <text x="1050" y="431" font-size="15" text-anchor="middle">then click a fic to see</text>
+  <text x="1050" y="454" font-size="15" text-anchor="middle">its first page.</text>
+  <text x="600.0" y="556" font-size="20" text-anchor="middle">Everything stays on your Mac: no internet, no account.</text>
+</svg>
