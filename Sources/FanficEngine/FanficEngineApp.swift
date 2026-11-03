@@ -74,6 +74,21 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
                 try? lines.joined(separator: "\n").write(toFile: (path as NSString).expandingTildeInPath, atomically: true, encoding: .utf8)
             }
         }
+        // Developer option `-windowFrame "x y width height"` (screen points, origin bottom left): moves the window there
+        // once it is open, for example onto a Retina display for screenshots at 2x. A negative x needs a leading space
+        // (`-windowFrame " -1410 150 1100 700"`), or it is read as an option name.
+        if let numbers = UserDefaults.standard.string(forKey: "windowFrame")?.split(separator: " ").compactMap({ Double($0) }),
+           numbers.count == 4 {
+            let frame = NSRect(x: numbers[0], y: numbers[1], width: numbers[2], height: numbers[3])
+            func place(_ attempt: Int) {
+                if let window = NSApp.windows.first(where: { $0.isVisible && $0.title == "Fanfic Engine" }) {
+                    window.setFrame(frame, display: true)
+                } else if attempt < 20 {
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.25) { place(attempt + 1) }
+                }
+            }
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.25) { place(0) }
+        }
         // Developer option `-showAppMenu YES`: opens the app menu under the window's top-left corner (screenshots).
         if UserDefaults.standard.bool(forKey: "showAppMenu") {
             DispatchQueue.main.asyncAfter(deadline: .now() + 2) {

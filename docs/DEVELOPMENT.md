@@ -81,6 +81,8 @@ open -n "/Applications/Fanfic Engine.app" --args \
   -checkInBackgroundOnLaunch YES       # updater tests: a quiet check at start
   -installUpdatesImmediately YES       # updater tests: install a downloaded update at once and restart
   -windowSize 1100x1000                # window size
+  -windowFrame " -1410 150 1100 700"   # put the window at x y width height (screen points), e.g. on a Retina display
+                                       # for 2x screenshots; keep the leading space when x is negative
   -ApplePersistenceIgnoreState YES     # ignore the saved window state
 ```
 
