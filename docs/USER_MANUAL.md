@@ -27,7 +27,7 @@ Fanfic Engine keeps a library of the fanfics you have downloaded and lets you fi
 
 ## 1. Installing and opening the app
 
-Download **Fanfic-Engine-1.0.dmg** from the [Releases page](https://github.com/lumierecoding/fanfic-engine/releases), open it and drag **Fanfic Engine** onto **Applications**. (Or build it yourself, see the [README](../README.md#build-it-yourself).) It runs on macOS 15 or later.
+Download the newest **Fanfic-Engine-….dmg** from the [Releases page](https://github.com/lumierecoding/fanfic-engine/releases), open it and drag **Fanfic Engine** onto **Applications**. (Or build it yourself, see the [README](../README.md#build-it-yourself).) It runs on macOS 15 or later.
 
 **The first time you open a downloaded copy**, macOS says it *could not verify* "Fanfic Engine". That is because the app is not notarized by Apple (notarizing needs a paid developer account), not because something is wrong with it. To allow it once:
 
@@ -78,7 +78,7 @@ The window has three columns:
 
 - **Sidebar (left)**: **All Works** and **No Pairing Found**, with counts, and below them three lists — **Fandoms**, **Characters** and **Pairings** — that start folded.
 - **Works list (middle)**: every work that matches the current search or sidebar choice, sorted by title. Each row shows the title, the file type, the author, the fandom and the relationships. Relationships that match your search are highlighted.
-- **Details (right)**: the selected work's first page, its fandom(s), relationships, file name and IDs, with buttons to open it.
+- **Details (right)**: the selected work's summary and first page, its fandom(s), relationships, file name and IDs, with buttons to open it.
 
 The toolbar has **+** (add files), the **folder** button (show the library in Finder), the **gear** (Settings) and the **search field**. The line under the window title says how many fanfics are listed.
 
@@ -116,6 +116,7 @@ The three lists in the sidebar start folded. **Click a list's name** (or the sma
 
 Select a work in the middle column to see:
 
+- its **summary**, as the author wrote it, under the buttons. It's read once when the work is added; long summaries are shown in full, and you can select and copy the text. A file without one shows *No summary found* (common for files from sites other than AO3);
 - its **first page** (the saved copy);
 - **Fandom(s)**, **Relationships**, the original **file** name and which page was used as the first page;
 - the **Work ID** and **First-page ID** (you can select and copy them).
@@ -154,7 +155,7 @@ Click the **folder** button (or **File → Show Library in Finder**). The librar
 
 `library.json` is a text file you can open in any text editor. It contains:
 
-- **works** — every work with its work ID, first-page ID, original file name, title, author, relationships and fandoms;
+- **works** — every work with its work ID, first-page ID, original file name, title, author, relationships, fandoms and summary;
 - **pairings**, **characters**, **fandoms** — each name once, A–Z;
 - **pairingIndex**, **characterIndex**, **fandomIndex** — each name with the work ID and first-page ID of every work that has it.
 
@@ -169,7 +170,7 @@ The same story in a *different* file is currently imported as a separate work �
 ## 10. Removing works and re-reading the library
 
 - **Remove a work**: right-click it in the middle column → **Remove from Library…** and confirm. The library's copy of the file, its first-page copy and its entries in `library.json` are deleted. Your original file is not touched.
-- **Re-read Library** (**File** menu or Settings): reads every stored work again with the current rules — useful after an update of the app improves how files are read. IDs stay the same; first-page copies, pairings and fandoms are replaced.
+- **Re-read Library** (**File** menu or Settings): reads every stored work again with the current rules — useful after an update of the app improves how files are read. IDs stay the same; first-page copies, pairings, fandoms and summaries are replaced.
 
 ## 11. Which files work best
 
@@ -177,6 +178,8 @@ The same story in a *different* file is currently imported as a separate work �
 - **Other sites and tools** (for example FicHub exports) are imported, but if their first page has no Relationship or Fandom field, the work appears under *No Pairing Found* and in no fandom.
 - **EPUB "first page"**: EPUBs have no fixed pages, so the first page is the first section with text (cover images are skipped). It is drawn as a simple one-page PDF from its text. If that section has no Relationship field, the next two are checked.
 - **PDF first page**: page 1; if page 1 has no Relationship field, pages 2 and 3 are checked.
+- **Summaries**: in AO3 EPUBs the summary is in the section after the tags, and in AO3 PDFs after the title; the app finds it there. PDFs don't record paragraphs, so a PDF summary is shown as one paragraph. A text after a "Summary" heading that is longer than AO3 allows (1,250 characters) is not taken as a summary.
+- **Updating from version 1.0**: the first time version 1.1 opens your library, it reads every fanfic once more to find the summaries (a few seconds for hundreds of fanfics; the wheel in the toolbar turns meanwhile). IDs, pairings and fandoms stay the same, and the previous `library.json` is kept as `library-v2-backup.json` in the library folder.
 - **Scanned PDFs** (pictures of pages, no text) can't be read.
 
 ## 12. Big libraries
@@ -241,7 +244,7 @@ It works like the Mac app described above — same reading rules, search, sideba
 | Library in `~/Library/Application Support/Fanfic Engine` | Windows `%APPDATA%\Fanfic Engine`, Linux `~/.local/share/Fanfic Engine` |
 | Settings in the Mac app's preferences | Windows registry `HKEY_CURRENT_USER\Software\Fanfic Engine`; Linux `~/.config/Fanfic Engine/Fanfic Engine.conf` |
 
-Both versions write the same `library.json`, so a library folder can be moved between a Mac and a Windows or Linux computer. Don't open the same library folder in two apps at the same time.
+Both versions read the same `library.json`, so a library folder can be moved between a Mac and a Windows or Linux computer. Summaries are Mac-only for now: the Windows/Linux version opens a library with summaries but doesn't show them, and if it saves the library, the summaries are dropped (the Mac app reads them again the next time it opens it). Don't open the same library folder in two apps at the same time.
 
 ![The Windows/Linux version with a fandom selected (shown running on macOS)](images/desktop-fandom-search-dark.png)
 

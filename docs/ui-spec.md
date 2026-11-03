@@ -1,5 +1,123 @@
 # Fanfic Engine — UI spec
 
+## Change 7 (3 November 2026, OK'd and built): the summary in the details column
+
+Owner: "I want the summary of each fic on the details pane on the right". The reading rules are in `SPEC.md` section 5a. This part covers what you see.
+
+### What changes visually
+
+- **Details column (right), one new block, "Summary",** between the button row (Open Fanfic, Open First Page, Show in Finder) and the first-page picture:
+  - the heading "Summary" in the same font and grey (secondary) colour as the labels under the picture (Fandom, Relationships, File …);
+  - under it the summary in the normal body font and colour, using the column's full width (the same 16 pt margins as now) and wrapping; paragraphs 7 pt apart (planned 6 pt; the gap is an empty line in a tiny font so the summary stays one selectable text, and its height only goes in steps of 5 or 7 pt); the text can be selected and copied, like the other details;
+  - the whole summary is shown (AO3 allows at most 1,250 characters); the column scrolls as it does now;
+  - a fanfic without a summary shows "No summary found" in italic grey under the heading, like "No fandom found".
+- **The first time the new version opens your library** (version 2), it reads every fanfic once more to find the summaries: the small progress wheel in the toolbar turns, as during Re-read Library, and the summaries appear as they are read (a few seconds for hundreds of fanfics).
+
+### Stays the same
+
+The window, toolbar, sidebar, works list and its rows; the title, author and buttons at the top of the details column; the first-page picture and the details below it (they move down by the height of the Summary block); the import summary; Settings; the library folder, IDs and first-page copies.
+
+This build also contains the toolbar fix of change 6, which is waiting for your check on macOS 27.0.1.
+
+### Not in this change (possible later)
+
+- Searching inside summaries.
+- Folding long summaries (the first few lines and a "More" button).
+- The summary in the works list rows.
+- The summary in the Windows/Linux version.
+- Export (change 5) waits for its own OK and doesn't depend on this change.
+
+### Files
+
+- Core: new `SummaryReader.swift` (the rules of `SPEC.md` 5a); `WorkReader.swift` (looks on the first page and the next two pages or documents), `EPUBBook.swift` (a document's HTML, for the blockquote), `HTMLText.swift` (keeps paragraph breaks for summaries), `Models.swift` (`summary`, version 3), `Library.swift` (stores it; update from version 2 with the backup copy).
+- App: `WorkDetailView.swift`.
+- Test files: `scripts/make-fixtures.swift` and `Fixtures/expected.json` (a `summary` for each file). New files: an EPUB in AO3's layout (tags in the first document; summary blockquote with two paragraphs in the second, then Notes), the same without Notes, a PDF whose summary runs onto page 2, an inline `Summary:` line, a "Summary" chapter longer than 1,500 characters, and a file without a summary. Tests in `ReadingTests.swift` and `LibraryTests.swift` (the version 2 → 3 update keeps IDs and every other field).
+- After the gallery OK: `SPEC.md`, `USER_MANUAL.md`, `README.md`, `CHANGELOG.md`.
+
+### Layout rules for change 7
+
+| # | Rule | How it is checked |
+| --- | --- | --- |
+| U35 | The Summary block sits between the button row and the first-page picture, 14 pt from each (the column's spacing now); its left edge lines up with the title and the buttons | Screenshot, pixel check |
+| U36 | Heading "Summary" in the font and secondary colour of the details labels; the text in the body font and primary colour, wrapped to the column width, never cut off or shortened; paragraphs 7 pt apart (planned 6; see above) | Screenshots with a one-line, a two-paragraph and a 1,250-character summary; light and dark; narrow and wide details column |
+| U37 | No summary: "No summary found" under the heading, italic and secondary, the same as "No fandom found" | Screenshot of a file without a summary |
+| U38 | The summary text can be selected and copied (⌘C) | Screenshot with a selection; the copied text checked |
+| U39 | Nothing else in the window changes; only the picture and the details below it move down by the block's height | Before/after pictures of all three columns, light and dark |
+| U40 | Only standard macOS text styles and system colours (U9) | Screenshots in light and dark |
+
+---
+
+## Change 6 (2 November 2026, bug fix; shipped with change 7 in 1.1): toolbar line and search text
+
+- **Owner report** (Mac Studio, macOS 27.0.1, dark mode): the typed search text is dark on the dark toolbar (it should be white), and a thin vertical line runs through the **+** button.
+- **Cause of the line:** since change 4, the works list and the details column each drew their own band, so the divider between them ran up through the toolbar (the "known difference" in change 4). When the details column is narrow, the toolbar buttons sit over that divider. Seen here on macOS 27.2 too, with a narrow details column. Before change 4, macOS's band ran unbroken across both columns.
+- **Cause of the dark text:** the toolbar search field draws its text once, in the colour of the moment, and does not redraw it when the window switches between light and dark. All its views report the new look; only the drawn text is stale. Reproduced here on macOS 27.2: a window that switches from dark to light while open keeps white text on the light field. Not caused by the app-drawn band (macOS's own band shows the same).
+- **What changes:**
+  - The app draws **one** band across the works list and the details column, from the sidebar divider to the window's right edge, so the divider between list and details stops at the band's bottom line again (as before change 4). Height, colour, bottom line and the sidebar corner (U22–U24) stay as they are. Still on macOS 27 and later.
+  - When the window opens and after every light/dark change, the app sets the search field's text again, which makes the field draw it in the current colour. The search itself does not change; while someone is typing, the field is left alone.
+- **Stays the same:** everything else, including the buttons, the search field and their places.
+- **Files:** `ContentView.swift`, `TitleBand.swift`, new `SearchFieldAppearance.swift`.
+- **Checked:** on macOS 27.2 here (U22–U24, U33, U34), light and dark; on macOS 27.0.1 by the owner with a test build.
+
+| # | Rule | How it is checked |
+| --- | --- | --- |
+| U33 | No vertical line in the band: the list/details divider stops at the band's bottom line, also when the toolbar buttons sit above it | Screenshot and pixel check with a narrow details column, light and dark |
+| U34 | The typed search text is white in dark mode and black in light mode, also after the window switches between them while open | Screenshot after a dark → light switch while open (27.2, test copy); owner on macOS 27.0.1 with the test build |
+
+---
+
+## Change 5 (2 November 2026, waiting for the owner's OK): export with readable file names
+
+The naming rules and the draft list of short names are in `SPEC.md` section 9. This part covers what you see.
+
+### What changes visually
+
+- **File menu:** a new item **Export Shown Fanfics…** (⇧⌘E) after Add Files…. It exports what the works list shows right now (all works, one fandom, a search result, No Pairing Found). Greyed out when the list is empty.
+- **Right-click a fanfic:** a new item **Export…** after Show in Finder, above a separator and Remove from Library.
+- **Right-click a fandom, character or pairing in the sidebar:** a new menu with one item, **Export N Fanfics…** (N = the number next to it). Clicking the row works as before.
+- **Choosing the folder:** the standard macOS folder panel with **New Folder**. Its button says **Export** and its message says "Export 12 fanfics with readable names into this folder." It opens in the folder used last time.
+- **Export summary (new sheet):** looks like the import summary: counts for **Exported**, **Already in folder** and **Could not copy**, the new file names under each heading, and the buttons **Show in Finder** and **OK** (default).
+- **Settings, new group "File names"** between Relationships and Library:
+  - an example line, e.g. "HP - Harry x Draco - The Quiet Winter.pdf", for the selected fanfic (or the first one in the library);
+  - a button **Fandom Short Names…**, which opens a sheet with a table of the fandoms in the library: **Fandom** (the full tag, as in the sidebar), **Short name** (editable; type the same short name as another fandom to group them), **Names** (pop-up: First word, Last word, Full name), **Fanfics** (count). A search field above the table, **Restore Built-in Names** and **Done** below it. Changes show in the example line at once.
+
+### What changes on disk
+
+- Nothing in the library. An export writes only into the folder you chose, and never overwrites a file there.
+- Your own short names are stored in the app's preferences on this Mac, like the other settings. No network code is added.
+
+### Files
+
+- Core: new `FileNames.swift` (the naming rules), new data file `FandomShortNames.json` (the built-in list), `Package.swift` (resource).
+- App: `AppModel.swift` (export), `FanficEngineApp.swift` (menu item), `WorkListView.swift` and `SidebarView.swift` (right-click menus), new `ExportSummaryView.swift`, `SettingsView.swift`, new `ShortNamesView.swift`.
+- Tests: a table test with every example in `SPEC.md` 9.1 plus the hard cases (alternate names, `(Supernatural)`, OMC/OFC, nicknames in quotes, family name first, same first names, `:` and `?` in titles, too-long titles, name clashes, re-export into the same folder).
+- `SPEC.md`, `USER_MANUAL.md`, `README.md` (feature list; the Privacy section says the app writes only to its library folder, so it gets "and into folders you export to"), `CHANGELOG.md`, the gallery.
+
+### Stays the same
+
+The window, toolbar, sidebar, works list and details look exactly as before; import, search, IDs, the library folder and `library.json`; left-clicks everywhere.
+
+### Not in this change (possible later)
+
+- Grouping the sidebar's Fandoms list by short name (HP once instead of every Harry Potter tag).
+- Dragging a fanfic from the list into Finder to save it with its readable name.
+- Export in the Windows/Linux version.
+
+### Layout rules for change 5
+
+| # | Rule | How it is checked |
+| --- | --- | --- |
+| U25 | File menu: Export Shown Fanfics… (⇧⌘E) directly after Add Files…; greyed out when the works list is empty | Screenshot of the open menu, with and without works |
+| U26 | Fanfic right-click menu: Open Fanfic, Open First Page, Show in Finder, Export…, separator, Remove from Library | Screenshot of the open menu |
+| U27 | Sidebar right-click on a fandom, character or pairing: one item "Export N Fanfics…" with the row's count; left-click unchanged | Screenshot; click test |
+| U28 | Folder panel: standard panel, New Folder, button "Export", message with the number of fanfics | Screenshot |
+| U29 | Export summary: same layout, fonts and spacing as the import summary; three counts, names listed under their heading; Show in Finder and OK (default) | Screenshot next to the import summary, light and dark |
+| U30 | Settings: "File names" group between Relationships and Library with the example line and the Fandom Short Names… button; the rest of Settings unchanged | Screenshot compared with change 2, light and dark |
+| U31 | Short-names sheet: standard table with the four columns, search field, Restore Built-in Names and Done; a short-name edit updates the example line at once | Screenshots before and after an edit |
+| U32 | Only standard macOS controls, system colours and materials (U9) | Screenshots in light and dark |
+
+---
+
 ## Change 4 (1 November 2026): title band drawn by the app (owner: "try app drawn band")
 
 - **Why:** on macOS 27.2 the grey band behind the window title and toolbar, and its bottom line, start 2 pt left of the sidebar divider, so the lines don't meet (a bare three-column window has the same step, so macOS draws it). Hiding macOS's band alone is not enough: scrolled works then run under the title.

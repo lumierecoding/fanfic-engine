@@ -47,7 +47,7 @@ struct LibraryTests {
     func libraryFileLists() async throws {
         let (library, _, _) = try await importedLibrary()
         let file = try JSONDecoder.iso.decode(LibraryFile.self, from: Data(contentsOf: library.libraryFile))
-        #expect(file.version == 2)
+        #expect(file.version == 3)
         #expect(file.works.map(\.workID) == library.works.map(\.workID))
         #expect(file.pairings.count == 16)
         #expect(file.characters.count == 25)
@@ -100,7 +100,7 @@ struct LibraryTests {
     func folderImport() async throws {
         let library = Library(root: try temporaryLibraryFolder())
         let report = await library.importFiles([fixturesFolder])
-        #expect(report.addedCount == 11)
+        #expect(report.addedCount == 16)  // 11 + the 5 summary test files in the Summaries subfolder
         #expect(Set(report.items(.skipped).map(\.fileName)) == ["expected.json", "notes.txt"])
         #expect(report.items(.duplicate).map(\.fileName) == ["Zz Duplicate of The Quiet Winter.pdf"])
         #expect(report.items(.unreadable).count == 3)
@@ -128,7 +128,7 @@ struct LibraryTests {
         #expect(library.works == before)
     }
 
-    @Test("A version 1 library is upgraded once: fandoms filled in, IDs unchanged, saved as version 2")
+    @Test("A version 1 library is upgraded once: fandoms filled in, IDs unchanged, saved as version 3")
     func upgradeFromVersion1() async throws {
         let (library, _, _) = try await importedLibrary()
         let before = library.works
@@ -148,7 +148,7 @@ struct LibraryTests {
         #expect(!old.needsUpgrade)
         #expect(old.works == before)
         let file = try JSONDecoder.iso.decode(LibraryFile.self, from: Data(contentsOf: library.libraryFile))
-        #expect(file.version == 2)
+        #expect(file.version == 3)
         #expect(file.fandoms.count == 6)
         #expect(!Library(root: library.root).needsUpgrade)
     }

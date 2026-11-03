@@ -19,6 +19,8 @@ public struct PreparedWork: Sendable {
     public let fandoms: [String]
     public let title: String
     public let author: String?
+    /// The work's summary (SPEC section 5a); nil when none was found.
+    public let summary: String?
 }
 
 public enum ReadError: LocalizedError {
@@ -39,10 +41,12 @@ public enum ReadError: LocalizedError {
     }
 }
 
-/// Reads a PDF or EPUB: hash, title, author, first page copy and relationships (SPEC section 3).
+/// Reads a PDF or EPUB: hash, title, author, first page copy, relationships, fandoms and summary (SPEC sections 3, 5, 5a).
 public enum WorkReader {
     /// How many pages (PDF) or text documents (EPUB) are checked for the Relationship field.
     static let pagesChecked = 3
+    /// The summary is looked for on the first-page page or document and this many after it (SPEC 5a).
+    static let summaryPagesAfterFirst = 2
 
     public static func read(_ url: URL) throws -> PreparedWork {
         guard let kind = FileKind(url: url) else { throw ReadError.notSupported }
@@ -85,7 +89,20 @@ public enum WorkReader {
             firstPageSource: "page \(chosen + 1)", firstPageText: texts[chosen],
             hasRelationshipField: tags != nil, relationships: tags ?? [], fandoms: fandoms,
             title: nonEmpty(attributes[PDFDocumentAttribute.titleAttribute] as? String) ?? fallbackTitle,
-            author: nonEmpty(attributes[PDFDocumentAttribute.authorAttribute] as? String))
+            author: nonEmpty(attributes[PDFDocumentAttribute.authorAttribute] as? String),
+            summary: pdfSummary(document, firstPage: chosen))
+    }
+
+    /// The summary on the first-page page or one of the two after it; a summary that reaches the end of its page
+    /// goes on with the next page. PDF text has no paragraph marks, so its lines become one paragraph.
+    static func pdfSummary(_ document: PDFDocument, firstPage chosen: Int) -> String? {
+        func text(_ index: Int) -> String? { index < document.pageCount ? (document.page(at: index)?.string ?? "") : nil }
+        for index in chosen...(chosen + summaryPagesAfterFirst) {
+            guard let page = text(index) else { break }
+            let result = SummaryReader.read(text: page, nextPage: text(index + 1), joinLines: true)
+            if result != .noLabel { return result.summary }
+        }
+        return nil
     }
 
     // MARK: EPUB
@@ -93,13 +110,22 @@ public enum WorkReader {
     static func readEPUB(_ data: Data, fallbackTitle: String) throws -> PreparedWork {
         let book = try EPUBBook(data: data)
 
-        // Text documents in reading order; image-only pages are skipped.
-        var documents: [(path: String, text: String)] = []
-        for path in book.spinePaths {
-            guard let text = try? book.text(at: path), hasVisibleText(text) else { continue }
-            documents.append((path, text))
-            if documents.count > pagesChecked { break }
+        // Text documents in reading order; image-only pages are skipped. Read one by one, only as far as needed.
+        var documents: [(path: String, html: String, text: String)] = []
+        var nextSpineIndex = 0
+        func loadNextDocument() -> Bool {
+            while nextSpineIndex < book.spinePaths.count {
+                let path = book.spinePaths[nextSpineIndex]
+                nextSpineIndex += 1
+                guard let html = try? book.html(at: path) else { continue }
+                let text = HTMLText.plainText(from: html)
+                guard hasVisibleText(text) else { continue }
+                documents.append((path, html, text))
+                return true
+            }
+            return false
         }
+        while documents.count <= pagesChecked, loadNextDocument() {}
         guard !documents.isEmpty else { throw ReadError.noText }
 
         let chosen = documents.prefix(pagesChecked).firstIndex { RelationshipParser.hasField($0.text) } ?? 0
@@ -108,12 +134,24 @@ public enum WorkReader {
         let tags = RelationshipParser.relationships(in: text, nextPage: next)
         let fandoms = fandoms(in: documents.map(\.text), preferring: chosen, checked: min(pagesChecked, documents.count))
 
+        // The summary: in AO3 EPUBs it is in the document after the tags (SPEC 5a).
+        var summary: String?
+        for index in chosen...(chosen + summaryPagesAfterFirst) {
+            while documents.count <= index, loadNextDocument() {}
+            guard index < documents.count else { break }
+            let result = SummaryReader.read(html: documents[index].html)
+            if result != .noLabel {
+                summary = result.summary
+                break
+            }
+        }
+
         return PreparedWork(
             kind: .epub, sha256: sha256(data), fileData: data,
             firstPagePDF: TextPage.pdf(from: text),
             firstPageSource: documents[chosen].path, firstPageText: text,
             hasRelationshipField: tags != nil, relationships: tags ?? [], fandoms: fandoms,
-            title: nonEmpty(book.title) ?? fallbackTitle, author: nonEmpty(book.author))
+            title: nonEmpty(book.title) ?? fallbackTitle, author: nonEmpty(book.author), summary: summary)
     }
 
     /// The Fandom field from the chosen first page; if that page has none, from the other checked pages.

@@ -27,6 +27,26 @@ public enum HTMLText {
         return lines.filter { !$0.isEmpty }.joined(separator: "\n")
     }
 
+    /// Text with its paragraphs kept, for summaries (SPEC 5a rule 4): an empty line between block elements
+    /// (paragraphs, headings, list items …), a line break for `<br>`, runs of spaces as one space.
+    public static func paragraphText(from html: String) -> String {
+        let lineBreakMark = "\u{E000}"  // a private-use character that never occurs in fic text
+        var s = html
+        s = replace(comments, in: s, with: "")
+        s = replace(invisible, in: s, with: "")
+        s = replace(lineBreak, in: s, with: lineBreakMark)
+        s = replace(blockTag, in: s, with: "\n")
+        s = replace(anyTag, in: s, with: "")
+        s = decodeEntities(s)
+        let paragraphs = s.components(separatedBy: .newlines).map { block in
+            block.components(separatedBy: lineBreakMark)
+                .map { $0.components(separatedBy: .whitespaces).filter { !$0.isEmpty }.joined(separator: " ") }
+                .filter { !$0.isEmpty }
+                .joined(separator: "\n")
+        }
+        return paragraphs.filter { !$0.isEmpty }.joined(separator: "\n\n")
+    }
+
     /// Text in a common legacy or Unicode encoding.
     public static func decode(_ data: Data) -> String {
         if data.starts(with: [0xFF, 0xFE]) || data.starts(with: [0xFE, 0xFF]) {

@@ -30,11 +30,12 @@ swift build
 ```
 Package.swift
 Sources/FanficCore/        ZipArchive, EPUBBook, HTMLText, WorkReader (first pages), Relationships (field
-                           reading), Search (name matching, queries), Models (records, lists), Library (store)
+                           reading), SummaryReader, Search (name matching, queries), Models (records, lists),
+                           Library (store)
 Sources/FanficEngine/      App, AppModel, ContentView, SidebarView, WorkListView, WorkDetailView,
                            PDFPreview, ImportSummaryView, SettingsView
-Tests/FanficCoreTests/     Reading, Library, Search and library-folder-move tests
-Fixtures/                  AO3-style test files + expected.json (generated)
+Tests/FanficCoreTests/     Reading, Summary, Library, Search and library-folder-move tests
+Fixtures/                  AO3-style test files + expected.json (generated); Summaries/ for the summary cases
 Resources/                 Info.plist, AppIcon.icns
 scripts/                   build-app.sh, make-release.sh, make-fixtures.swift, make-icon.swift, sync-repo.sh
 SPEC.md                    the rules: what is read, how, what library.json contains, how search works
@@ -45,7 +46,7 @@ docs/                      user manual, this file, UI rules, screenshots
 
 [SPEC.md](../SPEC.md) describes exactly how files are read and searched. Code comments refer to its sections. If you change a rule, change SPEC.md and add or update a test.
 
-The UI layout rules are in [docs/ui-spec.md](ui-spec.md) (numbered U1–U21). Describe visual changes there before changing the views.
+The UI layout rules are in [docs/ui-spec.md](ui-spec.md) (numbered U1–U40). Describe visual changes there before changing the views.
 
 ## Test files
 
@@ -55,7 +56,7 @@ The UI layout rules are in [docs/ui-spec.md](ui-spec.md) (numbered U1–U21). De
 swift scripts/make-fixtures.swift Fixtures
 ```
 
-They cover singular and plural labels, names broken across lines, poly pairings, friendship tags, a crossover, a field that continues on the next page, a cover page without the field, an image-only EPUB cover, a FicHub-style export without fields, a duplicate, a scanned PDF without text and broken files. Stories, authors (`example-author-N`) and links (`example.org`) are invented; only fandom and character names are real.
+They cover singular and plural labels, names broken across lines, poly pairings, friendship tags, a crossover, a field that continues on the next page, a cover page without the field, an image-only EPUB cover, a FicHub-style export without fields, a duplicate, a scanned PDF without text and broken files. `Fixtures/Summaries/` (with its own `expected.json`) holds the summary cases: AO3's EPUB layout with and without Notes, a PDF summary that runs onto page 2, an inline `Summary:` line and a "Summary" chapter that is too long. Stories, authors (`example-author-N`) and links (`example.org`) are invented; only fandom and character names are real.
 
 When a real file is read wrongly, add a fixture that reproduces the layout (with invented text) and its expected result.
 

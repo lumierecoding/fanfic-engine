@@ -40,6 +40,7 @@ If it helps you, a ⭐ on this page helps other fans find it.
 
 - **Import** EPUB and PDF files by dragging them (or whole folders) onto the window or the Dock icon, with **Add Files…**, or with Finder's *Open With*. A summary shows what was added, skipped or could not be read.
 - **First-page copies**: the first page of every work is saved as its own one-page PDF, so you can see a work's tags at a glance.
+- **Summaries**: each fic's summary, as its author wrote it, is shown above its first page (from version 1.1).
 - **IDs and lists**: every work and every first-page copy gets its own ID. `library.json` lists all works, pairings, characters and fandoms with those IDs — readable by hand.
 - **Search by pairing**: order, spacing, upper/lower case and accents don't matter; part of a name works if it is the start of a word (`Hotch/Reid` finds *Aaron Hotchner/Spencer Reid*, and `Ron` does not find *Aaron*). Poly pairings and friendship tags (`A & B`) are understood.
 - **Browse** by fandom (crossovers count in every fandom they list), by character or by pairing in the sidebar.
@@ -54,13 +55,13 @@ If it helps you, a ⭐ on this page helps other fans find it.
 
 ## Download
 
-1. Download **Fanfic-Engine-1.0.dmg** from the [Releases page](https://github.com/lumierecoding/fanfic-engine/releases).
+1. Download the newest **Fanfic-Engine-….dmg** from the [Releases page](https://github.com/lumierecoding/fanfic-engine/releases).
 2. Open it and drag **Fanfic Engine** onto **Applications**.
 3. Open Fanfic Engine. Because the app is free and not notarized by Apple (that needs a paid developer account), macOS first says it *could not verify* the app. Click **Done**, then open **System Settings → Privacy & Security**, scroll down to *"Fanfic Engine" was blocked…* and click **Open Anyway** (confirm with your password or Touch ID). After that it opens normally.
 
    Terminal alternative: `xattr -dr com.apple.quarantine "/Applications/Fanfic Engine.app"`
 
-The disk image also contains these steps as *Read Me First.txt*. To check the download, compare its SHA-256 (`shasum -a 256 Fanfic-Engine-1.0.dmg`) with `SHA256SUMS` on the release page.
+The disk image also contains these steps as *Read Me First.txt*. To check the download, compare its SHA-256 (`shasum -a 256 Fanfic-Engine-*.dmg`) with `SHA256SUMS` on the release page.
 
 ## Build it yourself
 

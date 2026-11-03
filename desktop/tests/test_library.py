@@ -92,7 +92,7 @@ def test_same_file_again_is_duplicate(imported):
 def test_folder_import(tmp_path):
     library = Library(tmp_path / "library")
     report = library.import_files([FIXTURES])
-    assert report.added_count == 11
+    assert report.added_count == 16  # 11 + the 5 summary test files in the Summaries subfolder
     assert {i.file_name for i in report.of("skipped")} == {"expected.json", "notes.txt"}
     assert [i.file_name for i in report.of("duplicate")] == ["Zz Duplicate of The Quiet Winter.pdf"]
     assert len(report.of("unreadable")) == 3

@@ -1,5 +1,13 @@
 # Changelog
 
+## 1.1 — 2026-11-03
+
+- **Summaries:** the details column shows each fic's summary, as its author wrote it, above the first page. It is read once on import (in AO3 EPUBs from the section after the tags, in PDFs after the title); paragraphs are kept in EPUBs; you can select and copy it. Files without one show *No summary found*.
+- On first start, a library from version 1.0 is read once more to add the summaries (a few seconds for hundreds of fanfics). IDs, pairings and fandoms stay the same; the previous `library.json` is kept as `library-v2-backup.json`. `library.json` is now version 3.
+- Fixed: a thin line could run through the toolbar's **+** button when the details column was narrow.
+- Fixed: the search field's text could keep the colour of the previous appearance (dark text in dark mode) after switching between light and dark mode.
+- The Windows/Linux alpha is unchanged (no summaries yet).
+
 ## Windows and Linux 0.1.0a1 (alpha) — 2026-11-01
 
 - First alpha of the Windows/Linux version (Python + Qt) in `desktop/`: the same reading rules, search, sidebar lists, Settings and library format as the Mac app, checked against the same test files.

@@ -15,10 +15,14 @@ struct ExpectedResult: Codable, Sendable {
     var firstPageSource: String?
     var relationships: [String]
     var fandoms: [String]
+    var summary: String?
 }
 
-func loadExpected() throws -> [ExpectedResult] {
-    try JSONDecoder().decode([ExpectedResult].self, from: Data(contentsOf: fixturesFolder.appendingPathComponent("expected.json")))
+/// The summary test files (SPEC section 5a) are in Fixtures/Summaries with their own expected.json.
+let summaryFixturesFolder = fixturesFolder.appendingPathComponent("Summaries", isDirectory: true)
+
+func loadExpected(in folder: URL = fixturesFolder) throws -> [ExpectedResult] {
+    try JSONDecoder().decode([ExpectedResult].self, from: Data(contentsOf: folder.appendingPathComponent("expected.json")))
 }
 
 func fixture(_ name: String) -> URL { fixturesFolder.appendingPathComponent(name) }

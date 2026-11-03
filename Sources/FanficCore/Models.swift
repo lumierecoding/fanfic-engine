@@ -33,15 +33,18 @@ public struct WorkRecord: Codable, Identifiable, Hashable, Sendable {
     public var relationships: [String]
     /// The Fandom field's values (several for a crossover). Empty in version 1 libraries until they are re-read.
     public var fandoms: [String] = []
+    /// The summary (SPEC section 5a); nil when none was found, and in version 1 and 2 libraries until they are re-read.
+    /// Left out of library.json when nil.
+    public var summary: String? = nil
 }
 
 extension WorkRecord {
     enum CodingKeys: String, CodingKey {
         case workID, firstPageID, kind, originalFileName, storedFile, firstPageFile, firstPageSource
-        case title, author, sha256, importedAt, relationships, fandoms
+        case title, author, sha256, importedAt, relationships, fandoms, summary
     }
 
-    /// Reads version 1 entries too (they have no `fandoms`).
+    /// Reads version 1 and 2 entries too (they have no `fandoms` / `summary`).
     public init(from decoder: Decoder) throws {
         let c = try decoder.container(keyedBy: CodingKeys.self)
         workID = try c.decode(UUID.self, forKey: .workID)
@@ -57,6 +60,7 @@ extension WorkRecord {
         importedAt = try c.decode(Date.self, forKey: .importedAt)
         relationships = try c.decode([String].self, forKey: .relationships)
         fandoms = try c.decodeIfPresent([String].self, forKey: .fandoms) ?? []
+        summary = try c.decodeIfPresent(String.self, forKey: .summary)
     }
 }
 
@@ -84,9 +88,9 @@ public struct FandomIndexEntry: Codable, Hashable, Sendable {
     public let works: [WorkRef]
 }
 
-/// The whole `library.json` file (version 2).
+/// The whole `library.json` file (version 3: version 2 plus `summary` per work).
 public struct LibraryFile: Codable, Sendable {
-    public static let currentVersion = 2
+    public static let currentVersion = 3
 
     public var version: Int
     public var works: [WorkRecord]
@@ -102,7 +106,7 @@ public struct LibraryFile: Codable, Sendable {
     public var fandomIndex: [FandomIndexEntry]
 }
 
-/// The part of `library.json` needed to load it; works for version 1 and 2 files.
+/// The part of `library.json` needed to load it; works for version 1, 2 and 3 files.
 struct LibraryHeader: Decodable {
     var version: Int
     var works: [WorkRecord]

@@ -1,0 +1,76 @@
+[
+  {
+    "author" : "example-author-12",
+    "fandoms" : [
+      "Percy Jackson and the Olympians - Rick Riordan"
+    ],
+    "file" : "Moonlit Library.epub",
+    "firstPageSource" : "OEBPS/preface.xhtml",
+    "kind" : "epub",
+    "outcome" : "added",
+    "relationships" : [
+      "Nico di Angelo/Will Solace"
+    ],
+    "summary" : "Will keeps falling asleep in the one library on Long Island that is open all night.\n\nNico keeps not waking him up.\nIt’s a system & it works.",
+    "title" : "Moonlit Library"
+  },
+  {
+    "author" : "example-author-13",
+    "fandoms" : [
+      "Avatar: The Last Airbender"
+    ],
+    "file" : "Paper Lanterns.epub",
+    "firstPageSource" : "OEBPS/preface.xhtml",
+    "kind" : "epub",
+    "outcome" : "added",
+    "relationships" : [
+      "Katara/Zuko (Avatar)"
+    ],
+    "summary" : "Two lanterns, one festival, and a promise neither of them meant to keep.",
+    "title" : "Paper Lanterns"
+  },
+  {
+    "author" : "example-author-14",
+    "fandoms" : [
+      "Good Omens (TV)"
+    ],
+    "file" : "Harbour Lights.pdf",
+    "firstPageSource" : "page 1",
+    "kind" : "pdf",
+    "outcome" : "added",
+    "relationships" : [
+      "Aziraphale/Crowley (Good Omens)"
+    ],
+    "summary" : "A lighthouse keeper who has not spoken to anyone in years, and the demon who keeps rowing out to bring him tea. Neither of them is very good at pretending that it is about the tea.",
+    "title" : "Harbour Lights"
+  },
+  {
+    "author" : "example-author-15",
+    "fandoms" : [
+      "How to Train Your Dragon (Movies)"
+    ],
+    "file" : "Dragon Post.epub",
+    "firstPageSource" : "OEBPS/titlepage.xhtml",
+    "kind" : "epub",
+    "outcome" : "added",
+    "relationships" : [
+      "Astrid Hofferson/Hiccup Horrendous Haddock III"
+    ],
+    "summary" : "A courier, a dragon and a very late letter.",
+    "title" : "Dragon Post"
+  },
+  {
+    "author" : "example-author-16",
+    "fandoms" : [
+
+    ],
+    "file" : "Long Road Home.epub",
+    "firstPageSource" : "EPUB/introduction.xhtml",
+    "kind" : "epub",
+    "outcome" : "addedNoPairing",
+    "relationships" : [
+
+    ],
+    "title" : "Long Road Home"
+  }
+]

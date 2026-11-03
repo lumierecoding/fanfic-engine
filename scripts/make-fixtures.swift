@@ -28,6 +28,7 @@ struct Expected: Codable {
     var firstPageSource: String?
     var relationships: [String]
     var fandoms: [String] = []
+    var summary: String? = nil     // SPEC section 5a; left out when the file has none
 }
 var expected: [Expected] = []
 
@@ -42,8 +43,9 @@ func label(_ t: String) -> Line { Line(text: t, bold: true) }
 func value(_ t: String) -> Line { Line(text: t) }
 func heading(_ t: String) -> Line { Line(text: t, bold: true, size: 18) }
 
-func writePDF(_ name: String, title: String?, author: String?, pages: [[Line]], drawTextless: Bool = false) throws {
-    let url = out.appendingPathComponent(name)
+func writePDF(_ name: String, title: String?, author: String?, pages: [[Line]], drawTextless: Bool = false,
+              into folder: URL = out) throws {
+    let url = folder.appendingPathComponent(name)
     var box = CGRect(x: 0, y: 0, width: 595, height: 842)
     var info: [CFString: Any] = [kCGPDFContextCreator: "Fanfic Engine test files"]
     if let title { info[kCGPDFContextTitle] = title }
@@ -100,7 +102,8 @@ try writePDF("The Quiet Winter.pdf", title: "The Quiet Winter", author: "example
 ])
 expected.append(Expected(file: "The Quiet Winter.pdf", outcome: "added", kind: "pdf",
     title: "The Quiet Winter", author: "example-author-1", firstPageSource: "page 1",
-    relationships: ["Harry Potter/Draco Malfoy"], fandoms: ["Harry Potter - J. K. Rowling"]))
+    relationships: ["Harry Potter/Draco Malfoy"], fandoms: ["Harry Potter - J. K. Rowling"],
+    summary: "Two former rivals, one snowed-in cottage."))
 
 // 2. Inline "Label: value" layout, plural label, a friendship tag, "Aaron" (must not match "Ron").
 try writePDF("Profilers Notes.pdf", title: "Profiler's Notes", author: "example-author-2", pages: [
@@ -225,7 +228,7 @@ func run(_ tool: String, _ args: [String], in dir: URL) throws {
 }
 
 func writeEPUB(_ name: String, title: String, author: String, docs: [(id: String, body: String)], storedOnly: Bool,
-               folder: String = "OEBPS") throws {
+               folder: String = "OEBPS", into outFolder: URL = out) throws {
     let tmp = fm.temporaryDirectory.appendingPathComponent("fixture-" + UUID().uuidString, isDirectory: true)
     let oebps = tmp.appendingPathComponent(folder, isDirectory: true)
     let meta = tmp.appendingPathComponent("META-INF", isDirectory: true)
@@ -276,7 +279,7 @@ func writeEPUB(_ name: String, title: String, author: String, docs: [(id: String
         """.write(to: oebps.appendingPathComponent("\(doc.id).xhtml"), atomically: true, encoding: .utf8)
     }
 
-    let target = out.appendingPathComponent(name)
+    let target = outFolder.appendingPathComponent(name)
     try? fm.removeItem(at: target)   // zip would otherwise add to an old archive
     try run("/usr/bin/zip", ["-X", "-q", "-0", target.path, "mimetype"], in: tmp)
     try run("/usr/bin/zip", ["-X", "-q", "-r", storedOnly ? "-0" : "-9", target.path, "META-INF", folder], in: tmp)
@@ -356,7 +359,132 @@ expected.append(Expected(file: "Zz Duplicate of The Quiet Winter.pdf", outcome: 
 try "Shopping list: tea, biscuits.\n".write(to: out.appendingPathComponent("notes.txt"), atomically: true, encoding: .utf8)
 expected.append(Expected(file: "notes.txt", outcome: "skipped", relationships: []))
 
+// MARK: - Summaries (SPEC section 5a): Summaries/ with its own expected.json
+
+let summaries = out.appendingPathComponent("Summaries", isDirectory: true)
+try fm.createDirectory(at: summaries, withIntermediateDirectories: true)
+var summaryExpected: [Expected] = []
+
+/// AO3's EPUB preface: the tags in the first document.
+func ao3Tags(_ title: String, fandom: String, relationship: String, characters: String) -> String {
+    """
+    <div class="meta">
+    <h1>\(title)</h1>
+    <p>Posted originally on the Archive of Our Own at https://example.org/works/20.</p>
+    <dl class="tags">
+    <dt>Rating:</dt><dd>General Audiences</dd>
+    <dt>Fandom:</dt><dd><a href="#">\(fandom)</a></dd>
+    <dt>Relationship:</dt><dd><a href="#">\(relationship)</a></dd>
+    <dt>Characters:</dt><dd>\(characters)</dd>
+    <dt>Language:</dt><dd>English</dd>
+    </dl>
+    </div>
+    """
+}
+
+// S1. AO3's EPUB layout: tags in document 1; in document 2 a "Summary" paragraph, a blockquote with two paragraphs
+// (italics, a link, a line break, an entity), then "Notes" with its own blockquote.
+try writeEPUB("Moonlit Library.epub", title: "Moonlit Library", author: "example-author-12", docs: [
+    (id: "preface", body: ao3Tags("Moonlit Library", fandom: "Percy Jackson and the Olympians - Rick Riordan",
+                                  relationship: "Nico di Angelo/Will Solace", characters: "Nico di Angelo, Will Solace")),
+    (id: "summary", body: """
+    <h1>Moonlit Library</h1>
+    <div class="byline">by <a href="#">example-author-12</a></div>
+    <p>Summary</p>
+    <blockquote class="userstuff">
+      <p>Will keeps falling asleep in the <em>one</em> library on Long Island that is open all night.</p>
+      <p>Nico keeps not waking him up.<br/>It&#8217;s a <a href="https://example.org/tags/1">system</a> &amp; it works.</p>
+    </blockquote>
+    <p>Notes</p>
+    <blockquote class="userstuff"><p>Written for a fluff exchange.</p></blockquote>
+    """),
+    (id: "chapter1", body: "<h2>Chapter 1</h2><p>The radiator clanked twice and gave up.</p>"),
+], storedOnly: false, into: summaries)
+summaryExpected.append(Expected(file: "Moonlit Library.epub", outcome: "added", kind: "epub",
+    title: "Moonlit Library", author: "example-author-12", firstPageSource: "OEBPS/preface.xhtml",
+    relationships: ["Nico di Angelo/Will Solace"], fandoms: ["Percy Jackson and the Olympians - Rick Riordan"],
+    summary: "Will keeps falling asleep in the one library on Long Island that is open all night.\n\nNico keeps not waking him up.\nIt’s a system & it works."))
+
+// S2. The same layout without Notes: the summary blockquote is the last thing in document 2.
+try writeEPUB("Paper Lanterns.epub", title: "Paper Lanterns", author: "example-author-13", docs: [
+    (id: "preface", body: ao3Tags("Paper Lanterns", fandom: "Avatar: The Last Airbender",
+                                  relationship: "Katara/Zuko (Avatar)", characters: "Katara (Avatar), Zuko (Avatar)")),
+    (id: "summary", body: """
+    <h1>Paper Lanterns</h1>
+    <div class="byline">by <a href="#">example-author-13</a></div>
+    <p>Summary</p>
+    <blockquote class="userstuff"><p>Two lanterns, one festival, and a promise neither of them meant to keep.</p></blockquote>
+    """),
+    (id: "chapter1", body: "<h2>Chapter 1</h2><p>The paper was thinner than she remembered.</p>"),
+], storedOnly: true, into: summaries)
+summaryExpected.append(Expected(file: "Paper Lanterns.epub", outcome: "added", kind: "epub",
+    title: "Paper Lanterns", author: "example-author-13", firstPageSource: "OEBPS/preface.xhtml",
+    relationships: ["Katara/Zuko (Avatar)"], fandoms: ["Avatar: The Last Airbender"],
+    summary: "Two lanterns, one festival, and a promise neither of them meant to keep."))
+
+// S3. PDF: the summary starts at the bottom of page 1 and goes on at the top of page 2, up to "Notes".
+// PDF text has no paragraph marks (PDFKit drops empty lines), so the lines become one paragraph.
+try writePDF("Harbour Lights.pdf", title: "Harbour Lights", author: "example-author-14", pages: [
+    [heading("Harbour Lights"),
+     value("Posted originally on the Archive of Our Own at https://example.org/works/21."),
+     label("Rating:"), value("General Audiences"),
+     label("Fandom:"), value("Good Omens (TV)"),
+     label("Relationship:"), value("Aziraphale/Crowley (Good Omens)"),
+     label("Characters:"), value("Aziraphale (Good Omens), Crowley (Good Omens)"),
+     label("Language:"), value("English"),
+     label("Stats:"), value("Published: 2025-11-20 Words: 3,050 Chapters: 1/1"),
+     value(""), heading("Harbour Lights"), value("by example-author-14"), value(""),
+     label("Summary"),
+     value("A lighthouse keeper who has not spoken to anyone in years,"),
+     value("and the demon who keeps rowing out to bring him tea."),
+     value(""),
+     value("Neither of them is very good at pretending")],
+    [value("that it is about the tea."),
+     value(""),
+     label("Notes"), value("Written for a winter exchange.")],
+    chapterPage("Chapter 1"),
+], into: summaries)
+summaryExpected.append(Expected(file: "Harbour Lights.pdf", outcome: "added", kind: "pdf",
+    title: "Harbour Lights", author: "example-author-14", firstPageSource: "page 1",
+    relationships: ["Aziraphale/Crowley (Good Omens)"], fandoms: ["Good Omens (TV)"],
+    summary: "A lighthouse keeper who has not spoken to anyone in years, and the demon who keeps rowing out to bring him tea. Neither of them is very good at pretending that it is about the tea."))
+
+// S4. Another maker's layout: "Summary:" with the text on the same line, in the document with the tags; ends at "Language:".
+try writeEPUB("Dragon Post.epub", title: "Dragon Post", author: "example-author-15", docs: [
+    (id: "titlepage", body: """
+    <h1>Dragon Post</h1>
+    <p><b>Fandom:</b> How to Train Your Dragon (Movies)</p>
+    <p><b>Relationship:</b> Astrid Hofferson/Hiccup Horrendous Haddock III</p>
+    <p><b>Summary:</b> A courier, a dragon and a very late letter.</p>
+    <p><b>Language:</b> English</p>
+    """),
+    (id: "chapter1", body: "<h2>Chapter 1</h2><p>The letter was three weeks late and slightly singed.</p>"),
+], storedOnly: false, into: summaries)
+summaryExpected.append(Expected(file: "Dragon Post.epub", outcome: "added", kind: "epub",
+    title: "Dragon Post", author: "example-author-15", firstPageSource: "OEBPS/titlepage.xhtml",
+    relationships: ["Astrid Hofferson/Hiccup Horrendous Haddock III"], fandoms: ["How to Train Your Dragon (Movies)"],
+    summary: "A courier, a dragon and a very late letter."))
+
+// S5. An export from another site whose first chapter starts with a heading "Summary" and runs on for over
+// 1,500 characters with no end label: not a summary (SPEC 5a rule 5).
+let longChapter = (1...14).map { "<p>Paragraph \($0) of the first chapter. The road went on past the old mill and the river, and nobody on the cart said a word for a long time.</p>" }.joined(separator: "\n")
+try writeEPUB("Long Road Home.epub", title: "Long Road Home", author: "example-author-16", docs: [
+    (id: "introduction", body: """
+    <h1>Long Road Home</h1>
+    <p>By: example-author-16</p>
+    <p>Status: complete</p>
+    <p>Exported with the assistance of</p>
+    <p>FicHub.net</p>
+    """),
+    (id: "chap_1", body: "<h2>Summary</h2>\n" + longChapter),
+    (id: "chap_2", body: "<h2>Chapter 2</h2><p>The mill was gone.</p>"),
+], storedOnly: false, folder: "EPUB", into: summaries)
+summaryExpected.append(Expected(file: "Long Road Home.epub", outcome: "addedNoPairing", kind: "epub",
+    title: "Long Road Home", author: "example-author-16", firstPageSource: "EPUB/introduction.xhtml",
+    relationships: []))
+
 let encoder = JSONEncoder()
 encoder.outputFormatting = [.prettyPrinted, .sortedKeys, .withoutEscapingSlashes]
 try encoder.encode(expected).write(to: out.appendingPathComponent("expected.json"))
-print("Wrote \(expected.count) test files and expected.json to \(out.path)")
+try encoder.encode(summaryExpected).write(to: summaries.appendingPathComponent("expected.json"))
+print("Wrote \(expected.count) test files and expected.json to \(out.path), \(summaryExpected.count) to \(summaries.path)")

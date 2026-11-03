@@ -1,40 +1,73 @@
 import AppKit
 import SwiftUI
 
-/// The band behind the window title and toolbar over the works list and details columns (ui-spec U22–U24).
+/// The band behind the window title and toolbar over the works list and details columns (ui-spec U22–U24, U33).
 ///
-/// On macOS 27 the system's own band and its bottom line start 2 pt left of the sidebar divider, so the lines
+/// On macOS 27.2 the system's own band and its bottom line start 2 pt left of the sidebar divider, so the lines
 /// don't meet (a bare three-column `NavigationSplitView` shows the same step). The app therefore hides the system
-/// band (`toolbarBackgroundVisibility(.hidden, for: .windowToolbar)` in `ContentView`) and each column draws the
-/// same title-bar material itself, from the window top to the toolbar's bottom edge, with macOS's bottom line.
-/// It starts exactly at the column's edge and covers works scrolled under it.
-struct TitleBand: ViewModifier {
+/// band (`toolbarBackgroundVisibility(.hidden, for: .windowToolbar)`) and draws the same title-bar material itself,
+/// from the window top to the toolbar's bottom edge, with macOS's bottom line.
+///
+/// The band is drawn once over the whole split view, from the works list's left edge (the sidebar divider) to the
+/// window's right edge. Drawn per column, the divider between the works list and the details column ran up through
+/// the toolbar buttons (ui-spec change 6), because macOS draws that divider above the columns. Where the works list
+/// starts and where the toolbar ends are measured in the works list column.
+///
+/// Only on macOS 27 and later, where the step was seen; earlier systems keep their own band.
+struct TitleBandMetrics: Equatable {
+    /// The works list's left edge (= the sidebar divider's right edge), in window coordinates.
+    var leadingX: CGFloat = 0
+    /// The toolbar's bottom edge, in window coordinates.
+    var bottomY: CGFloat = 0
+}
+
+private struct TitleBand: ViewModifier {
+    let metrics: TitleBandMetrics
+
     func body(content: Content) -> some View {
-        // Fill the column first: empty states ("No fanfics yet") are only as tall as their text.
-        content.frame(maxWidth: .infinity, maxHeight: .infinity).overlay(alignment: .top) {
+        content.overlay(alignment: .topLeading) {
             GeometryReader { geometry in
-                // Inside the column the toolbar is the top safe-area inset; the band is drawn above it.
-                let top = geometry.safeAreaInsets.top
+                let frame = geometry.frame(in: .global)
+                let x = max(0, metrics.leadingX - frame.minX)
                 VStack(spacing: 0) {
-                    TitlebarMaterial().frame(height: top)
+                    TitlebarMaterial().frame(height: max(0, metrics.bottomY - frame.minY))
                     BandLine()
                 }
-                .offset(y: -top)
+                .frame(width: max(0, frame.width - x))
+                .offset(x: x)
             }
+            .ignoresSafeArea()
             .allowsHitTesting(false)
+            .opacity(metrics.bottomY > 0 ? 1 : 0)
         }
     }
 }
 
+/// Whether the app draws its own title band (macOS 27 and later).
+private var drawsOwnTitleBand: Bool {
+    if #available(macOS 27, *) { true } else { false }
+}
+
 extension View {
-    /// The app-drawn title band on macOS 27 and later; earlier systems keep their own band.
-    @ViewBuilder func titleBand() -> some View {
-        if #available(macOS 27, *) { modifier(TitleBand()) } else { self }
+    /// The app-drawn title band over the works list and details columns, on the split view.
+    @ViewBuilder func titleBand(_ metrics: TitleBandMetrics) -> some View {
+        if drawsOwnTitleBand { modifier(TitleBand(metrics: metrics)) } else { self }
     }
 
-    /// Hides the system's title band where the app draws its own (macOS 27 and later).
+    /// On the works list and details columns: fill the column (empty states are only as tall as their text) and
+    /// report the column's frame, from which the works list gives the band's left edge and bottom.
+    @ViewBuilder func titleBandColumn(reporting report: @escaping (CGRect) -> Void = { _ in }) -> some View {
+        if drawsOwnTitleBand {
+            frame(maxWidth: .infinity, maxHeight: .infinity)
+                .onGeometryChange(for: CGRect.self) { $0.frame(in: .global) } action: { report($0) }
+        } else {
+            self
+        }
+    }
+
+    /// Hides the system's title band where the app draws its own.
     @ViewBuilder func hidingSystemTitleBand() -> some View {
-        if #available(macOS 27, *) { toolbarBackgroundVisibility(.hidden, for: .windowToolbar) } else { self }
+        if drawsOwnTitleBand { toolbarBackgroundVisibility(.hidden, for: .windowToolbar) } else { self }
     }
 }
 

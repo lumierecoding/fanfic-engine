@@ -15,8 +15,11 @@ public final class Library {
     public private(set) var revision = 0
     /// Set when library.json existed but could not be read (it is kept aside, never overwritten).
     public private(set) var loadProblem: String?
-    /// True when library.json is an older version (1) that has no fandoms yet; see `upgradeIfNeeded()`.
+    /// True when library.json is an older version (1: no fandoms, 2: no summaries) that still has to be read again
+    /// once; see `upgradeIfNeeded()`.
     public private(set) var needsUpgrade = false
+    /// The version of library.json as it was loaded (nil when there was none).
+    @ObservationIgnored private var loadedVersion: Int?
     public private(set) var isBusy = false
 
     @ObservationIgnored private var indexByID: [UUID: Int] = [:]
@@ -149,6 +152,7 @@ public final class Library {
         do {
             let file = try Self.decoder.decode(LibraryHeader.self, from: Data(contentsOf: libraryFile))
             works = file.works
+            loadedVersion = file.version
             needsUpgrade = file.version < LibraryFile.currentVersion && !file.works.isEmpty
         } catch {
             // Keep the unreadable file aside instead of overwriting it.
@@ -160,7 +164,7 @@ public final class Library {
         }
     }
 
-    /// Writes library.json (version 2) in one atomic write, with the lists of SPEC section 4.
+    /// Writes library.json (version 3) in one atomic write, with the lists of SPEC section 4.
     /// The lists always include friendship tags; the Settings switch only changes the sidebar.
     func save() throws {
         let groups = pairingList()
@@ -181,9 +185,20 @@ public final class Library {
         try Self.encoder.encode(file).write(to: libraryFile, options: .atomic)
     }
 
-    /// Re-reads a version 1 library once so every work gets its fandoms. IDs do not change.
+    /// The copy of the old library.json kept before an upgrade, e.g. `library-v2-backup.json` (SPEC 5a).
+    public var upgradeBackupFile: URL? {
+        loadedVersion.map { root.appendingPathComponent("library-v\($0)-backup.json") }
+    }
+
+    /// Re-reads an older library once so every work gets its fandoms (version 1) and summary (version 2).
+    /// IDs do not change. The old library.json is copied to `library-v<N>-backup.json` first (an existing backup is
+    /// kept); if that copy can't be made, nothing is changed.
     public func upgradeIfNeeded() async {
-        guard needsUpgrade else { return }
+        guard needsUpgrade, let backup = upgradeBackupFile else { return }
+        let fm = FileManager.default
+        if !fm.fileExists(atPath: backup.path) {
+            do { try fm.copyItem(at: libraryFile, to: backup) } catch { return }
+        }
         let result = await rereadAll()
         if result.failed.isEmpty { needsUpgrade = false }
     }
@@ -278,7 +293,7 @@ public final class Library {
             firstPageSource: prepared.firstPageSource,
             title: prepared.title, author: prepared.author, sha256: prepared.sha256,
             importedAt: Date(timeIntervalSince1970: Date().timeIntervalSince1970.rounded(.down)),  // library.json keeps whole seconds
-            relationships: prepared.relationships, fandoms: prepared.fandoms)
+            relationships: prepared.relationships, fandoms: prepared.fandoms, summary: prepared.summary)
         let workURL = url(of: record.storedFile)
         let pageURL = url(of: record.firstPageFile)
         do {
@@ -332,7 +347,8 @@ public final class Library {
         try? FileManager.default.removeItem(at: url(of: record.firstPageFile))
     }
 
-    /// Reads every stored work again with the current rules. IDs stay; first pages, pairings and fandoms are replaced.
+    /// Reads every stored work again with the current rules. IDs stay; first pages, pairings, fandoms and summaries
+    /// are replaced.
     public func rereadAll() async -> (updated: Int, failed: [String]) {
         isBusy = true
         defer { isBusy = false }
@@ -346,6 +362,7 @@ public final class Library {
                 guard let i = indexByID[record.workID], i < works.count else { continue }
                 works[i].relationships = prepared.relationships
                 works[i].fandoms = prepared.fandoms
+                works[i].summary = prepared.summary
                 works[i].firstPageSource = prepared.firstPageSource
                 updated += 1
             } catch {

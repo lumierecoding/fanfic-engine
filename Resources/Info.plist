@@ -6,30 +6,6 @@
 	<string>en</string>
 	<key>CFBundleDisplayName</key>
 	<string>Fanfic Engine</string>
-	<key>CFBundleName</key>
-	<string>Fanfic Engine</string>
-	<key>CFBundleExecutable</key>
-	<string>FanficEngine</string>
-	<key>CFBundleIdentifier</key>
-	<string>io.github.lumierecoding.fanficengine</string>
-	<key>CFBundleIconFile</key>
-	<string>AppIcon</string>
-	<key>CFBundleInfoDictionaryVersion</key>
-	<string>6.0</string>
-	<key>CFBundlePackageType</key>
-	<string>APPL</string>
-	<key>CFBundleShortVersionString</key>
-	<string>1.0</string>
-	<key>CFBundleVersion</key>
-	<string>1</string>
-	<key>LSMinimumSystemVersion</key>
-	<string>15.0</string>
-	<key>LSApplicationCategoryType</key>
-	<string>public.app-category.productivity</string>
-	<key>NSHighResolutionCapable</key>
-	<true/>
-	<key>NSHumanReadableCopyright</key>
-	<string>© 2026 lumierecoding. MIT License. Works offline.</string>
 	<key>CFBundleDocumentTypes</key>
 	<array>
 		<dict>
@@ -57,5 +33,29 @@
 			</array>
 		</dict>
 	</array>
+	<key>CFBundleExecutable</key>
+	<string>FanficEngine</string>
+	<key>CFBundleIconFile</key>
+	<string>AppIcon</string>
+	<key>CFBundleIdentifier</key>
+	<string>io.github.lumierecoding.fanficengine</string>
+	<key>CFBundleInfoDictionaryVersion</key>
+	<string>6.0</string>
+	<key>CFBundleName</key>
+	<string>Fanfic Engine</string>
+	<key>CFBundlePackageType</key>
+	<string>APPL</string>
+	<key>CFBundleShortVersionString</key>
+	<string>1.1</string>
+	<key>CFBundleVersion</key>
+	<string>2</string>
+	<key>LSApplicationCategoryType</key>
+	<string>public.app-category.productivity</string>
+	<key>LSMinimumSystemVersion</key>
+	<string>15.0</string>
+	<key>NSHighResolutionCapable</key>
+	<true/>
+	<key>NSHumanReadableCopyright</key>
+	<string>© 2026 lumierecoding. MIT License. Works offline.</string>
 </dict>
 </plist>

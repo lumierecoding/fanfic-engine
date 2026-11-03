@@ -41,7 +41,12 @@ public struct EPUBBook: Sendable {
 
     /// Plain text of one spine document.
     public func text(at path: String) throws -> String {
-        HTMLText.plainText(from: HTMLText.decode(try archive.contents(of: path)))
+        HTMLText.plainText(from: try html(at: path))
+    }
+
+    /// The (X)HTML of one spine document, decoded but otherwise as it is (for AO3's summary blockquote).
+    public func html(at path: String) throws -> String {
+        HTMLText.decode(try archive.contents(of: path))
     }
 
     static func resolve(base: String, href: String) -> String {

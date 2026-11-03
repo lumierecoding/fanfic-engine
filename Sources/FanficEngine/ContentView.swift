@@ -5,6 +5,7 @@ import SwiftUI
 struct ContentView: View {
     @Bindable var model: AppModel
     @State private var isDropTargeted = false
+    @State private var band = TitleBandMetrics()
     @Environment(\.openSettings) private var openSettings
 
     var body: some View {
@@ -13,17 +14,19 @@ struct ContentView: View {
                 .navigationSplitViewColumnWidth(min: 200, ideal: 240, max: 320)
         } content: {
             WorkListView(model: model)
-                .titleBand()
-                .navigationSplitViewColumnWidth(min: 320, ideal: 420)
+                .titleBandColumn { band = TitleBandMetrics(leadingX: $0.minX, bottomY: $0.minY) }
+                .navigationSplitViewColumnWidth(min: 320, ideal: Self.listWidth)
         } detail: {
             WorkDetailView(model: model)
-                .titleBand()
+                .titleBandColumn()
                 .frame(minWidth: 340)
         }
+        .titleBand(band)
         .hidingSystemTitleBand()
         .navigationTitle("Fanfic Engine")
         .navigationSubtitle(subtitle)
         .searchable(text: $model.searchText, placement: .toolbar, prompt: "Search pairing, e.g. Harry/Draco")
+        .searchTextFollowsAppearance()
         .toolbar {
             ToolbarItemGroup(placement: .primaryAction) {
                 if model.library.isBusy {
@@ -77,6 +80,12 @@ struct ContentView: View {
         } message: { _ in
             Text("Its copy and its first-page copy are deleted from the library folder. Your original file is not touched.")
         }
+    }
+
+    /// 420 pt. Developer option `-listWidth 520` (screenshots with a narrow details column).
+    private static var listWidth: CGFloat {
+        let width = UserDefaults.standard.double(forKey: "listWidth")
+        return width > 0 ? width : 420
     }
 
     private var subtitle: String {

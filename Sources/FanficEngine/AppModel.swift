@@ -72,7 +72,7 @@ final class AppModel {
         if let path = defaults.string(forKey: "importOnLaunch") {
             importFiles([URL(fileURLWithPath: (path as NSString).expandingTildeInPath)])
         }
-        // A library written by version 1 gets its fandoms once; IDs stay the same.
+        // An older library is read again once (version 1: fandoms, version 2: summaries); IDs stay the same.
         if library.needsUpgrade {
             Task { await library.upgradeIfNeeded() }
         }
