@@ -29,11 +29,19 @@ mkdir -p "$APP/Contents/MacOS" "$APP/Contents/Resources"
 cp "$BIN_DIR/FanficEngine" "$APP/Contents/MacOS/FanficEngine"
 cp "$ROOT/Resources/Info.plist" "$APP/Contents/Info.plist"
 cp "$ROOT/Resources/AppIcon.icns" "$APP/Contents/Resources/AppIcon.icns"
+# Sparkle, the updater (SPEC section 10): the framework next to the app's code, found through the run path.
+# It keeps the Sparkle project's own signature; the app around it is signed ad-hoc below.
+mkdir -p "$APP/Contents/Frameworks"
+ditto "$BIN_DIR/Sparkle.framework" "$APP/Contents/Frameworks/Sparkle.framework"
+if ! otool -l "$APP/Contents/MacOS/FanficEngine" | grep -q "@executable_path/../Frameworks"; then
+  install_name_tool -add_rpath "@executable_path/../Frameworks" "$APP/Contents/MacOS/FanficEngine"
+fi
+cp "$ROOT/THIRD_PARTY_NOTICES.md" "$APP/Contents/Resources/THIRD_PARTY_NOTICES.md"
 xattr -cr "$APP"
 
 echo "→ Signing (ad-hoc)…"
 codesign --force --sign - --timestamp=none "$APP"
-codesign --verify --strict "$APP"
+codesign --verify --deep --strict "$APP"
 
 if (( ! INSTALL )); then
   echo "✓ Built (not installed): $APP"

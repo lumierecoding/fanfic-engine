@@ -1,6 +1,6 @@
 # Fanfic Engine — User manual
 
-Fanfic Engine keeps a library of the fanfics you have downloaded and lets you find them by pairing, character and fandom. It works completely offline.
+Fanfic Engine keeps a library of the fanfics you have downloaded and lets you find them by pairing, character and fandom. It works offline; the only thing that uses the internet is the update check, and only if you allow it (section 7 and 13).
 
 ![How Fanfic Engine works, in four steps. 1: you drag EPUB or PDF files, or whole folders, onto the window; your original files are never changed or moved. 2: the first page is saved as its own PDF and its Fandom and Relationship tags are read; A/B is a pairing, A & B a friendship. 3: a library folder keeps a copy of each fic, its first page and library.json; the same file is only added once, and every fic and first page gets its own ID. 4: you search a pairing in any order, or browse fandoms, characters and pairings, and click a fic to see its first page. Everything stays on your Mac.](images/how-it-works.png)
 
@@ -36,6 +36,8 @@ Download the newest **Fanfic-Engine-….dmg** from the [Releases page](https://g
 3. Click **Open Anyway** and confirm with your password or Touch ID.
 
 From then on, open it like any other app: from Applications, Launchpad, the Dock or Spotlight (⌘ Space, type "Fanfic"). If you prefer Terminal: `xattr -dr com.apple.quarantine "/Applications/Fanfic Engine.app"` does the same.
+
+**Updates** (from version 1.1): choose **Fanfic Engine → Check for Updates…**, or let the app check once a day; it asks on its second start whether it may. When a new version is there, click **Install Update**: the app downloads it, checks that it is signed by the project, replaces itself and opens again, without the *Open Anyway* step. Your library is not touched. Going from 1.0 to 1.1 is the one update you install by hand.
 
 The first time it opens, the library is empty and the middle of the window says *"Drop EPUB or PDF files here, or click Add Files…"*.
 
@@ -138,7 +140,7 @@ Open Settings with the **gear** button or **Fanfic Engine → Settings…** (⌘
 - **Sidebar** — show or hide **Fandoms**, **Characters** and **Pairings**, and sort these lists by **Name** (A–Z) or by **Number of fanfics** (largest first).
 - **Relationships** — **Include friendship tags (A & B)**. When off, `A & B` tags are left out of the Pairings list, and people who only appear in friendship tags are left out of Characters. Searching is not affected.
 - **Library** — where the library folder is, how many fanfics and first pages it holds, **Show in Finder** and **Re-read Library**.
-- **Offline** — a reminder that the app never connects to the internet.
+- **Updates** — **Check for updates automatically** (once a day), when the app last checked, and **Check Now**.
 
 Settings are stored in the app's preferences on your Mac.
 
@@ -196,7 +198,7 @@ During a big import the app saves its list at most every few seconds, so importi
 
 ## 13. Privacy
 
-- The app has no network code and cannot connect to the internet.
+- Importing, reading and searching work fully offline. The only connection is the update check to GitHub (Sparkle), when you choose Check for Updates or once a day if you allowed automatic checks. GitHub sees your IP address and the app's version; nothing about your library is sent.
 - It has no accounts, no analytics and no tracking.
 - It reads only the files you give it and writes only into its library folder and its preferences.
 

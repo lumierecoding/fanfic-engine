@@ -1,6 +1,6 @@
 # Fanfic Engine — Specification
 
-A small offline Mac app that helps find fanfictions by pairing. It imports EPUB and PDF files (for example AO3 downloads), keeps a copy of each work and of its first page, reads the pairings from the work's "Relationship:" field and lets you search for them.
+A small Mac app that works offline and helps find fanfictions by pairing. It imports EPUB and PDF files (for example AO3 downloads), keeps a copy of each work and of its first page, reads the pairings from the work's "Relationship:" field and lets you search for them.
 
 ## 1. Inputs
 
@@ -171,7 +171,7 @@ Results are sorted by title. In each result the relationships that matched are h
 
 ## 8. Limits
 
-- Works fully offline: no network code, no third-party libraries, no account.
+- Works offline: no account; the only network code and the only third-party library is the updater (Sparkle, section 10), which only contacts GitHub.
 - Scanned PDFs without a text layer have no readable text and are reported as "could not read".
 - The search field searches the Relationship field; fandoms are browsed through the sidebar; summaries are shown, not searched. The `Characters:` field and other tags are not used.
 - macOS 27 or later, Apple Silicon.
@@ -287,3 +287,22 @@ A fandom tag belongs to a group if it, or one of its ` | ` parts, starts with on
 | Original | Original Work | first word |
 
 Fandoms that are not on the list use their cleaned name (9.2). In Settings you can give any fandom in your library a different short name, or the short name of another fandom to group them, and change its Names setting.
+
+## 10. Updates
+
+Fanfic Engine can update itself with **Sparkle** (open source, MIT licence, [sparkle-project.org](https://sparkle-project.org)), the updater many Mac apps use. It is the only part of the app that connects to the internet, and it only connects to GitHub. Reading files, the library and search stay fully offline.
+
+**When it connects**
+
+- When you choose **Fanfic Engine → Check for Updates…** (or **Check Now** in Settings).
+- Automatically, about once a day, **only if you said yes**. On the second start the app asks once: *Check for updates automatically?* (Sparkle's standard question). Until you answer, and after **Don't Check**, it never checks on its own. The answer can be changed in Settings → Updates.
+
+**What it sends.** One ordinary web request for a small file, `appcast.xml`, attached to the newest published release on GitHub: `https://github.com/lumierecoding/fanfic-engine/releases/latest/download/appcast.xml`. GitHub sees your IP address and the app's name and version (in the request header). Nothing about your library or your files is sent; Sparkle's optional system profile stays off.
+
+**When a new version is there.** Sparkle's window shows the new version and short notes (plain text inside `appcast.xml`; nothing is loaded from anywhere else). **Install Update** downloads the disk image from the GitHub release and checks its EdDSA signature with the public key built into the app (`SUPublicEDKey` in `Info.plist`); an update that is not signed with the project's key is refused. Then it replaces the app where it is and starts it again. **Skip This Version** skips it; closing the window means later (this Sparkle version has no separate Remind Me Later button). Sparkle's question on the second start also has a box *Automatically download and install updates* (off unless ticked): when ticked, updates are installed without asking when the app quits. The library folder is not touched by the update itself; if the new version uses a newer `library.json`, it updates the file on its first start (as in 5a, with a backup).
+
+**Gatekeeper.** Because the app downloads the update itself, macOS should not ask for *Open Anyway* again after an update (to be confirmed by the end-to-end test before release).
+
+**Releases.** Every release carries its own `appcast.xml` (version, `CFBundleVersion`, minimum macOS, download address, size, signature). A version is offered only once its release is published; drafts are never offered. The private signing key is a file on the developer's Mac, outside the repository and iCloud Drive and not in the Keychain. If it were lost, existing installs could no longer be updated in the app (they would need one update by hand), so it is backed up.
+
+**Versions.** 1.0 has no updater, so going from 1.0 to 1.1 is by hand, once; from 1.1 on, updates come through the app. The Windows/Linux alpha has no updater (it is updated with `uv tool upgrade` or `pipx upgrade`).

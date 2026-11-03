@@ -4,7 +4,7 @@
 
 <h1 align="center">Fanfic Engine</h1>
 
-A small, fully offline Mac app that sorts your downloaded fanfiction by **pairing**, **character** and **fandom**.
+A small Mac app that works offline and sorts your downloaded fanfiction by **pairing**, **character** and **fandom**.
 
 Give it the EPUB or PDF files you downloaded (for example from AO3). It reads the *Relationship* and *Fandom* fields on each work's first page, keeps a copy of the work and of its first page, and lets you find everything again by pairing — `Harry/Draco`, `Draco/Harry`, `harry / draco` or just `Draco` all work.
 
@@ -46,7 +46,8 @@ If it helps you, a ⭐ on this page helps other fans find it.
 - **Browse** by fandom (crossovers count in every fandom they list), by character or by pairing in the sidebar.
 - **Settings** to show, hide and sort the sidebar lists and to leave friendship tags out.
 - **Fast with big libraries**: about a second to open and a few hundredths of a second per search at 10,000 fanfics.
-- **Private**: no internet access, no accounts, no analytics. Everything stays on your Mac.
+- **Updates inside the app** (from 1.1): it can check for a new version and install it itself, but only if you allow it.
+- **Private**: no accounts, no analytics. Everything you import stays on your Mac; the only connection is the update check to GitHub.
 
 ## Requirements
 
@@ -61,7 +62,7 @@ If it helps you, a ⭐ on this page helps other fans find it.
 
    Terminal alternative: `xattr -dr com.apple.quarantine "/Applications/Fanfic Engine.app"`
 
-The disk image also contains these steps as *Read Me First.txt*. To check the download, compare its SHA-256 (`shasum -a 256 Fanfic-Engine-*.dmg`) with `SHA256SUMS` on the release page.
+From version 1.1 on, new versions arrive inside the app (**Fanfic Engine → Check for Updates…**), so this is needed only once. The disk image also contains these steps as *Read Me First.txt*. To check the download, compare its SHA-256 (`shasum -a 256 Fanfic-Engine-*.dmg`) with `SHA256SUMS` on the release page.
 
 ## Build it yourself
 
@@ -100,7 +101,9 @@ Install it with `uv tool install "git+https://github.com/lumierecoding/fanfic-en
 
 ## Privacy
 
-Fanfic Engine has no network code and links no networking libraries; it cannot connect to the internet. It only reads files you give it and writes into its own library folder (`~/Library/Application Support/Fanfic Engine`) and its preferences. Nothing is uploaded or shared.
+Fanfic Engine reads only the files you give it and writes only into its own library folder (`~/Library/Application Support/Fanfic Engine`) and its preferences. Nothing is uploaded or shared. Importing, reading and searching work fully offline.
+
+The one exception is the **update check** (from 1.1; [Sparkle](https://sparkle-project.org), the only third-party code in the Mac app). It asks GitHub whether there is a newer version: when you choose **Check for Updates…**, or once a day if you said yes to automatic checks (the app asks on its second start). GitHub sees your IP address and the app's version; nothing about your library is sent. Updates are installed only if they are signed with the project's key.
 
 ## Not affiliated
 

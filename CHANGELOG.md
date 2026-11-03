@@ -2,6 +2,7 @@
 
 ## 1.1 — 2026-11-03
 
+- **Updates inside the app:** Fanfic Engine can check for a new version and install it itself (Fanfic Engine → Check for Updates…, or once a day if you allow it; it asks on the second start). Updates come only from this project's GitHub releases and are installed only if they are signed with the project's key. This is the app's only internet connection; importing, reading and searching stay offline. Updating from 1.0 to 1.1 is by hand, once.
 - **Summaries:** the details column shows each fic's summary, as its author wrote it, above the first page. It is read once on import (in AO3 EPUBs from the section after the tags, in PDFs after the title); paragraphs are kept in EPUBs; you can select and copy it. Files without one show *No summary found*.
 - On first start, a library from version 1.0 is read once more to add the summaries (a few seconds for hundreds of fanfics). IDs, pairings and fandoms stay the same; the previous `library.json` is kept as `library-v2-backup.json`. `library.json` is now version 3.
 - Fixed: a thin line could run through the toolbar's **+** button when the details column was narrow.

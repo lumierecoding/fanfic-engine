@@ -1,5 +1,52 @@
 # Fanfic Engine — UI spec
 
+## Change 8 (3 November 2026, OK'd and built): updates inside the app
+
+Owner: an update feature that installs new versions inside the app (Sparkle), asking first before checking automatically. The rules are in `SPEC.md` section 10. This part covers what you see.
+
+### What changes visually
+
+- **App menu (Fanfic Engine):** a new item **Check for Updates…** directly after **About Fanfic Engine**, where Mac apps usually have it.
+- **Settings:** the **Offline** group (“never connects to the internet”) becomes **Updates**:
+  - a switch **Check for updates automatically** (off until you say yes to the question below);
+  - a line **Last checked:** with the date and time, or *Never*;
+  - a button **Check Now**;
+  - under it, in grey: “Fanfic Engine only connects to GitHub to look for a new version: when you click Check Now or Check for Updates, or once a day if automatic checks are on. Your fanfics and your library never leave this Mac.”
+- **Sparkle's own windows** (the standard ones, with the app's icon and name; not drawn by this app):
+  - on the **second start**, once: *Check for updates automatically?* with **Check Automatically** and **Don't Check**, and Sparkle's box *Automatically download and install updates* (off);
+  - **A new version is available** with the version, the short notes and **Install Update** and **Skip This Version** (closing the window means later; this Sparkle version has no Remind Me Later button);
+  - a download progress window, then **Install and Relaunch**;
+  - **You're up to date** when you check and there is nothing new;
+  - an error message if an update can't be downloaded or isn't correctly signed.
+
+### Stays the same
+
+The main window (sidebar, works list, details with the summary), the toolbar, the File menu, the import summary, the other Settings groups, the library and everything else.
+
+### Not in this change (possible later)
+
+- Updates for the Windows/Linux alpha.
+- Showing “what's new” inside the app after an update.
+
+### Files
+
+- `Package.swift` (Sparkle, one exact version, at least 2.6.4); new `Updater.swift` (Sparkle's standard updater controller and the menu item); `FanficEngineApp.swift` (menu); `SettingsView.swift` (Updates group); `Resources/Info.plist` (`SUFeedURL`, `SUPublicEDKey`).
+- `scripts/build-app.sh` and `scripts/make-release.sh` (put Sparkle into the app and sign it; sign the disk image with the update key; write `appcast.xml` for the release); a small script that makes the key once and signs files with it; Sparkle's licence in the app and the repository.
+- After the gallery OK: `SPEC.md` (sections 8 and 10), `README.md` (the offline and privacy wording, download), `USER_MANUAL.md` (Settings, Privacy, a new Updates section), `CHANGELOG.md` (1.1), `docs/DEVELOPMENT.md` (Releasing), `CLAUDE.md` (the no-network rule).
+
+### Layout rules for change 8
+
+| # | Rule | How it is checked |
+| --- | --- | --- |
+| U41 | App menu: **Check for Updates…** directly after **About Fanfic Engine**; it works with or without an open window | Screenshot of the open menu; a check started from the menu |
+| U42 | Settings: an **Updates** group where **Offline** was, with the switch, the *Last checked* line, **Check Now** and the grey note; the other groups unchanged | Screenshot compared with before, light and dark |
+| U43 | Sparkle's windows are its standard windows with the app's icon and name, readable in light and dark | Screenshots of the question, update available, progress, up to date |
+| U44 | No check before the answer: the question comes on the second start; **Don't Check** leaves the switch off and no automatic check happens | Test copy: first start, second start, network log of the test |
+| U45 | The update window's notes come only from `appcast.xml`; nothing else is loaded | Test feed; the test's network log |
+| U46 | The main window and the other menus don't change | Before/after pictures |
+
+---
+
 ## Change 7 (3 November 2026, OK'd and built): the summary in the details column
 
 Owner: "I want the summary of each fic on the details pane on the right". The reading rules are in `SPEC.md` section 5a. This part covers what you see.

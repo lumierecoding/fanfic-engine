@@ -57,5 +57,11 @@
 	<true/>
 	<key>NSHumanReadableCopyright</key>
 	<string>© 2026 lumierecoding. MIT License. Works offline.</string>
+	<key>SUEnableSystemProfiling</key>
+	<false/>
+	<key>SUFeedURL</key>
+	<string>https://github.com/lumierecoding/fanfic-engine/releases/latest/download/appcast.xml</string>
+	<key>SUPublicEDKey</key>
+	<string>vgA0Ez2oDbMFCryI69T96eVyyfhQ+eh4/vP8PwlHGI0=</string>
 </dict>
 </plist>

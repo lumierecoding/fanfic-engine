@@ -5,6 +5,7 @@ import SwiftUI
 /// Everything is stored in the app's preferences on this Mac.
 struct SettingsView: View {
     @Bindable var model: AppModel
+    @Bindable var updater: AppUpdater
 
     @AppStorage("showFandoms") private var showFandoms = true
     @AppStorage("showCharacters") private var showCharacters = true
@@ -51,11 +52,26 @@ struct SettingsView: View {
                 }
             }
 
-            Section("Offline") {
-                Label("Fanfic Engine works entirely on this Mac. It never connects to the internet.", systemImage: "wifi.slash")
+            // Updates (ui-spec change 8, U42): Sparkle's settings; the app's only connection is to GitHub.
+            Section {
+                Toggle("Check for updates automatically", isOn: $updater.automaticallyChecks)
+                LabeledContent("Last checked") {
+                    Text(updater.lastCheck.map { $0.formatted(date: .abbreviated, time: .shortened) } ?? "Never")
+                }
+                HStack {
+                    Spacer()
+                    Button("Check Now") { updater.checkForUpdates() }
+                        .disabled(!updater.canCheckForUpdates)
+                }
+            } header: {
+                Text("Updates")
+            } footer: {
+                Text("Fanfic Engine only connects to GitHub to look for a new version: when you click Check Now or Check for Updates, or once a day if automatic checks are on. Your fanfics and your library never leave this Mac.")
+                    .foregroundStyle(.secondary)
             }
         }
         .formStyle(.grouped)
+        .onAppear { updater.refresh() }
         .frame(width: 480)
         .fixedSize(horizontal: false, vertical: true)
     }

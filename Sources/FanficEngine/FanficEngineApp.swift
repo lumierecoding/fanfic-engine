@@ -5,6 +5,7 @@ import SwiftUI
 struct FanficEngineApp: App {
     @NSApplicationDelegateAdaptor(AppDelegate.self) private var appDelegate
     @State private var model = AppModel.shared
+    @State private var updater = AppUpdater.shared
 
     /// 1100 × 700 (ui-spec U1). Developer option `-windowSize 1100x1000` for screenshots.
     private static var windowSize: CGSize {
@@ -28,10 +29,11 @@ struct FanficEngineApp: App {
                     .disabled(model.library.isBusy || model.library.works.isEmpty)
                 Button("Show Library in Finder") { model.showLibraryInFinder() }
             }
+            CheckForUpdatesCommand(updater: updater)
         }
 
         Settings {
-            SettingsView(model: model)
+            SettingsView(model: model, updater: updater)
         }
     }
 }
@@ -57,6 +59,29 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         }
         NSApp.setActivationPolicy(.regular)
         NSApp.activate()
+        AppUpdater.shared.start()
+
+        // Developer option `-dumpMenus <file>`: writes the menu bar as text (to check the menus without clicking).
+        if let path = UserDefaults.standard.string(forKey: "dumpMenus") {
+            DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
+                var lines: [String] = []
+                for item in NSApp.mainMenu?.items ?? [] {
+                    lines.append(item.title)
+                    for sub in item.submenu?.items ?? [] {
+                        lines.append(sub.isSeparatorItem ? "  ——" : "  " + sub.title + (sub.isEnabled ? "" : " (greyed out)"))
+                    }
+                }
+                try? lines.joined(separator: "\n").write(toFile: (path as NSString).expandingTildeInPath, atomically: true, encoding: .utf8)
+            }
+        }
+        // Developer option `-showAppMenu YES`: opens the app menu under the window's top-left corner (screenshots).
+        if UserDefaults.standard.bool(forKey: "showAppMenu") {
+            DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
+                guard let menu = NSApp.mainMenu?.items.first?.submenu,
+                      let view = NSApp.windows.first(where: { $0.isVisible && $0.title == "Fanfic Engine" })?.contentView else { return }
+                menu.popUp(positioning: nil, at: NSPoint(x: 12, y: view.bounds.height - 12), in: view)
+            }
+        }
     }
 
     func applicationShouldTerminateAfterLastWindowClosed(_ sender: NSApplication) -> Bool { true }

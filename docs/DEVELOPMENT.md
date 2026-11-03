@@ -8,7 +8,7 @@ Fanfic Engine is a Swift package with three targets:
 | `FanficEngine` | The SwiftUI Mac app (window, sidebar, details, Settings) |
 | `FanficCoreTests` | Swift Testing tests for `FanficCore`, run against the files in `Fixtures/` |
 
-There are no third-party dependencies and no network code. Please keep it that way (see [CONTRIBUTING](../CONTRIBUTING.md)).
+The only third-party dependency and the only network code is the updater, [Sparkle](https://sparkle-project.org) (one exact version in `Package.swift`; `Updater.swift`). Please keep it that way (see [CONTRIBUTING](../CONTRIBUTING.md)).
 
 ## Build, test, install
 
@@ -75,6 +75,11 @@ open -n "/Applications/Fanfic Engine.app" --args \
   -selectTitle "<title>"               # select a work
   -openSettings YES                    # open the Settings window
   -previewDrop YES                     # show the drag-and-drop outline
+  -dumpMenus /path/menus.txt           # write the menu bar as text
+  -showAppMenu YES                     # open the app menu (screenshots)
+  -checkForUpdatesOnLaunch YES         # updater tests: Check for Updates at start
+  -checkInBackgroundOnLaunch YES       # updater tests: a quiet check at start
+  -installUpdatesImmediately YES       # updater tests: install a downloaded update at once and restart
   -windowSize 1100x1000                # window size
   -ApplePersistenceIgnoreState YES     # ignore the saved window state
 ```
@@ -95,9 +100,15 @@ Names are normalised once and remembered (`Memo` in `Search.swift`), the sidebar
 ./scripts/make-release.sh
 ```
 
-builds `Fanfic Engine.app` for Apple Silicon and Intel (`--arch arm64 --arch x86_64`), signs it ad-hoc and puts it with an Applications shortcut and *Read Me First.txt* into `~/Library/Developer/FanficEngine/dist/Fanfic-Engine-<version>.dmg`, plus `SHA256SUMS`. The version comes from `Resources/Info.plist`. It never touches `/Applications`.
+builds `Fanfic Engine.app` for Apple Silicon and Intel (`--arch arm64 --arch x86_64`) with `Sparkle.framework` inside, signs it ad-hoc and puts it with an Applications shortcut and *Read Me First.txt* into `~/Library/Developer/FanficEngine/dist/Fanfic-Engine-<version>.dmg`. It signs the disk image with the update key and writes `appcast.xml` (the update feed: version, download address, size, signature, and this version's list from `CHANGELOG.md` as the notes), plus `SHA256SUMS`. The version comes from `Resources/Info.plist`. It never touches `/Applications`.
 
-Attach the disk image, `SHA256SUMS` and the Windows/Linux wheel (`cd desktop && uv build`) to a GitHub release. The app is not notarized (that needs a Developer ID certificate from a paid Apple Developer account), so downloaded copies need the one-time "Open Anyway" step described in the README. The Intel half is built but can't be tested on macOS 27, which no longer runs Intel code.
+Rules the updater adds:
+
+- **Raise `CFBundleVersion`** in `Info.plist` with every release (with `CFBundleShortVersionString`): Sparkle compares it.
+- **Every release carries its `appcast.xml`.** The app's feed is `https://github.com/lumierecoding/fanfic-engine/releases/latest/download/appcast.xml`, so the newest published release must have one, and its disk image must be the exact file that was signed. Drafts are never offered.
+- **The update key** is a file outside the repository and iCloud (`~/Library/Developer/FanficEngine/keys/fanfic-engine-update.key`, or `FANFIC_UPDATE_KEY`), made once with `swift scripts/update-key.swift new <file>`; its public half is `SUPublicEDKey` in `Info.plist`. Keep a backup: without it, installed copies can't be updated in the app.
+
+Attach the disk image, `appcast.xml`, `SHA256SUMS` and the Windows/Linux wheel to a GitHub release, with the tag `v<version>` (for example `v1.1.0`) that the feed's download address uses. The app is not notarized (that needs a Developer ID certificate from a paid Apple Developer account), so downloaded copies need the one-time "Open Anyway" step described in the README. The Intel half is built but can't be tested on macOS 27, which no longer runs Intel code.
 
 ## Windows and Linux version (`desktop/`)
 
