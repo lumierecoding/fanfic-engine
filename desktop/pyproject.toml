@@ -1,6 +1,6 @@
 [project]
 name = "fanfic-engine"
-version = "0.1.0a1"
+version = "0.1.0a2"
 description = "Offline app that sorts downloaded fanfiction by pairing, character and fandom (Windows and Linux alpha)."
 readme = "README.md"
 license = "MIT"

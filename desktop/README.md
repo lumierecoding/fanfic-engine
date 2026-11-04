@@ -33,7 +33,7 @@ Getting uv: on Windows `winget install astral-sh.uv`, on Linux `curl -LsSf https
 
 Linux note (untested): Qt needs a few system libraries for its window system plugin. If the app does not start on Debian/Ubuntu, `sudo apt install libxcb-cursor0` usually fixes it.
 
-**From the release page:** download the `.whl` file from the [Releases page](https://github.com/lumierecoding/fanfic-engine/releases) and run `uv tool install fanfic_engine-0.1.0a1-py3-none-any.whl` (or `pipx install …`) in the folder you saved it to. It still needs Python; a stand-alone Windows or Linux app doesn't exist yet.
+**From the release page:** download the `.whl` file from the [Releases page](https://github.com/lumierecoding/fanfic-engine/releases) and run `uv tool install fanfic_engine-0.1.0a2-py3-none-any.whl` (or `pipx install …`) in the folder you saved it to. It still needs Python; a stand-alone Windows or Linux app doesn't exist yet.
 
 **From a downloaded copy of the repository:**
 
