@@ -30,7 +30,8 @@ public enum SummaryReader {
     /// Closing tags and spaces, then a `<blockquote …>` (checked right after the label).
     private static let blockquoteStart = try! NSRegularExpression(
         pattern: "(?:\\s|</[a-zA-Z0-9]+\\s*>)*<blockquote\\b[^>]*>", options: [.caseInsensitive])
-    private static let blockquoteTag = try! NSRegularExpression(pattern: "<(/?)blockquote\\b[^>]*>", options: [.caseInsensitive])
+    /// Start of `<(/?)blockquote\b[^>]*>`; the `>` is found with a forward search (see `HTMLText`).
+    private static let blockquoteTagStart = try! NSRegularExpression(pattern: "<(/?)blockquote\\b", options: [.caseInsensitive])
 
     /// The summary in one EPUB document: AO3's blockquote if it follows the label (rule 2), otherwise the text after
     /// the label up to the next label (rule 3).
@@ -49,13 +50,21 @@ public enum SummaryReader {
         return read(text: HTMLText.paragraphText(from: html), joinLines: false)
     }
 
-    /// Where the blockquote that starts before `from` ends (nested blockquotes are counted).
+    /// Where the blockquote that starts before `from` ends (nested blockquotes are counted): the tags
+    /// `<(/?)blockquote\b[^>]*>` from `from` on, each ending at the next `>`. Without a `>` after a tag start,
+    /// no later tag has one either.
     private static func matchingBlockquoteEnd(in html: String, from: Int) -> Int? {
-        let ns = html as NSString
+        let ns = NSString(string: html)
         var depth = 1
-        for tag in blockquoteTag.matches(in: html, range: NSRange(location: from, length: ns.length - from)) {
-            depth += ns.substring(with: tag.range(at: 1)).isEmpty ? 1 : -1
+        var position = from
+        for tag in blockquoteTagStart.matches(in: ns as String, range: NSRange(location: from, length: ns.length - from))
+        where tag.range.location >= position {
+            let afterStart = NSMaxRange(tag.range)
+            let close = ns.range(of: ">", options: .literal, range: NSRange(location: afterStart, length: ns.length - afterStart))
+            guard close.location != NSNotFound else { return nil }
+            depth += tag.range(at: 1).length == 0 ? 1 : -1
             if depth == 0 { return tag.range.location }
+            position = close.location + 1
         }
         return nil
     }

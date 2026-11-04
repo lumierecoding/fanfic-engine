@@ -31,6 +31,13 @@ A small Mac app that works offline and helps find fanfictions by pairing. It imp
 5. **Title and author.** PDF document info or EPUB `dc:title` / `dc:creator`; if missing, the file name.
 6. **Saving.** The original is copied to `Works/`, the first page to `First Pages/`, and `library.json` is rewritten in one atomic write. If any step fails, the files written for this work are removed again and the work is reported as "could not read".
 
+**Limits for crafted files** (security scan, 4 November 2026). A file can be made on purpose to keep the import busy or fill the memory; these limits stop that without changing anything for real files:
+
+- A part of an EPUB that is larger than **16 MB** (packed or unpacked) is not read. The size is checked before anything is unpacked, so a part that claims to unpack to gigabytes is refused. The largest text document in a real library of 809 AO3 EPUBs was 0.27 MB. If the container or package file is too large, the work is reported as "could not read"; a too-large reading-order document is skipped like an unreadable one.
+- At most the first **50 documents** of an EPUB's reading order are read.
+- Only the first **50,000 characters** of the first page are laid out for its PDF copy; a page shows about 10,000 at most.
+- Text is taken out of the markup, and pairings are matched, in time that grows with the length of the text (a single pass over each document; names matched to members as a matching rather than by trying every order). Results are the same as before: checked on all 18,508 documents of a real library of 809 AO3 EPUBs.
+
 Results are reported per import:
 
 | Result | Meaning |

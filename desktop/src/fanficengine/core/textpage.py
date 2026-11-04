@@ -12,6 +12,10 @@ import re
 import threading
 
 _LABEL = re.compile(r"^([^\W\d_](?:[^\W\d_]| ){0,30}:)(.*)$")  # letters and spaces, then ":" (as in the Mac app)
+# Only the start of the text is laid out: far more than fits on the page (about 10,000 of the narrowest characters),
+# so the page looks the same, but a crafted document with megabytes on one line isn't laid out whole (Qt's layout
+# time grows with the square of a line's length). Same as TextPage.maxCharacters in the Mac app.
+MAX_CHARACTERS = 50_000
 _app_lock = threading.Lock()
 _app = None
 
@@ -41,6 +45,7 @@ def _markup(text: str) -> str:
 
 
 def pdf_from_text(text: str) -> bytes:
+    text = text[:MAX_CHARACTERS]
     _ensure_gui_application()
     from PySide6.QtCore import QBuffer, QByteArray, QIODevice, QMarginsF, QRectF
     from PySide6.QtGui import QFont, QPageLayout, QPageSize, QPainter, QPdfWriter, QTextDocument

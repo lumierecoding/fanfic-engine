@@ -20,6 +20,11 @@ import pypdfium2 as pdfium
 from . import text as T
 
 PAGES_CHECKED = 3  # pages (PDF) or text documents (EPUB) checked for the Relationship field
+# Limits for EPUBs (SPEC section 3), as in the Mac app: a part larger than this is not unpacked (checked before reading,
+# so a part that claims or unpacks to gigabytes is refused; the largest text document in a real library of 809 AO3
+# EPUBs was 0.27 MB), and at most this many documents from the start of the reading order are read.
+MAX_MEMBER_SIZE = 16 * 1024 * 1024
+MAX_DOCUMENTS_TRIED = 50
 
 
 class ReadError(Exception):
@@ -180,8 +185,14 @@ class EPUBBook:
         actual = name if name in self._zip.namelist() else self._names.get(name.lower())
         if actual is None:
             raise ReadError(f"{name} is missing inside the EPUB")
+        info = self._zip.getinfo(actual)
+        if info.file_size > MAX_MEMBER_SIZE or info.compress_size > MAX_MEMBER_SIZE:
+            raise ReadError(f"{actual} inside the EPUB is larger than 16 MB")
         try:
-            return self._zip.read(actual)
+            # Read through a stream with a limit: ZipFile.read would unpack a part completely before cutting it to its
+            # declared size, so a part that claims 1 KB could still fill the memory.
+            with self._zip.open(actual) as member:
+                return member.read(MAX_MEMBER_SIZE + 1)
         except (zipfile.BadZipFile, OSError, NotImplementedError) as error:
             raise ReadError("the EPUB file is damaged") from error
 
@@ -194,7 +205,7 @@ def read_epub(data: bytes, fallback_title: str) -> PreparedWork:
 
     book = EPUBBook(data)
     documents: list[tuple[str, str]] = []  # text documents in reading order; image-only pages skipped
-    for path in book.spine_paths:
+    for path in book.spine_paths[:MAX_DOCUMENTS_TRIED]:
         try:
             content = book.text(path)
         except ReadError:

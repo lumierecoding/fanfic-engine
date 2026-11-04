@@ -47,6 +47,9 @@ public enum WorkReader {
     static let pagesChecked = 3
     /// The summary is looked for on the first-page page or document and this many after it (SPEC 5a).
     static let summaryPagesAfterFirst = 2
+    /// At most this many documents from the start of an EPUB's reading order are read (SPEC section 3), so a crafted
+    /// reading order with thousands of empty or huge documents can't keep an import busy.
+    public static let maxDocumentsTried = 50
 
     public static func read(_ url: URL) throws -> PreparedWork {
         guard let kind = FileKind(url: url) else { throw ReadError.notSupported }
@@ -114,7 +117,7 @@ public enum WorkReader {
         var documents: [(path: String, html: String, text: String)] = []
         var nextSpineIndex = 0
         func loadNextDocument() -> Bool {
-            while nextSpineIndex < book.spinePaths.count {
+            while nextSpineIndex < min(book.spinePaths.count, maxDocumentsTried) {
                 let path = book.spinePaths[nextSpineIndex]
                 nextSpineIndex += 1
                 guard let html = try? book.html(at: path) else { continue }
@@ -178,7 +181,12 @@ public enum WorkReader {
 /// The first line is the heading; "Label:" at the start of a line is bold. Text that does not fit is cut off,
 /// because this is the first page only.
 public enum TextPage {
+    /// Only the start of the text is laid out: far more than fits on the page (about 10,000 of the narrowest
+    /// characters), so the page looks the same, but a crafted document with megabytes on one line isn't laid out whole.
+    public static let maxCharacters = 50_000
+
     public static func pdf(from text: String) -> Data {
+        let text = String(text.prefix(maxCharacters))
         let output = NSMutableData()
         var box = CGRect(x: 0, y: 0, width: 595, height: 842)
         guard let consumer = CGDataConsumer(data: output as CFMutableData),

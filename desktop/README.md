@@ -80,7 +80,7 @@ The app itself is under the [MIT License](../LICENSE).
 
 ```sh
 cd desktop
-uv run pytest            # 32 tests on the shared ../Fixtures, same expected results as the Mac app
+uv run pytest            # 53 tests on the shared ../Fixtures and crafted files, same expected results as the Mac app
 uv run fanfic-engine --help
 ```
 

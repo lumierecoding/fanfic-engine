@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased
+
+- **Security fixes** (found with a Codex Security scan, 4 November 2026): a deliberately crafted EPUB could make the app use up its memory or freeze during import, and two crafted pairing tags could freeze the app when one of them was clicked in the sidebar. No ordinary fic triggers these, and no data could leak. Now parts of an EPUB larger than 16 MB are refused before they are unpacked, at most the first 50 documents of an EPUB are read, and text and pairings are read in time proportional to their length.
+- Results for real files are unchanged: the old and new code gave the same pairings, fandoms, summaries, first pages and search results for a library of 809 AO3 EPUBs.
+- The Windows/Linux alpha has the same fixes (there, a part of an EPUB is also read through a size-limited stream).
+
 ## 1.1 — 2026-11-03
 
 - **Updates inside the app:** Fanfic Engine can check for a new version and install it itself (Fanfic Engine → Check for Updates…, or once a day if you allow it; it asks on the second start). Updates come only from this project's GitHub releases and are installed only if they are signed with the project's key. This is the app's only internet connection; importing, reading and searching stay offline. Updating from 1.0 to 1.1 is by hand, once.

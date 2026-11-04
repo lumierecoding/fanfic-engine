@@ -213,6 +213,9 @@ Same as above — report the Relationship line. After a fix, use **Re-read Libra
 **"Could not read" for a PDF.**
 The PDF is damaged, password-protected, or a scan without text.
 
+**"Could not read" for an EPUB.**
+The EPUB is damaged, has no text in its first 50 documents, or has a part larger than 16 MB (real fics are far smaller; this limit protects against files made to fill the memory).
+
 **The same story appears twice.**
 It was imported from two different files (see [Duplicates](#9-duplicates)); remove one.
 

@@ -44,23 +44,25 @@ class PairingQuery:
 
 
 def assign(keys: list[str], members: tuple[str, ...]) -> bool:
-    """Each query name must match a different member, in any order."""
+    """Each query name must match a different member, in any order. Found as a matching between names and members
+    (augmenting paths), at most names² × members steps. Trying every order instead took 14! steps for a crafted tag
+    with 14 equal names (security scan, 4 November 2026). Same as Search.swift."""
     if len(keys) > len(members):
         return False
-    used = [False] * len(members)
+    fits = [[matches_key(k, m) for m in members] for k in keys]
+    owner: list[int | None] = [None] * len(members)  # which name each member is given to
 
-    def place(i: int) -> bool:
-        if i == len(keys):
-            return True
-        for j, member in enumerate(members):
-            if not used[j] and matches_key(keys[i], member):
-                used[j] = True
-                if place(i + 1):
+    def give(i: int, visited: list[bool]) -> bool:
+        """Gives name i a member, moving names that already have one to another member if needed."""
+        for j in range(len(members)):
+            if fits[i][j] and not visited[j]:
+                visited[j] = True
+                if owner[j] is None or give(owner[j], visited):
+                    owner[j] = i
                     return True
-                used[j] = False
         return False
 
-    return place(0)
+    return all(give(i, [False] * len(members)) for i in range(len(keys)))
 
 
 @dataclass

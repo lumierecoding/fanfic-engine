@@ -13,24 +13,95 @@ from functools import lru_cache
 
 # ---------------------------------------------------------------- HTML → text
 
-_COMMENTS = re.compile(r"<!--.*?-->", re.S)
-_INVISIBLE = re.compile(r"<(head|script|style|svg|template)\b.*?</\1\s*>", re.S | re.I)
-_LINE_BREAK = re.compile(r"<br\b[^>]*>", re.I)
-_BLOCK_TAG = re.compile(
+# Each step gives the same result as the regular expression in its comment (`<[^>]*>` and so on), but finds the end
+# of a match with one forward search: only the short, fixed-length start of a match is a regular expression. Letting
+# the regex engine look for the end from every `<` again took time growing with the square of the length on crafted
+# files (security scan, 4 November 2026). Same steps as HTMLText.swift.
+
+# Start of `<(head|script|style|svg|template)\b.*?</\1\s*>` (across lines, any case): an invisible element.
+_INVISIBLE_START = re.compile(r"<(head|script|style|svg|template)\b", re.I)
+# Start of `<br\b[^>]*>`.
+_LINE_BREAK_START = re.compile(r"<br\b", re.I)
+# Start of `</?(p|div|…)\b[^>]*>`.
+_BLOCK_TAG_START = re.compile(
     r"</?(p|div|h[1-6]|li|dt|dd|dl|ul|ol|tr|td|th|table|section|article|blockquote|header|footer|hr|pre|figure"
-    r"|figcaption|nav|aside|main|body|html)\b[^>]*>",
+    r"|figcaption|nav|aside|main|body|html)\b",
     re.I,
 )
-_ANY_TAG = re.compile(r"<[^>]*>", re.S)
+
+
+def _comment_spans(s: str):
+    """`<!--.*?-->` (across lines)."""
+    position = 0
+    while (start := s.find("<!--", position)) >= 0 and (end := s.find("-->", start + 4)) >= 0:
+        position = end + 3
+        yield start, position
+
+
+def _element_spans(s: str, start_pattern: re.Pattern):
+    """`start.*?</\\1\\s*>` (across lines, any case) for a start pattern `<(names)\\b`. All closing tags of a name
+    are found once, so a start without a closing tag costs no new search."""
+    position = 0
+    closers: dict[str, list] = {}  # name → [closing tag ranges, index of the next one to look at]
+    while (match := start_pattern.search(s, position)) is not None:
+        name = match.group(1)
+        key = name.casefold()
+        if key not in closers:
+            closer = re.compile("</" + re.escape(name) + r"\s*>", re.I)
+            closers[key] = [[m.span() for m in closer.finditer(s)], 0]
+        tags, index = closers[key]
+        while index < len(tags) and tags[index][0] < match.end():
+            index += 1
+        closers[key][1] = index
+        if index < len(tags):
+            position = tags[index][1]
+            yield match.start(), position
+        else:
+            position = match.start() + 1
+
+
+def _tag_spans(s: str, start_pattern: re.Pattern | None = None):
+    """`start[^>]*>` for a start pattern that begins with `<`, or `<[^>]*>` without one. Without a `>` after a
+    start, no later start has one either, so the search stops there."""
+    position = 0
+    while True:
+        if start_pattern is None:
+            start = s.find("<", position)
+            if start < 0:
+                return
+            after = start + 1
+        else:
+            match = start_pattern.search(s, position)
+            if match is None:
+                return
+            start, after = match.start(), match.end()
+        end = s.find(">", after)
+        if end < 0:
+            return
+        position = end + 1
+        yield start, position
+
+
+def _replace(s: str, spans, template: str) -> str:
+    parts: list[str] = []
+    copied = 0
+    for start, end in spans:
+        parts.append(s[copied:start])
+        parts.append(template)
+        copied = end
+    if not parts:
+        return s
+    parts.append(s[copied:])
+    return "".join(parts)
 
 
 def plain_text(markup: str) -> str:
     """Turns an (X)HTML document into plain text lines. Nothing is loaded from anywhere."""
-    s = _COMMENTS.sub("", markup)
-    s = _INVISIBLE.sub("", s)
-    s = _LINE_BREAK.sub("\n", s)
-    s = _BLOCK_TAG.sub("\n", s)
-    s = _ANY_TAG.sub("", s)
+    s = _replace(markup, _comment_spans(markup), "")
+    s = _replace(s, _element_spans(s, _INVISIBLE_START), "")
+    s = _replace(s, _tag_spans(s, _LINE_BREAK_START), "\n")
+    s = _replace(s, _tag_spans(s, _BLOCK_TAG_START), "\n")
+    s = _replace(s, _tag_spans(s), "")
     s = html.unescape(s)
     lines = (" ".join(line.split()) for line in s.splitlines())
     return "\n".join(line for line in lines if line)

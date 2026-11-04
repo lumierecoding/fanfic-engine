@@ -4,6 +4,10 @@ import Foundation
 /// A minimal read-only ZIP reader (enough for EPUB files).
 /// Reads the central directory, supports stored (0) and deflate (8) entries. No ZIP64, no encryption.
 public struct ZipArchive: Sendable {
+    /// The largest entry that is unpacked (SPEC section 3). Checked before any memory is reserved, so an entry that
+    /// claims to unpack to gigabytes is refused. The largest text document in a real library of 809 AO3 EPUBs was 0.27 MB.
+    public static let maxEntrySize = 16 * 1024 * 1024
+
     public struct Entry: Sendable {
         public let name: String
         let method: UInt16
@@ -17,6 +21,7 @@ public struct ZipArchive: Sendable {
         case damaged
         case unsupported(String)
         case missingEntry(String)
+        case tooLarge(String)
 
         public var errorDescription: String? {
             switch self {
@@ -24,6 +29,7 @@ public struct ZipArchive: Sendable {
             case .damaged: "the EPUB file is damaged"
             case .unsupported(let what): "unsupported EPUB packing (\(what))"
             case .missingEntry(let name): "\(name) is missing inside the EPUB"
+            case .tooLarge(let name): "\(name) inside the EPUB is larger than 16 MB"
             }
         }
     }
@@ -81,6 +87,9 @@ public struct ZipArchive: Sendable {
     /// The uncompressed bytes of one entry. Name lookup is exact first, then case-insensitive.
     public func contents(of name: String) throws -> Data {
         guard let entry = entry(named: name) else { throw ZipError.missingEntry(name) }
+        guard entry.compressedSize <= Self.maxEntrySize, entry.uncompressedSize <= Self.maxEntrySize else {
+            throw ZipError.tooLarge(entry.name)
+        }
         let o = entry.localHeaderOffset
         guard o + 30 <= bytes.count, Self.u32(bytes, o) == 0x0403_4B50 else { throw ZipError.damaged }
         let start = o + 30 + Int(Self.u16(bytes, o + 26)) + Int(Self.u16(bytes, o + 28))

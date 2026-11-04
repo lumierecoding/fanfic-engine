@@ -118,7 +118,7 @@ A Python + Qt (PySide6) port, labelled alpha because it is only tested on macOS.
 
 ```sh
 cd desktop
-uv run pytest                        # 32 tests on ../Fixtures, same expected results as the Swift tests
+uv run pytest                        # 53 tests on ../Fixtures and crafted files, same expected results as the Swift tests
 uv run fanfic-engine --library-path /tmp/test-library --import ../Fixtures
 ```
 

@@ -133,20 +133,29 @@ public struct PairingQuery: Sendable, Equatable {
         }
     }
 
-    /// Each query name must match a different member, in any order.
+    /// Each query name must match a different member, in any order. Found as a matching between names and members
+    /// (augmenting paths), which takes at most names² × members steps. Trying every order instead took 14! steps for
+    /// a crafted tag with 14 equal names (security scan, 4 November 2026).
     static func assign(_ keys: [String], to members: [String]) -> Bool {
         guard keys.count <= members.count else { return false }
-        var used = [Bool](repeating: false, count: members.count)
-        func place(_ i: Int) -> Bool {
-            if i == keys.count { return true }
-            for j in members.indices where !used[j] && NameMatcher.matches(queryKey: keys[i], member: members[j]) {
-                used[j] = true
-                if place(i + 1) { return true }
-                used[j] = false
+        let fits = keys.map { key in members.map { NameMatcher.matches(queryKey: key, member: $0) } }
+        var owner = [Int?](repeating: nil, count: members.count)  // which name each member is given to
+        // Gives name `i` a member, moving names that already have one to another member if needed.
+        func give(_ i: Int, _ visited: inout [Bool]) -> Bool {
+            for j in members.indices where fits[i][j] && !visited[j] {
+                visited[j] = true
+                if owner[j] == nil || give(owner[j]!, &visited) {
+                    owner[j] = i
+                    return true
+                }
             }
             return false
         }
-        return place(0)
+        for i in keys.indices {
+            var visited = [Bool](repeating: false, count: members.count)
+            if !give(i, &visited) { return false }
+        }
+        return true
     }
 }
 
