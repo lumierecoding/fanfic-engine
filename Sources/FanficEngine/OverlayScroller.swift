@@ -1,19 +1,19 @@
 import AppKit
 import SwiftUI
 
-/// Gives the sidebar the thin scroll bar that floats over it and shows while scrolling, whatever the system setting
-/// (ui-spec change 9, U47–U49).
+/// Gives a column the thin scroll bar that floats over it and shows while scrolling, whatever the system setting:
+/// the sidebar (ui-spec change 9, U47–U49), the works list and the details column (change 10, U50–U52).
 ///
 /// With a mouse connected (*Show scroll bars: Automatically*) or *Always*, macOS gives every scrolling area a
-/// permanent scroll bar in a track of its own; in the sidebar that track is a grey strip with a line beside the counts.
-/// SwiftUI has no setting for the scroll bar style, so this finds the sidebar list's `NSScrollView` and sets its
-/// style to `.overlay`. macOS sets every scroll view back to the system style when that changes (a mouse plugged in
+/// permanent scroll bar in a track of its own: a grey strip with a line at the column's right edge. SwiftUI has no
+/// setting for the scroll bar style, so this goes behind a `List` or `ScrollView` (`.background(OverlayScroller())`),
+/// finds the `NSScrollView` in the same place and sets its style to `.overlay`. macOS sets every scroll view back to the system style when that changes (a mouse plugged in
 /// or out), so the style is set again after each change.
 struct OverlayScroller: NSViewRepresentable {
     func makeNSView(context: Context) -> ScrollViewFinder { ScrollViewFinder() }
     func updateNSView(_ view: ScrollViewFinder, context: Context) { view.applySoon() }
 
-    /// An empty view behind the sidebar list; it finds the scroll view that covers the same place in the window.
+    /// An empty view behind the list or scroll view; it finds the scroll view that covers the same place in the window.
     final class ScrollViewFinder: NSView {
         private weak var scrollView: NSScrollView?
         private var observer: NSObjectProtocol?

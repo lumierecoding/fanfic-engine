@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.1.3 — 2026-11-04
+
+- Fixed: with a mouse connected, the works list and the details column also had a grey scroll bar strip at their right edges. They now use the same thin scroll bar as the sidebar, which appears while scrolling. With a trackpad only, nothing changes.
+- The Windows/Linux alpha is unchanged (0.1.0a2).
+
 ## 1.1.2 — 2026-11-04
 
 - Fixed: with a mouse connected (or *Show scroll bars: Always*), a grey scroll bar strip with a line ran down the sidebar's right edge, next to the counts. The sidebar now always uses the thin scroll bar that appears while scrolling; the works list and details keep the system's scroll bars.

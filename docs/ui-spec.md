@@ -1,5 +1,21 @@
 # Fanfic Engine — UI spec
 
+## Change 10 (4 November 2026, asked by the owner after change 9: "now do the same to the other scroll bar"; built, shipped in 1.1.3): no scroll bar strips in the works list and details
+
+- **Owner request:** after 1.1.2 removed the sidebar's strip, the same for the other scroll bars. With a mouse connected, the works list has the same grey strip at its right edge, and so does the details column when a fic is selected and its summary and first page are taller than the column.
+- **What changes:** the works list and the details column get the same thin scroll bar as the sidebar (change 9): it floats over the column and appears while scrolling, whatever the system setting. No strips anywhere in the main window. The rows and the details use the full column width, as they already do with a trackpad.
+- **Stays the same:** with a trackpad only, the window looks exactly as before. Scrolling with a mouse wheel or trackpad, and dragging a scroll bar while it shows, still work. The import summary sheet and the Settings window keep the system's scroll bars.
+- **Files:** `WorkListView.swift`, `WorkDetailView.swift` (the same `OverlayScroller` as the sidebar).
+- **Checked:** before/after pictures with permanent and thin scroll bars, light and dark, with a fic selected; switching the setting while open.
+
+| # | Rule | How it is checked |
+| --- | --- | --- |
+| U50 | With permanent scroll bars set, the works list and the details column have no scroll bar strip or line at their right edges | Screenshots and pixel checks, light and dark, a fic selected |
+| U51 | Both columns look exactly as they do with thin scroll bars; with thin scroll bars the whole window is pixel-identical to before | Pixel comparisons |
+| U52 | The style holds after the setting changes while the window is open, also after selecting another fic | Setting switched while open (test copy's own setting and the system's announcement) |
+
+---
+
 ## Change 9 (4 November 2026, bug fix; OK'd and built, shipped in 1.1.2): no scroll bar strip in the sidebar
 
 - **Owner report** (their Mac, 1.1.1, dark mode, with a mouse): a grey strip with a line runs down the sidebar's right edge, right next to the counts (809, 227).

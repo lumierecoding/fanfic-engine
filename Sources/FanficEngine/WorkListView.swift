@@ -31,6 +31,7 @@ struct WorkListView: View {
                             Button("Remove from Library…", role: .destructive) { model.confirmRemoval(of: hit.work) }
                         }
                 }
+                .background(OverlayScroller())  // no scroll bar strip with a mouse (ui-spec change 10)
             }
         }
     }

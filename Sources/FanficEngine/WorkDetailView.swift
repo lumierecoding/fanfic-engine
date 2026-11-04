@@ -31,6 +31,7 @@ struct WorkDetailView: View {
                 .padding(16)
                 .frame(maxWidth: .infinity, alignment: .leading)
             }
+            .background(OverlayScroller())  // no scroll bar strip with a mouse (ui-spec change 10)
         } else {
             ContentUnavailableView("Select a fanfic", systemImage: "doc.text.magnifyingglass")
         }
