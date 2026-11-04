@@ -1,5 +1,23 @@
 # Fanfic Engine — UI spec
 
+## Change 9 (4 November 2026, bug fix; OK'd and built, shipped in 1.1.2): no scroll bar strip in the sidebar
+
+- **Owner report** (their Mac, 1.1.1, dark mode, with a mouse): a grey strip with a line runs down the sidebar's right edge, right next to the counts (809, 227).
+- **Cause:** with a mouse connected, macOS's setting *Show scroll bars: Automatically based on mouse or trackpad* (and *Always*) gives every scrolling area a permanent scroll bar in its own track. In the sidebar that track is a strip of its own between the counts and the divider. Every picture so far was taken with the thin scroll bars that only appear while scrolling (trackpad style), so the strip was never seen.
+- **What changes:** the sidebar's scroll bar is always the thin kind that floats over the sidebar and appears while scrolling, whatever the system setting: no strip, no line. The rows and counts use the full sidebar width, as they already do with a trackpad.
+- **Stays the same:** the works list and the details column keep the system's scroll bars (a permanent one with a mouse); with a trackpad only, the whole window looks exactly as before. Scrolling the sidebar with a mouse wheel or trackpad, and dragging its scroll bar while it shows, still work.
+- **If macOS doesn't allow it:** if the sidebar keeps getting the permanent scroll bar back (it can switch styles on its own when a mouse is plugged in or out), the fallback is to hide the sidebar's scroll bar completely; scrolling with the wheel or trackpad still works. The gallery will say which one was built.
+- **Files:** `SidebarView.swift` and `OverlayScroller.swift` (finds the sidebar list's scroll view and sets its style again after each system change).
+- **Checked:** before/after pictures with permanent scroll bars (as on the owner's Mac) and with thin ones, light and dark; plugging a mouse in or out is simulated by switching the setting while the window is open.
+
+| # | Rule | How it is checked |
+| --- | --- | --- |
+| U47 | With permanent scroll bars set (mouse connected or *Always*), the sidebar has no scroll bar strip or line at its right edge; its scroll bar floats over the sidebar while scrolling | Screenshots and a pixel check of the sidebar's right edge, light and dark |
+| U48 | The counts stay right-aligned at the same place as with thin scroll bars; the sidebar still scrolls with wheel and trackpad | Before/after pictures; scrolling a long Characters list in a test copy |
+| U49 | Nothing else changes: the works list and details keep the system's scroll bars, and with thin scroll bars the window is pixel-identical to before; the style holds after the setting changes while the window is open | Before/after pixel comparison; setting switched while open |
+
+---
+
 ## Change 8 (3 November 2026, OK'd and built): updates inside the app
 
 Owner: an update feature that installs new versions inside the app (Sparkle), asking first before checking automatically. The rules are in `SPEC.md` section 10. This part covers what you see.

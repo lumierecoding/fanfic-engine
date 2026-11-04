@@ -26,7 +26,7 @@ swift build -c release --package-path "$ROOT" --scratch-path "$BUILD" --product 
 BIN_DIR="$(swift build -c release --package-path "$ROOT" --scratch-path "$BUILD" "${ARCHS[@]}" --show-bin-path)"
 lipo -info "$BIN_DIR/FanficEngine"
 
-echo "→ Assembling $APP_NAME…"
+echo "→ Assembling ${APP_NAME}…"
 rm -rf "$FOLDER" "$DMG" "$DIST"/*.whl(N) "$DIST/SHA256SUMS" "$DIST/appcast.xml"
 mkdir -p "$APP/Contents/MacOS" "$APP/Contents/Resources"
 cp "$BIN_DIR/FanficEngine" "$APP/Contents/MacOS/FanficEngine"

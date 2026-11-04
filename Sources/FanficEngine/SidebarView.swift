@@ -55,6 +55,7 @@ struct SidebarView: View {
             }
         }
         .listStyle(.sidebar)
+        .background(OverlayScroller())  // no scroll bar strip beside the counts with a mouse (ui-spec change 9)
     }
 
     private func row(_ name: String, count: Int) -> some View {

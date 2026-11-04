@@ -23,7 +23,7 @@ if [[ ! -f "$ROOT/Resources/AppIcon.icns" ]]; then
   swift "$ROOT/scripts/make-icon.swift" "$ROOT/Resources/AppIcon.icns"
 fi
 
-echo "→ Assembling $APP_NAME…"
+echo "→ Assembling ${APP_NAME}…"
 rm -rf "$APP"
 mkdir -p "$APP/Contents/MacOS" "$APP/Contents/Resources"
 cp "$BIN_DIR/FanficEngine" "$APP/Contents/MacOS/FanficEngine"
@@ -48,7 +48,7 @@ if (( ! INSTALL )); then
   exit 0
 fi
 
-echo "→ Installing to $INSTALL_DIR…"
+echo "→ Installing to ${INSTALL_DIR}…"
 rm -rf "$INSTALL_DIR/$APP_NAME"
 ditto "$APP" "$INSTALL_DIR/$APP_NAME"
 codesign --verify --strict "$INSTALL_DIR/$APP_NAME"

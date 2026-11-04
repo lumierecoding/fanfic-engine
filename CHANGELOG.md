@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.1.2 — 2026-11-04
+
+- Fixed: with a mouse connected (or *Show scroll bars: Always*), a grey scroll bar strip with a line ran down the sidebar's right edge, next to the counts. The sidebar now always uses the thin scroll bar that appears while scrolling; the works list and details keep the system's scroll bars.
+- The Windows/Linux alpha is unchanged (0.1.0a2).
+
 ## 1.1.1 — 2026-11-04
 
 - **Security fixes** (found with a Codex Security scan, 4 November 2026): a deliberately crafted EPUB could make the app use up its memory or freeze during import, and two crafted pairing tags could freeze the app when one of them was clicked in the sidebar. No ordinary fic triggers these, and no data could leak. Now parts of an EPUB larger than 16 MB are refused before they are unpacked, at most the first 50 documents of an EPUB are read, and text and pairings are read in time proportional to their length.
