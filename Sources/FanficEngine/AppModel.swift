@@ -10,6 +10,13 @@ enum SidebarItem: Hashable {
     case fandom(String)     // NameGroup.key — a filter; the search field searches inside it
     case character(String)  // NameGroup.key — fills the search field
     case pairing(String)    // PairingGroup.key — fills the search field
+    case tag(String)        // NameGroup.key — a filter like a fandom (SPEC section 5b)
+}
+
+/// What the search field searches (ui-spec change 11, U56): relationships, or the Additional Tags.
+enum SearchScope: Hashable {
+    case pairings
+    case tags
 }
 
 struct ReportSheet: Identifiable {
@@ -31,6 +38,7 @@ final class AppModel {
 
     let library: Library
     var searchText = ""
+    var searchScope = SearchScope.pairings
     var sidebarSelection: SidebarItem? = .all
     var selectedWorkID: UUID?
     var reportSheet: ReportSheet?
@@ -41,6 +49,12 @@ final class AppModel {
     private var importChain: Task<Void, Never>?
     /// The last search result, reused until the search, the sidebar selection or the library changes.
     @ObservationIgnored private var hitsCache: (search: String, selection: SidebarItem?, revision: Int, hits: [SearchHit])?
+
+    /// The query the core searches: in the Tags scope a "#" is put in front (SPEC section 6), unless typed already.
+    var effectiveQuery: String {
+        let text = searchText.trimmingCharacters(in: .whitespaces)
+        return searchScope == .tags && !text.isEmpty && !text.hasPrefix("#") ? "#" + text : text
+    }
 
     init() {
         let defaults = UserDefaults.standard
@@ -64,6 +78,7 @@ final class AppModel {
             case "fandom": sidebarSelection = .fandom(NameMatcher.key(name))
             case "character": sidebarSelection = .character(NameMatcher.key(name)); searchText = name
             case "pairing": sidebarSelection = .pairing(Relationship(name).groupKey); searchText = name
+            case "tag": sidebarSelection = .tag(NameMatcher.key(name))
             default: break
             }
         }
@@ -76,6 +91,8 @@ final class AppModel {
         if library.needsUpgrade {
             Task { await library.upgradeIfNeeded() }
         }
+        // Developer option `-searchScope tags` (screenshots).
+        if defaults.string(forKey: "searchScope") == "tags" { searchScope = .tags }
         if let title = defaults.string(forKey: "selectTitle") {
             selectedWorkID = library.works.first { $0.title == title }?.workID
         }
@@ -85,7 +102,7 @@ final class AppModel {
     // MARK: What the window shows
 
     var hits: [SearchHit] {
-        let search = searchText, selection = sidebarSelection, revision = library.revision
+        let search = effectiveQuery, selection = sidebarSelection, revision = library.revision
         if let cache = hitsCache, cache.search == search, cache.selection == selection, cache.revision == revision {
             return cache.hits
         }
@@ -95,6 +112,8 @@ final class AppModel {
             hits = Search.run("", in: library.worksWithoutPairing)
         case .fandom(let key):
             hits = Search.run(search, in: library.works.filter { $0.fandoms.contains { NameMatcher.key($0) == key } })
+        case .tag(let key):
+            hits = Search.run(search, in: library.works.filter { $0.tags.contains { NameMatcher.key($0) == key } })
         default:
             hits = Search.run(search, in: library.works)
         }
@@ -102,10 +121,13 @@ final class AppModel {
         return hits
     }
 
-    /// The selected fandom's name, when a fandom is selected.
+    /// The selected fandom's or tag's name, when a fandom or a tag is selected (shown in the title band).
     var selectedFandomName: String? {
-        guard case .fandom(let key) = sidebarSelection else { return nil }
-        return library.fandomList().first { $0.key == key }?.display
+        switch sidebarSelection {
+        case .fandom(let key): library.fandomList().first { $0.key == key }?.display
+        case .tag(let key): library.tagList().first { $0.key == key }?.display
+        default: nil
+        }
     }
 
     private func pairingName(_ key: String) -> String? {
@@ -122,10 +144,12 @@ final class AppModel {
     func sidebarChanged() {
         switch sidebarSelection {
         case .pairing(let key):
+            searchScope = .pairings  // a pairing name is searched among the relationships, never as a tag
             if let name = pairingName(key) { searchText = name }
         case .character(let key):
+            searchScope = .pairings
             if let name = characterName(key) { searchText = name }
-        case .all, .noPairing, .fandom:
+        case .all, .noPairing, .fandom, .tag:
             searchText = ""
         case nil:
             break
@@ -138,7 +162,7 @@ final class AppModel {
         switch sidebarSelection {
         case .pairing(let key): if pairingName(key) == searchText { return }
         case .character(let key): if characterName(key) == searchText { return }
-        case .fandom: return
+        case .fandom, .tag: return
         default: break
         }
         if searchText.trimmingCharacters(in: .whitespaces).isEmpty {

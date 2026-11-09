@@ -36,15 +36,18 @@ public struct WorkRecord: Codable, Identifiable, Hashable, Sendable {
     /// The summary (SPEC section 5a); nil when none was found, and in version 1 and 2 libraries until they are re-read.
     /// Left out of library.json when nil.
     public var summary: String? = nil
+    /// The Additional Tags field's values (SPEC section 5b), in page order. Empty in libraries before version 4 until
+    /// they are re-read.
+    public var tags: [String] = []
 }
 
 extension WorkRecord {
     enum CodingKeys: String, CodingKey {
         case workID, firstPageID, kind, originalFileName, storedFile, firstPageFile, firstPageSource
-        case title, author, sha256, importedAt, relationships, fandoms, summary
+        case title, author, sha256, importedAt, relationships, fandoms, summary, tags
     }
 
-    /// Reads version 1 and 2 entries too (they have no `fandoms` / `summary`).
+    /// Reads version 1, 2 and 3 entries too (they have no `fandoms` / `summary` / `tags`).
     public init(from decoder: Decoder) throws {
         let c = try decoder.container(keyedBy: CodingKeys.self)
         workID = try c.decode(UUID.self, forKey: .workID)
@@ -61,6 +64,7 @@ extension WorkRecord {
         relationships = try c.decode([String].self, forKey: .relationships)
         fandoms = try c.decodeIfPresent([String].self, forKey: .fandoms) ?? []
         summary = try c.decodeIfPresent(String.self, forKey: .summary)
+        tags = try c.decodeIfPresent([String].self, forKey: .tags) ?? []
     }
 }
 
@@ -88,9 +92,15 @@ public struct FandomIndexEntry: Codable, Hashable, Sendable {
     public let works: [WorkRef]
 }
 
-/// The whole `library.json` file (version 3: version 2 plus `summary` per work).
+/// One tag with the works that have it (`library.json` → `tagIndex`, SPEC section 5b).
+public struct TagIndexEntry: Codable, Hashable, Sendable {
+    public let tag: String
+    public let works: [WorkRef]
+}
+
+/// The whole `library.json` file (version 4: version 3 plus `tags` per work and the `tags`/`tagIndex` lists).
 public struct LibraryFile: Codable, Sendable {
-    public static let currentVersion = 3
+    public static let currentVersion = 4
 
     public var version: Int
     public var works: [WorkRecord]
@@ -104,9 +114,12 @@ public struct LibraryFile: Codable, Sendable {
     /// Every fandom once, sorted alphabetically.
     public var fandoms: [String]
     public var fandomIndex: [FandomIndexEntry]
+    /// Every Additional Tag once, sorted alphabetically (version 4).
+    public var tags: [String]
+    public var tagIndex: [TagIndexEntry]
 }
 
-/// The part of `library.json` needed to load it; works for version 1, 2 and 3 files.
+/// The part of `library.json` needed to load it; works for version 1, 2, 3 and 4 files.
 struct LibraryHeader: Decodable {
     var version: Int
     var works: [WorkRecord]
@@ -131,6 +144,16 @@ extension Array where Element: SidebarGroup {
             if order == .count, a.workIDs.count != b.workIDs.count { return a.workIDs.count > b.workIDs.count }
             return PairingGroup.alphabetical(a.display, b.display)
         }
+    }
+}
+
+extension Array where Element: SidebarGroup {
+    /// The entries whose name matches a typed filter by the word-start rule (SPEC section 6), in the same order;
+    /// every entry when the filter is empty. Used by the Search tags field of the Tags list.
+    public func matching(_ filter: String) -> [Element] {
+        let key = NameMatcher.key(filter)
+        guard !key.isEmpty else { return self }
+        return self.filter { NameMatcher.matches(queryKey: key, member: $0.display) }
     }
 }
 
@@ -160,6 +183,11 @@ public struct NameGroup: Identifiable, Hashable, Sendable, SidebarGroup {
     /// Every fandom once; a crossover counts in each of its fandoms.
     public static func fandoms(in works: [WorkRecord]) -> [NameGroup] {
         collect(works) { $0.fandoms }
+    }
+
+    /// Every Additional Tag once (SPEC section 5b); spellings that differ only in case, accents or spacing count as one.
+    public static func tags(in works: [WorkRecord]) -> [NameGroup] {
+        collect(works) { $0.tags }
     }
 
     private static let tidyMemo = Memo<String>()

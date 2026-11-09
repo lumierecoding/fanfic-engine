@@ -1,3 +1,4 @@
+import AppKit
 import FanficCore
 import SwiftUI
 
@@ -6,6 +7,7 @@ struct ContentView: View {
     @Bindable var model: AppModel
     @State private var isDropTargeted = false
     @State private var band = TitleBandMetrics()
+    @FocusState private var searchFocused: Bool
     @Environment(\.openSettings) private var openSettings
 
     var body: some View {
@@ -25,7 +27,14 @@ struct ContentView: View {
         .hidingSystemTitleBand()
         .navigationTitle("Fanfic Engine")
         .navigationSubtitle(subtitle)
-        .searchable(text: $model.searchText, placement: .toolbar, prompt: "Search pairing, e.g. Harry/Draco")
+        .searchable(text: $model.searchText, placement: .toolbar,
+                    prompt: Text(model.searchScope == .tags ? "Search tags, e.g. Slow Burn" : "Search pairing, e.g. Harry/Draco"))
+        // Pairings / Tags while searching (ui-spec change 11, U56); "#" at the start searches tags in either scope.
+        .searchFocused($searchFocused)
+        .searchScopes($model.searchScope, activation: .onSearchPresentation) {
+            Text("Pairings").tag(SearchScope.pairings)
+            Text("Tags").tag(SearchScope.tags)
+        }
         .searchTextFollowsAppearance()
         .toolbar {
             ToolbarItemGroup(placement: .primaryAction) {
@@ -56,7 +65,12 @@ struct ContentView: View {
         .frame(minWidth: 900, minHeight: 560)
         .onAppear {
             // Developer option `-openSettings YES` (screenshots).
-            if UserDefaults.standard.bool(forKey: "openSettings") { openSettings() }
+            // Developer option `-focusSearch YES` (screenshots of the Pairings / Tags scope bar).
+            if UserDefaults.standard.bool(forKey: "focusSearch") { searchFocused = true }
+            if UserDefaults.standard.bool(forKey: "openSettings") {
+                NSApp.activate()  // a copy started in the background doesn't open its Settings window otherwise
+                openSettings()
+            }
         }
         .onChange(of: model.sidebarSelection) { model.sidebarChanged() }
         .onChange(of: model.searchText) { model.searchChanged() }

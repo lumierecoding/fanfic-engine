@@ -140,6 +140,19 @@ public enum RelationshipParser {
     public static func tags(in field: String) -> [String] { FieldReader.tags(in: field) }
 }
 
+/// The Additional Tags field (SPEC section 5b): "Additional Tags:" or "Freeform:", split at commas like the other
+/// fields. A tag is just a name: "/" and "&" in it mean nothing ("Hurt/Comfort" is one tag, never a pairing).
+public enum TagParser {
+    static let label = try! NSRegularExpression(pattern: "\\b(?:Additional\\s+Tags|Freeform)\\s*:", options: [.caseInsensitive])
+
+    public static func hasField(_ text: String) -> Bool { FieldReader.has(label, in: text) }
+
+    /// The tags on the page in page order; nil when the page has no Additional Tags label, [] when the field is empty.
+    public static func tags(in text: String, nextPage: String? = nil) -> [String]? {
+        FieldReader.values(label, in: text, nextPage: nextPage)
+    }
+}
+
 /// The Fandom field (SPEC section 5): "Fandom:" or "Fandoms:", split at commas. Crossovers list several.
 public enum FandomParser {
     static let label = try! NSRegularExpression(pattern: "\\bFandoms?\\s*:", options: [.caseInsensitive])

@@ -27,7 +27,7 @@ A small Mac app that works offline and helps find fanfictions by pairing. It imp
    - **PDF:** page 1 is saved as its own one-page PDF.
    - **EPUB:** EPUBs have no fixed pages, so the "first page" is the first document in the reading order (spine) that has visible text. Image-only pages (covers, Calibre title images) are skipped. It is rendered as a one-page A4 PDF.
    - **Fallback:** if that page has no Relationship field, the next two pages (PDF) or text documents (EPUB) are checked. If one of them has the field, that page becomes the first-page copy. The work entry records which page was used (`firstPageSource`, e.g. `page 1` or `OEBPS/preface.xhtml`).
-4. **Pairings and fandoms.** Read from the text of the chosen page (section 5). If that page has no Fandom field, the other checked pages are tried for it.
+4. **Pairings, fandoms and tags.** Read from the text of the chosen page (sections 5 and 5b). If that page has no Fandom field or no Additional Tags field, the other checked pages are tried for it.
 5. **Title and author.** PDF document info or EPUB `dc:title` / `dc:creator`; if missing, the file name.
 6. **Saving.** The original is copied to `Works/`, the first page to `First Pages/`, and `library.json` is rewritten in one atomic write. If any step fails, the files written for this work are removed again and the work is reported as "could not read".
 
@@ -52,7 +52,7 @@ Results are reported per import:
 
 ```json
 {
-  "version": 3,
+  "version": 4,
   "works": [
     {
       "workID": "6F1C…",
@@ -68,7 +68,8 @@ Results are reported per import:
       "importedAt": "2026-11-01T17:00:00Z",
       "relationships": ["Harry Potter/Draco Malfoy", "Harry Potter & Ron Weasley"],
       "fandoms": ["Harry Potter - J. K. Rowling"],
-      "summary": "Two former rivals, one snowed-in cottage."
+      "summary": "Two former rivals, one snowed-in cottage.",
+      "tags": ["Fluff", "Hurt/Comfort", "Snow"]
     }
   ],
   "pairings": ["Aaron Hotchner/Spencer Reid", "Harry Potter & Ron Weasley", "Harry Potter/Draco Malfoy"],
@@ -81,18 +82,21 @@ Results are reported per import:
   "characters": ["Draco Malfoy", "Harry Potter", "Ron Weasley"],
   "characterIndex": [ { "character": "Harry Potter", "works": [ { "workID": "6F1C…", "firstPageID": "A93E…" } ] } ],
   "fandoms": ["Harry Potter - J. K. Rowling"],
-  "fandomIndex": [ { "fandom": "Harry Potter - J. K. Rowling", "works": [ { "workID": "6F1C…", "firstPageID": "A93E…" } ] } ]
+  "fandomIndex": [ { "fandom": "Harry Potter - J. K. Rowling", "works": [ { "workID": "6F1C…", "firstPageID": "A93E…" } ] } ],
+  "tags": ["Fluff", "Hurt/Comfort", "Snow"],
+  "tagIndex": [ { "tag": "Fluff", "works": [ { "workID": "6F1C…", "firstPageID": "A93E…" } ] } ]
 }
 ```
 
 - Keys are written in alphabetical order, so the file looks the same every time.
-- `works`: the list that matches each work ID with its first-page ID, plus its pairings in the order they appear on the page, its fandoms and its summary (section 5a; left out when the work has none).
+- `works`: the list that matches each work ID with its first-page ID, plus its pairings in the order they appear on the page, its fandoms, its summary (section 5a; left out when the work has none) and its tags (section 5b; an empty list when it has none).
 - `pairings`: every pairing in the library once, sorted alphabetically (case and accents ignored).
 - `pairingIndex`: every pairing with the work ID and first-page ID of each work that has it.
 - `characters` / `characterIndex`: every person named in a relationship tag (pairings and friendships), once, with the works that have them. This is not the first page's separate `Characters:` field. Spellings that differ only in case, accents or spacing count as one; alternate names (`Tom Riddle` and `Tom Riddle | Voldemort`) stay separate.
 - `fandoms` / `fandomIndex`: every value of the Fandom field, once, with the works that have it. A crossover counts in each of its fandoms.
+- `tags` / `tagIndex`: every value of the Additional Tags field (section 5b), once, with the works that have it. Spellings that differ only in case, accents or spacing count as one (the spelling used most often is shown).
 - These lists always include friendship tags; the Settings switch only changes the sidebar.
-- **Older files** are upgraded the first time the app opens them: every work is read again, IDs stay the same, and the file is saved as version 3. Version 1 (before characters and fandoms) gets `fandoms`, version 2 gets `summary` (section 5a). The old file is kept as `library-v1-backup.json` or `library-v2-backup.json`.
+- **Older files** are upgraded the first time the app opens them: every work is read again, IDs stay the same, and the file is saved as version 3. Version 1 (before characters and fandoms) gets `fandoms`, version 2 gets `summary` (section 5a), version 3 gets `tags` (section 5b). The old file is kept as `library-v1-backup.json`, `library-v2-backup.json` or `library-v3-backup.json`.
 - `pairings` and `pairingIndex` are rebuilt from `works` on every save. `A/B` and `B/A` count as one pairing; the spelling used most often is shown (on a tie, the first alphabetically).
 
 ## 5. Reading the Relationship and Fandom fields
@@ -139,6 +143,20 @@ The PDF rule has only been tried on the test files: no real AO3 PDF has been che
 
 The summary is not searched (section 6 is unchanged). The Windows/Linux alpha still writes version 2: it opens a version 3 library and ignores the summaries, but if it saves the library, the summaries are dropped, and the Mac app reads them again the next time it opens the library.
 
+## 5b. Reading the tags (Additional Tags)
+
+Added 9 November 2026. The tags are the work's **Additional Tags** on AO3: tropes, moods and content notes such as `Fluff`, `Slow Burn`, `Hurt/Comfort`, `Enemies to Lovers`.
+
+1. **Label:** `Additional Tags:` (any case, spaces allowed before the colon), or `Freeform:` (the name AO3 uses for these tags internally; some download tools print it).
+2. **Reading:** the same rules 1–4 as the Relationship field (section 5): the field ends at the next AO3 label (`Language:`, `Stats:`, `Series:`, `Summary:` …) or at the end of the page, then the next page is read too; line breaks and runs of spaces become one space; the text is split at commas; a part longer than 150 characters means free text ran in, so only its first line is kept and reading stops; a tag that appears twice is kept once.
+3. **A tag is just a name.** Unlike section 5 rule 5, `/` and `&` mean nothing here: `Hurt/Comfort` and `Fluff & Angst` are one tag each, never a pairing or a friendship. They are not counted as characters.
+4. **Which page:** the page used for the first-page copy; if it has no Additional Tags field, the other checked pages are tried (as for the Fandom field).
+5. **None found:** the work has no tags (`"tags": []`). Typical for FicHub exports and files from other sites.
+
+Example: `Additional Tags: Fluff, Hurt/Comfort,\nSlow\nBurn, Fluff` → `Fluff`, `Hurt/Comfort`, `Slow Burn`.
+
+**`library.json` version 4.** Each work gets `"tags": […]`, and the file gets the `tags` and `tagIndex` lists (section 4). The first time the app opens a version 3 library it reads every work once more, the same automatic re-read as the earlier updates: IDs, pairings, fandoms, summaries, first pages and files stay the same, the tags are added, and the version 3 file is kept as `library-v3-backup.json`. Fanfic Engine 1.1.3 and earlier on the Mac open a version 4 library and ignore the tags; if they save the library, they write version 3 without them, and a version with tags reads them again the next time it opens the library. The Windows/Linux alpha (version 2) drops them the same way.
+
 ## 6. Search
 
 **Normalising** (applied to the query and to the stored names): lower case, accents removed (`Chloé` → `chloe`), every character that is not a letter or digit counts as a space. A name becomes a list of words, e.g. `Lan Zhan | Lan Wangji` → `lan zhan lan wangji`.
@@ -161,26 +179,28 @@ and `Ron` does not match `Aaron Hotchner` or `Veronica`.
 | `Text2/Text1` | the same as `Text1/Text2` |
 | `Text1 & Text2` | a friendship tag with both |
 | `Text1` (no `/` or `&`) | any relationship (pairing or friendship) with a member matching Text1 |
-| empty | every work |
+| `#Text` | a tag (section 5b) matching Text with the same word-start rule as names: `#burn` and `#slow b` find `Slow Burn`, `#low` does not; `#hurt comfort` finds `Hurt/Comfort`. Relationships are not searched. In each result the matching tags are highlighted. The **Tags** scope of the search field (Pairings / Tags, shown while searching) does the same without typing `#` |
+| empty (or just `#`) | every work |
 
 Results are sorted by title. In each result the relationships that matched are highlighted.
 
 **Sidebar** (order: All Works and No Pairing Found, then Fandoms, Characters, Pairings; the three lists start folded):
 - clicking a **pairing** or a **character** puts it into the search field (so a character click also finds names that start with it, e.g. `Tom Riddle` finds `Tom Riddle | Voldemort` too);
-- clicking a **fandom** shows only that fandom's works; the search field then searches inside it.
+- clicking a **fandom** shows only that fandom's works; the search field then searches inside it;
+- clicking a **tag** (the **Tags** list, after Pairings) shows only the works with that tag; the search field then searches inside it, like a fandom. The open Tags list starts with its own **Search tags** field, which narrows the list to the tags that match by the word-start rule above (`burn` finds `Slow Burn`); it only filters the list and doesn't change the fanfic search.
 
-**Settings** (⌘, or the gear button; stored in the app's preferences on this Mac): show or hide Fandoms, Characters and Pairings; sort them by name or by number of fanfics (largest first, ties A–Z); include or leave out friendship tags (`A & B`) in Pairings and Characters; the library folder with Show in Finder and Re-read Library.
+**Settings** (⌘, or the gear button; stored in the app's preferences on this Mac): show or hide Fandoms, Characters, Pairings and Tags; sort them by name or by number of fanfics (largest first, ties A–Z); include or leave out friendship tags (`A & B`) in Pairings and Characters; the library folder with Show in Finder and Re-read Library.
 
 ## 7. Removing and re-reading
 
 - **Remove from Library** deletes the work's copy in `Works/`, its first-page copy and its entries in `library.json`.
-- **Re-read Library** reads every stored work again with the current rules. IDs stay the same; first-page copies, pairings, fandoms and summaries are replaced. (Used after the reading rules are improved.)
+- **Re-read Library** reads every stored work again with the current rules. IDs stay the same; first-page copies, pairings, fandoms, summaries and tags are replaced. (Used after the reading rules are improved.)
 
 ## 8. Limits
 
 - Works offline: no account; the only network code and the only third-party library is the updater (Sparkle, section 10), which only contacts GitHub.
 - Scanned PDFs without a text layer have no readable text and are reported as "could not read".
-- The search field searches the Relationship field; fandoms are browsed through the sidebar; summaries are shown, not searched. The `Characters:` field and other tags are not used.
+- The search field searches the Relationship field, or the Additional Tags with `#` (section 5b); fandoms and tags are browsed through the sidebar; summaries are shown, not searched. The `Characters:` field, ratings, warnings and categories are not used.
 - macOS 27 or later, Apple Silicon.
 
 ## 9. Export with readable file names (planned, not built yet)

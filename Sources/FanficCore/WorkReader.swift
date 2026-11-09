@@ -17,6 +17,8 @@ public struct PreparedWork: Sendable {
     public let relationships: [String]
     /// Values of the Fandom field (several for a crossover); empty when the page has none.
     public let fandoms: [String]
+    /// Values of the Additional Tags field (SPEC section 5b); empty when none of the checked pages has one.
+    public let tags: [String]
     public let title: String
     public let author: String?
     /// The work's summary (SPEC section 5a); nil when none was found.
@@ -80,6 +82,7 @@ public enum WorkReader {
         let next = chosen + 1 < texts.count ? texts[chosen + 1] : nil
         let tags = RelationshipParser.relationships(in: texts[chosen], nextPage: next)
         let fandoms = fandoms(in: texts, preferring: chosen, checked: checked.count)
+        let additionalTags = Self.additionalTags(in: texts, preferring: chosen, checked: checked.count)
 
         guard let page = document.page(at: chosen)?.copy() as? PDFPage else { throw ReadError.cannotCopyPage }
         let single = PDFDocument()
@@ -90,7 +93,7 @@ public enum WorkReader {
         return PreparedWork(
             kind: .pdf, sha256: sha256(data), fileData: data, firstPagePDF: pageData,
             firstPageSource: "page \(chosen + 1)", firstPageText: texts[chosen],
-            hasRelationshipField: tags != nil, relationships: tags ?? [], fandoms: fandoms,
+            hasRelationshipField: tags != nil, relationships: tags ?? [], fandoms: fandoms, tags: additionalTags,
             title: nonEmpty(attributes[PDFDocumentAttribute.titleAttribute] as? String) ?? fallbackTitle,
             author: nonEmpty(attributes[PDFDocumentAttribute.authorAttribute] as? String),
             summary: pdfSummary(document, firstPage: chosen))
@@ -136,6 +139,8 @@ public enum WorkReader {
         let text = documents[chosen].text
         let tags = RelationshipParser.relationships(in: text, nextPage: next)
         let fandoms = fandoms(in: documents.map(\.text), preferring: chosen, checked: min(pagesChecked, documents.count))
+        let additionalTags = Self.additionalTags(in: documents.map(\.text), preferring: chosen,
+                                                 checked: min(pagesChecked, documents.count))
 
         // The summary: in AO3 EPUBs it is in the document after the tags (SPEC 5a).
         var summary: String?
@@ -153,7 +158,7 @@ public enum WorkReader {
             kind: .epub, sha256: sha256(data), fileData: data,
             firstPagePDF: TextPage.pdf(from: text),
             firstPageSource: documents[chosen].path, firstPageText: text,
-            hasRelationshipField: tags != nil, relationships: tags ?? [], fandoms: fandoms,
+            hasRelationshipField: tags != nil, relationships: tags ?? [], fandoms: fandoms, tags: additionalTags,
             title: nonEmpty(book.title) ?? fallbackTitle, author: nonEmpty(book.author), summary: summary)
     }
 
@@ -163,6 +168,17 @@ public enum WorkReader {
         for index in order {
             let next = index + 1 < texts.count ? texts[index + 1] : nil
             if let values = FandomParser.fandoms(in: texts[index], nextPage: next) { return values }
+        }
+        return []
+    }
+
+    /// The Additional Tags field from the chosen first page; if that page has none, from the other checked pages
+    /// (SPEC section 5b, rule 4).
+    static func additionalTags(in texts: [String], preferring chosen: Int, checked: Int) -> [String] {
+        let order = [chosen] + (0..<checked).filter { $0 != chosen }
+        for index in order where index < texts.count {
+            let next = index + 1 < texts.count ? texts[index + 1] : nil
+            if let values = TagParser.tags(in: texts[index], nextPage: next) { return values }
         }
         return []
     }

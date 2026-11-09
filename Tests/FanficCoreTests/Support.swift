@@ -2,9 +2,12 @@ import Foundation
 @testable import FanficCore
 
 /// The project folder's Fixtures/ (made by scripts/make-fixtures.swift).
-let fixturesFolder = URL(fileURLWithPath: #filePath)
-    .deletingLastPathComponent().deletingLastPathComponent().deletingLastPathComponent()
-    .appendingPathComponent("Fixtures", isDirectory: true)
+/// When `FANFIC_FIXTURES` is set, the tests read the test files from that folder instead (a copy outside iCloud
+/// Drive: a simulator process that opens a file in iCloud Drive makes macOS ask for permission).
+let fixturesFolder = ProcessInfo.processInfo.environment["FANFIC_FIXTURES"].map { URL(fileURLWithPath: $0, isDirectory: true) }
+    ?? URL(fileURLWithPath: #filePath)
+        .deletingLastPathComponent().deletingLastPathComponent().deletingLastPathComponent()
+        .appendingPathComponent("Fixtures", isDirectory: true)
 
 struct ExpectedResult: Codable, Sendable {
     var file: String
@@ -16,6 +19,8 @@ struct ExpectedResult: Codable, Sendable {
     var relationships: [String]
     var fandoms: [String]
     var summary: String?
+    /// SPEC section 5b; nil (left out of expected.json) when the file has no Additional Tags.
+    var tags: [String]?
 }
 
 /// The summary test files (SPEC section 5a) are in Fixtures/Summaries with their own expected.json.

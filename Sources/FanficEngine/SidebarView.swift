@@ -1,7 +1,8 @@
 import FanficCore
 import SwiftUI
 
-/// Left column (ui-spec U2, U3, U12, U13): All Works and No Pairing Found, then Fandoms, Characters and Pairings.
+/// Left column (ui-spec U2, U3, U12, U13, U53): All Works and No Pairing Found, then Fandoms, Characters, Pairings
+/// and Tags.
 /// The three lists start folded; their open/closed state and the Settings choices are kept in the app's preferences.
 struct SidebarView: View {
     @Bindable var model: AppModel
@@ -9,11 +10,15 @@ struct SidebarView: View {
     @AppStorage("showFandoms") private var showFandoms = true
     @AppStorage("showCharacters") private var showCharacters = true
     @AppStorage("showPairings") private var showPairings = true
+    @AppStorage("showTags") private var showTags = true
     @AppStorage("sidebarSort") private var sort = SidebarSort.name
     @AppStorage("includeFriendships") private var includeFriendships = true
     @AppStorage("fandomsExpanded") private var fandomsExpanded = false
     @AppStorage("charactersExpanded") private var charactersExpanded = false
     @AppStorage("pairingsExpanded") private var pairingsExpanded = false
+    @AppStorage("tagsExpanded") private var tagsExpanded = false
+    /// The Search tags field of the open Tags list (ui-spec U54); only filters the list.
+    @State private var tagFilter = UserDefaults.standard.string(forKey: "tagFilter") ?? ""  // developer option for screenshots
 
     var body: some View {
         let works = model.library.works
@@ -53,9 +58,45 @@ struct SidebarView: View {
                     SectionHeader(title: "Pairings", isExpanded: $pairingsExpanded)
                 }
             }
+            // The Additional Tags (SPEC section 5b, ui-spec U53): a filter, like a fandom.
+            if showTags {
+                Section(isExpanded: $tagsExpanded) {
+                    tagSearchField
+                    let tags = model.library.tagList(sort: sort).matching(tagFilter)
+                    if tags.isEmpty, !tagFilter.trimmingCharacters(in: .whitespaces).isEmpty {
+                        Text("No tags match “\(tagFilter)”")
+                            .foregroundStyle(.secondary)
+                    }
+                    ForEach(tags) { group in
+                        row(group.display, count: group.workIDs.count).tag(SidebarItem.tag(group.key))
+                    }
+                } header: {
+                    SectionHeader(title: "Tags", isExpanded: $tagsExpanded)
+                }
+            }
         }
         .listStyle(.sidebar)
         .background(OverlayScroller())  // no scroll bar strip beside the counts with a mouse (ui-spec change 9)
+    }
+
+    /// First row of the open Tags list (ui-spec U54): narrows the list by the word-start rule.
+    private var tagSearchField: some View {
+        HStack(spacing: 6) {
+            Image(systemName: "magnifyingglass")
+                .foregroundStyle(.secondary)
+            TextField("Search tags", text: $tagFilter)
+                .textFieldStyle(.plain)
+                .autocorrectionDisabled()
+            if !tagFilter.isEmpty {
+                Button { tagFilter = "" } label: {
+                    Image(systemName: "xmark.circle.fill")
+                }
+                .buttonStyle(.plain)
+                .foregroundStyle(.secondary)
+                .help("Clear")
+            }
+        }
+        .padding(.vertical, 2)
     }
 
     private func row(_ name: String, count: Int) -> some View {

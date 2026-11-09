@@ -1,9 +1,12 @@
+import AppKit
 import FanficCore
 import SwiftUI
 
 /// Middle column: the works that match the search, sorted by title (ui-spec U5, U6, U10).
 struct WorkListView: View {
     @Bindable var model: AppModel
+    /// Developer option `-focusList YES` (screenshots of a selected row with the list focused).
+    @FocusState private var listFocused: Bool
 
     var body: some View {
         let hits = model.hits
@@ -22,7 +25,7 @@ struct WorkListView: View {
                 }
             } else {
                 List(hits, selection: $model.selectedWorkID) { hit in
-                    WorkRow(hit: hit)
+                    WorkRow(hit: hit, isSelected: model.selectedWorkID == hit.id)
                         .contextMenu {
                             Button("Open Fanfic") { model.open(hit.work) }
                             Button("Open First Page") { model.openFirstPage(hit.work) }
@@ -32,6 +35,12 @@ struct WorkListView: View {
                         }
                 }
                 .background(OverlayScroller())  // no scroll bar strip with a mouse (ui-spec change 10)
+                .focused($listFocused)
+                .onAppear {
+                    guard UserDefaults.standard.bool(forKey: "focusList") else { return }
+                    NSApp.activate()  // a selected row is only drawn emphasized in the active window
+                    listFocused = true
+                }
             }
         }
     }
@@ -39,6 +48,9 @@ struct WorkListView: View {
 
 struct WorkRow: View {
     let hit: SearchHit
+    /// Passed in: on macOS 27 `backgroundProminence` stays `.standard` in this list even for the selected row, so the
+    /// matches were drawn blue on the blue selection (found with change 11; U6 says bold, not accent, when selected).
+    var isSelected = false
     /// `.increased` while the row is selected; matching tags are then bold instead of accent-coloured.
     @Environment(\.backgroundProminence) private var prominence
 
@@ -65,12 +77,21 @@ struct WorkRow: View {
                     .foregroundStyle(.secondary)
                     .fixedSize(horizontal: false, vertical: true)
             }
+            // Found by a tag: the matching tags, in page order (ui-spec U57).
+            if !hit.matchedTags.isEmpty {
+                let tags = work.tags.filter(hit.matchedTags.contains).joined(separator: ", ")
+                Text("\(Image(systemName: "tag")) \(tags)")
+                    .font(.callout.weight(.semibold))
+                    .foregroundStyle(isSelected || prominence == .increased ? AnyShapeStyle(.primary) : AnyShapeStyle(Color.accentColor))
+                    .fixedSize(horizontal: false, vertical: true)
+                    .accessibilityLabel("Matching tags: \(tags)")
+            }
         }
         .padding(.vertical, 6)
     }
 
     private var relationshipsText: AttributedString {
-        let selected = prominence == .increased
+        let selected = isSelected || prominence == .increased
         var text = AttributedString()
         for (index, tag) in hit.work.relationships.enumerated() {
             if index > 0 { text += AttributedString(", ") }

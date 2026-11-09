@@ -41,9 +41,10 @@ If it helps you, a ⭐ on this page helps other fans find it.
 - **Import** EPUB and PDF files by dragging them (or whole folders) onto the window or the Dock icon, with **Add Files…**, or with Finder's *Open With*. A summary shows what was added, skipped or could not be read.
 - **First-page copies**: the first page of every work is saved as its own one-page PDF, so you can see a work's tags at a glance.
 - **Summaries**: each fic's summary, as its author wrote it, is shown above its first page (from version 1.1).
-- **IDs and lists**: every work and every first-page copy gets its own ID. `library.json` lists all works, pairings, characters and fandoms with those IDs — readable by hand.
+- **IDs and lists**: every work and every first-page copy gets its own ID. `library.json` lists all works, pairings, characters, fandoms and tags with those IDs — readable by hand.
 - **Search by pairing**: order, spacing, upper/lower case and accents don't matter; part of a name works if it is the start of a word (`Hotch/Reid` finds *Aaron Hotchner/Spencer Reid*, and `Ron` does not find *Aaron*). Poly pairings and friendship tags (`A & B`) are understood.
 - **Browse** by fandom (crossovers count in every fandom they list), by character or by pairing in the sidebar.
+- **Tags** (from 1.2): AO3's Additional Tags (`Fluff`, `Slow Burn`, `Hurt/Comfort` …) are read too. The sidebar's **Tags** list has its own search field; click a tag to see its fics, or search tags with `#` (`#slow burn`).
 - **Settings** to show, hide and sort the sidebar lists and to leave friendship tags out.
 - **Fast with big libraries**: about a second to open and a few hundredths of a second per search at 10,000 fanfics.
 - **Updates inside the app** (from 1.1): it can check for a new version and install it itself, but only if you allow it.
@@ -80,7 +81,7 @@ The script builds the app, signs it for your Mac (ad-hoc, no Apple account or pa
 
 1. Open **Fanfic Engine** from Applications or Spotlight.
 2. Drag a few downloaded fanfics (EPUB or PDF) onto the window.
-3. Type a pairing into the search field at the top right, or open **Fandoms**, **Characters** or **Pairings** in the sidebar by clicking their names.
+3. Type a pairing into the search field at the top right, or open **Fandoms**, **Characters**, **Pairings** or **Tags** in the sidebar by clicking their names.
 
 The [user manual](docs/USER_MANUAL.md) explains everything in detail.
 

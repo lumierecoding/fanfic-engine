@@ -1,6 +1,6 @@
 # Fanfic Engine — User manual
 
-Fanfic Engine keeps a library of the fanfics you have downloaded and lets you find them by pairing, character and fandom. It works offline; the only thing that uses the internet is the update check, and only if you allow it (section 7 and 13).
+Fanfic Engine keeps a library of the fanfics you have downloaded and lets you find them by pairing, character, fandom and tag. It works offline; the only thing that uses the internet is the update check, and only if you allow it (section 7 and 13).
 
 ![How Fanfic Engine works, in four steps. 1: you drag EPUB or PDF files, or whole folders, onto the window; your original files are never changed or moved. 2: the first page is saved as its own PDF and its Fandom and Relationship tags are read; A/B is a pairing, A & B a friendship. 3: a library folder keeps a copy of each fic, its first page and library.json; the same file is only added once, and every fic and first page gets its own ID. 4: you search a pairing in any order, or browse fandoms, characters and pairings, and click a fic to see its first page. Everything stays on your Mac.](images/how-it-works.png)
 
@@ -10,7 +10,7 @@ Fanfic Engine keeps a library of the fanfics you have downloaded and lets you fi
 2. [Adding fanfics](#2-adding-fanfics)
 3. [The window](#3-the-window)
 4. [Searching](#4-searching)
-5. [Browsing by fandom, character and pairing](#5-browsing-by-fandom-character-and-pairing)
+5. [Browsing by fandom, character, pairing and tag](#5-browsing-by-fandom-character-pairing-and-tag)
 6. [The details column](#6-the-details-column)
 7. [Settings](#7-settings)
 8. [Where your files are](#8-where-your-files-are)
@@ -78,9 +78,9 @@ Click **OK** to close it.
 
 The window has three columns:
 
-- **Sidebar (left)**: **All Works** and **No Pairing Found**, with counts, and below them three lists — **Fandoms**, **Characters** and **Pairings** — that start folded.
-- **Works list (middle)**: every work that matches the current search or sidebar choice, sorted by title. Each row shows the title, the file type, the author, the fandom and the relationships. Relationships that match your search are highlighted.
-- **Details (right)**: the selected work's summary and first page, its fandom(s), relationships, file name and IDs, with buttons to open it.
+- **Sidebar (left)**: **All Works** and **No Pairing Found**, with counts, and below them four lists — **Fandoms**, **Characters**, **Pairings** and **Tags** — that start folded.
+- **Works list (middle)**: every work that matches the current search or sidebar choice, sorted by title. Each row shows the title, the file type, the author, the fandom and the relationships. Relationships that match your search are highlighted; a work found by a tag gets one more line with its matching tags.
+- **Details (right)**: the selected work's summary and first page, its fandom(s), relationships, tags, file name and IDs, with buttons to open it.
 
 The toolbar has **+** (add files), the **folder** button (show the library in Finder), the **gear** (Settings) and the **search field**. The line under the window title says how many fanfics are listed.
 
@@ -102,15 +102,18 @@ Type into the search field at the top right. The list updates as you type.
 
 A search with `/` only finds pairings (romantic tags); a search with `&` only finds friendship tags; a single name finds both.
 
-The search looks at the **Relationship** field only. Fandoms are browsed through the sidebar (next section); the separate *Characters:* field and other tags on the first page are not used.
+**Searching by tag** (from version 1.2): while you type, a bar under the toolbar offers **Pairings | Tags**. Choose **Tags**, or start your search with `#` in either, to search the fic's *Additional Tags* instead of its relationships: `#burn` and `#slow b` find *Slow Burn*, and `#hurt comfort` finds *Hurt/Comfort*. The same start-of-a-word rule applies. Each work found shows a tag symbol and its matching tags in an extra line.
 
-## 5. Browsing by fandom, character and pairing
+The search looks at the **Relationship** field, or with `#` at the **Additional Tags**. Fandoms and tags are browsed through the sidebar (next section); the separate *Characters:* field, ratings, warnings and categories are not used.
 
-The three lists in the sidebar start folded. **Click a list's name** (or the small arrow that appears when you point at it) to open or fold it. The app remembers which lists you left open.
+## 5. Browsing by fandom, character, pairing and tag
+
+The four lists in the sidebar start folded. **Click a list's name** (or the small arrow that appears when you point at it) to open or fold it. The app remembers which lists you left open.
 
 - **Fandoms** — every fandom in your library once, with the number of fanfics. **Click a fandom** to see only its works; the search field then searches *inside* that fandom, and the line under the title shows the fandom's name. A crossover (a work with several fandoms) is listed under each of them. Click **All Works** to leave the fandom.
 - **Characters** — everyone who appears in a pairing or friendship tag, once each. **Click a character** to search for them (their name goes into the search field). This list is made from the relationship tags, not from the first page's separate *Characters:* field. Different spellings of the same name (case, accents, spacing) count as one; alternative names such as `Tom Riddle` and `Tom Riddle | Voldemort` stay separate entries. Because a name search also finds names that *start* with it, clicking `Tom Riddle` also finds works tagged `Tom Riddle | Voldemort`.
 - **Pairings** — every pairing once. `A/B` and `B/A` are one entry, shown in the spelling used most often. **Click a pairing** to search for it.
+- **Tags** (from version 1.2) — every *Additional Tag* once (`Fluff`, `Slow Burn`, `Hurt/Comfort` …), with the number of fanfics. A big library can have thousands of tags, so when the list is open its first row is a **Search tags** field: type the start of a word (`fam` for *Found Family*) to narrow the list, and click ✕ to see all tags again. **Click a tag** to see only its works, like a fandom: the line under the title shows the tag, and the search field searches inside it. `/` and `&` mean nothing in a tag: `Hurt/Comfort` is one tag, not a pairing.
 
 ![A fandom selected, with a search inside it](images/fandom-search-dark.png)
 
@@ -120,7 +123,7 @@ Select a work in the middle column to see:
 
 - its **summary**, as the author wrote it, under the buttons. It's read once when the work is added; long summaries are shown in full, and you can select and copy the text. A file without one shows *No summary found* (common for files from sites other than AO3);
 - its **first page** (the saved copy);
-- **Fandom(s)**, **Relationships**, the original **file** name and which page was used as the first page;
+- **Fandom(s)**, **Relationships**, **Tags** (one line, or *No tags found*), the original **file** name and which page was used as the first page;
 - the **Work ID** and **First-page ID** (you can select and copy them).
 
 Buttons:
@@ -137,7 +140,7 @@ Open Settings with the **gear** button or **Fanfic Engine → Settings…** (⌘
 
 ![Settings](images/settings.png)
 
-- **Sidebar** — show or hide **Fandoms**, **Characters** and **Pairings**, and sort these lists by **Name** (A–Z) or by **Number of fanfics** (largest first).
+- **Sidebar** — show or hide **Fandoms**, **Characters**, **Pairings** and **Tags**, and sort these lists by **Name** (A–Z) or by **Number of fanfics** (largest first).
 - **Relationships** — **Include friendship tags (A & B)**. When off, `A & B` tags are left out of the Pairings list, and people who only appear in friendship tags are left out of Characters. Searching is not affected.
 - **Library** — where the library folder is, how many fanfics and first pages it holds, **Show in Finder** and **Re-read Library**.
 - **Updates** — **Check for updates automatically** (once a day), when the app last checked, and **Check Now**.
@@ -157,9 +160,9 @@ Click the **folder** button (or **File → Show Library in Finder**). The librar
 
 `library.json` is a text file you can open in any text editor. It contains:
 
-- **works** — every work with its work ID, first-page ID, original file name, title, author, relationships, fandoms and summary;
-- **pairings**, **characters**, **fandoms** — each name once, A–Z;
-- **pairingIndex**, **characterIndex**, **fandomIndex** — each name with the work ID and first-page ID of every work that has it.
+- **works** — every work with its work ID, first-page ID, original file name, title, author, relationships, fandoms, tags and summary;
+- **pairings**, **characters**, **fandoms**, **tags** — each name once, A–Z;
+- **pairingIndex**, **characterIndex**, **fandomIndex**, **tagIndex** — each name with the work ID and first-page ID of every work that has it.
 
 **Backups and moving to another Mac:** quit the app and copy the whole *Fanfic Engine* folder. To restore it, put the folder back in the same place (`~/Library/Application Support/`) before opening the app. In Finder, use **Go → Go to Folder…** (⇧⌘G) and paste `~/Library/Application Support` to get there.
 
@@ -172,16 +175,17 @@ The same story in a *different* file is currently imported as a separate work �
 ## 10. Removing works and re-reading the library
 
 - **Remove a work**: right-click it in the middle column → **Remove from Library…** and confirm. The library's copy of the file, its first-page copy and its entries in `library.json` are deleted. Your original file is not touched.
-- **Re-read Library** (**File** menu or Settings): reads every stored work again with the current rules — useful after an update of the app improves how files are read. IDs stay the same; first-page copies, pairings, fandoms and summaries are replaced.
+- **Re-read Library** (**File** menu or Settings): reads every stored work again with the current rules — useful after an update of the app improves how files are read. IDs stay the same; first-page copies, pairings, fandoms, tags and summaries are replaced.
 
 ## 11. Which files work best
 
-- **AO3 downloads** (EPUB and PDF) work best: their first page lists *Fandom:*, *Relationship:* and *Characters:* in a fixed layout. Singular and plural labels (`Relationship:` / `Relationships:`), names broken over two lines, poly pairings, friendship tags and crossovers are all handled.
+- **AO3 downloads** (EPUB and PDF) work best: their first page lists *Fandom:*, *Relationship:* and *Characters:* in a fixed layout, and *Additional Tags:* for the tags. Singular and plural labels (`Relationship:` / `Relationships:`), names broken over two lines, poly pairings, friendship tags and crossovers are all handled.
 - **Other sites and tools** (for example FicHub exports) are imported, but if their first page has no Relationship or Fandom field, the work appears under *No Pairing Found* and in no fandom.
 - **EPUB "first page"**: EPUBs have no fixed pages, so the first page is the first section with text (cover images are skipped). It is drawn as a simple one-page PDF from its text. If that section has no Relationship field, the next two are checked.
 - **PDF first page**: page 1; if page 1 has no Relationship field, pages 2 and 3 are checked.
 - **Summaries**: in AO3 EPUBs the summary is in the section after the tags, and in AO3 PDFs after the title; the app finds it there. PDFs don't record paragraphs, so a PDF summary is shown as one paragraph. A text after a "Summary" heading that is longer than AO3 allows (1,250 characters) is not taken as a summary.
 - **Updating from version 1.0**: the first time version 1.1 opens your library, it reads every fanfic once more to find the summaries (a few seconds for hundreds of fanfics; the wheel in the toolbar turns meanwhile). IDs, pairings and fandoms stay the same, and the previous `library.json` is kept as `library-v2-backup.json` in the library folder.
+- **Updating from version 1.1**: the first time version 1.2 opens your library, it reads every fanfic once more to find the tags (about 7 seconds for 800 fanfics). IDs, pairings, fandoms, summaries and first pages stay the same, and the previous `library.json` is kept as `library-v3-backup.json`. Files from other sites usually have no *Additional Tags* field, so they have no tags.
 - **Scanned PDFs** (pictures of pages, no text) can't be read.
 
 ## 12. Big libraries

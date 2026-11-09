@@ -10,6 +10,7 @@ struct SettingsView: View {
     @AppStorage("showFandoms") private var showFandoms = true
     @AppStorage("showCharacters") private var showCharacters = true
     @AppStorage("showPairings") private var showPairings = true
+    @AppStorage("showTags") private var showTags = true
     @AppStorage("sidebarSort") private var sort = SidebarSort.name
     @AppStorage("includeFriendships") private var includeFriendships = true
 
@@ -19,6 +20,7 @@ struct SettingsView: View {
                 Toggle("Show Fandoms", isOn: $showFandoms)
                 Toggle("Show Characters", isOn: $showCharacters)
                 Toggle("Show Pairings", isOn: $showPairings)
+                Toggle("Show Tags", isOn: $showTags)
                 Picker("Sort lists by", selection: $sort) {
                     Text("Name").tag(SidebarSort.name)
                     Text("Number of fanfics").tag(SidebarSort.count)

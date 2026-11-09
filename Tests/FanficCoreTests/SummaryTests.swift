@@ -133,7 +133,7 @@ struct SummaryTests {
         let backup = library.root.appendingPathComponent("library-v2-backup.json")
         #expect(try Data(contentsOf: backup) == version2)
         let file = try JSONDecoder.iso.decode(LibraryFile.self, from: Data(contentsOf: library.libraryFile))
-        #expect(file.version == 3)
+        #expect(file.version == LibraryFile.currentVersion)
         #expect(!Library(root: library.root).needsUpgrade)
     }
 

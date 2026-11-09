@@ -1,5 +1,13 @@
 # Changelog
 
+## 1.2 — 2026-11-09
+
+- **Tags:** Fanfic Engine now also reads each fic's *Additional Tags* (AO3's tropes, moods and content notes, such as Fluff, Slow Burn or Hurt/Comfort). The sidebar has a fourth list, **Tags**, with a **Search tags** field at its top to find a tag quickly among thousands; click a tag to see its fics.
+- **Search by tag:** while you type in the search field, choose **Tags** in the bar under the toolbar, or start with `#` (`#slow burn`). Fics found by a tag show their matching tags in an extra line. The details column has a **Tags** row, and Settings has **Show Tags**.
+- On first start, the library is read once more to find the tags (about 7 seconds for 800 fanfics). IDs, pairings, fandoms, summaries and first pages stay the same; the previous `library.json` is kept as `library-v3-backup.json`. `library.json` is now version 4.
+- Fixed: in the selected row of the works list, the highlighted pairing was blue on the blue selection and hard to read. It is now bold white, and so are matching tags.
+- The Windows/Linux alpha is unchanged (0.1.0a2) and doesn't read tags yet. If it saves a library made by 1.2, the tags are dropped until the Mac app reads the library again.
+
 ## 1.1.3 — 2026-11-04
 
 - Fixed: with a mouse connected, the works list and the details column also had a grey scroll bar strip at their right edges. They now use the same thin scroll bar as the sidebar, which appears while scrolling. With a trackpad only, nothing changes.

@@ -1,5 +1,33 @@
 # Fanfic Engine — UI spec
 
+## Change 11 (9 November 2026, owner's "yes" to tags in the Mac app; built along this spec; gallery OK'd by the owner on 9 November): tags
+
+Reading rules: `SPEC.md` section 5b.
+
+- **Owner request:** "additionally to characters, fandoms, and relationships add a search and list for tags", then "yes" to a search inside the Tags list and "yes" to the Mac app.
+- **What changes:**
+  - **Sidebar:** a fourth list, **Tags**, after Pairings, folded at first like the others, with the number of fanfics per tag. When it is open, its first row is a **Search tags** field that narrows the list (start of a word: `burn` finds Slow Burn). Clicking a tag shows only its fanfics, like a fandom: the title band says "Slow Burn · 1 fanfic" and the search field searches inside it.
+  - **Search field:** while it is active, macOS's scope bar offers **Pairings | Tags** under the toolbar; in Tags the prompt is "Search tags, e.g. Slow Burn". Typing `#` first searches tags in either scope (`#fluff`). Rows found by a tag get one more line: a tag symbol and the matching tags in the accent colour (bold, white when the row is selected, like U6).
+  - **Details column:** a **Tags** row after Relationships: the tags as one comma-separated, wrapping, selectable line, or "No tags found".
+  - **Settings:** **Show Tags** under Show Pairings.
+  - **First start after the update:** the library is read once more to find the tags (progress wheel in the toolbar, Re-read Library greyed out, a few seconds); IDs and everything else stay; `library-v3-backup.json` is kept.
+- **Stays the same:** the pairing search and its highlight, Characters, Fandoms, the toolbar buttons, the import summary, updates, the window layout and column widths.
+- **Files:** `Sources/FanficCore` (TagParser, tags in the library file, `#` search), the tests and `Fixtures/expected.json`; Mac: `AppModel.swift`, `ContentView.swift`, `SidebarView.swift`, `WorkListView.swift`, `WorkDetailView.swift`, `SettingsView.swift`.
+- **Checked:** a test copy (`build-app.sh --no-install`, opened with `-libraryPath` on a copy of the demo library), never the installed app or the owner's library; light and dark.
+
+| # | Rule | How it is checked |
+| --- | --- | --- |
+| U53 | Sidebar shows **Tags** after Pairings, folded at the first start, opening by its arrow or by clicking its name (U21), remembered; rows like the other lists (name, count badge) | Screenshots folded and open, light and dark |
+| U54 | The open Tags list starts with a **Search tags** row (magnifying glass, prompt "Search tags", clear button while it has text) that narrows the list by the word-start rule; "No tags match “…”" when none | Screenshots with "fam" and "zzz"; core test |
+| U55 | Clicking a tag shows only its fanfics; title band subtitle "<tag> · N fanfic(s)"; the search then stays inside the tag | Screenshot |
+| U56 | The active search field shows a **Pairings / Tags** scope bar; Tags prompt "Search tags, e.g. Slow Burn"; `#` at the start searches tags in either scope | Screenshots |
+| U57 | Tag results: an extra callout line with a tag symbol and only the matching tags, semibold accent colour; on the selected row semibold in the row's own text colour (white on the blue selection), like U6. Fixes U6 too: in 1.1.3 on macOS 27 the matching relationships of the selected row were blue on the blue selection | Screenshots, a selected row in the active window, pairing and tag search |
+| U58 | Details: **Tags** row after Relationships, label right-aligned like the others, value one comma-separated wrapping line, selectable; "No tags found" italic secondary | Screenshots with and without tags |
+| U59 | Settings: **Show Tags** toggle directly under Show Pairings | Screenshot |
+| U60 | A version 3 library is read once on the first start (progress wheel), tags added, IDs unchanged, `library-v3-backup.json` kept; nothing else in the window moves; light and dark | The demo copy upgraded by the test copy; before/after pictures |
+
+---
+
 ## Change 10 (4 November 2026, asked by the owner after change 9: "now do the same to the other scroll bar"; built, shipped in 1.1.3): no scroll bar strips in the works list and details
 
 - **Owner request:** after 1.1.2 removed the sidebar's strip, the same for the other scroll bars. With a mouse connected, the works list has the same grey strip at its right edge, and so does the details column when a fic is selected and its summary and first page are taller than the column.

@@ -15,7 +15,7 @@ public final class Library {
     public private(set) var revision = 0
     /// Set when library.json existed but could not be read (it is kept aside, never overwritten).
     public private(set) var loadProblem: String?
-    /// True when library.json is an older version (1: no fandoms, 2: no summaries) that still has to be read again
+    /// True when library.json is an older version (1: no fandoms, 2: no summaries, 3: no tags) that still has to be read again
     /// once; see `upgradeIfNeeded()`.
     public private(set) var needsUpgrade = false
     /// The version of library.json as it was loaded (nil when there was none).
@@ -115,6 +115,16 @@ public final class Library {
         return list
     }
 
+    /// Every Additional Tag (SPEC section 5b), by name or by number of fanfics.
+    public func tagList(sort: SidebarSort = .name) -> [NameGroup] {
+        let key = "tags-\(sort.rawValue)"
+        _ = revision
+        if let cached = nameLists[key] { return cached }
+        let list = sort == .name ? NameGroup.tags(in: works) : tagList(sort: .name).sorted(by: .count)
+        nameLists[key] = list
+        return list
+    }
+
     /// Call after any change to `works`: rebuilds the lookup tables and forgets the lists.
     private func worksChanged() {
         indexByID = Dictionary(works.enumerated().map { ($1.workID, $0) }, uniquingKeysWith: { first, _ in first })
@@ -164,12 +174,13 @@ public final class Library {
         }
     }
 
-    /// Writes library.json (version 3) in one atomic write, with the lists of SPEC section 4.
+    /// Writes library.json (version 4) in one atomic write, with the lists of SPEC section 4.
     /// The lists always include friendship tags; the Settings switch only changes the sidebar.
     func save() throws {
         let groups = pairingList()
         let characters = characterList()
         let fandoms = fandomList()
+        let tags = tagList()
         func refs(_ ids: [UUID]) -> [WorkRef] {
             ids.compactMap { id in work(id).map { WorkRef(workID: id, firstPageID: $0.firstPageID) } }
         }
@@ -181,7 +192,9 @@ public final class Library {
             characters: characters.map(\.display),
             characterIndex: characters.map { CharacterIndexEntry(character: $0.display, works: refs($0.workIDs)) },
             fandoms: fandoms.map(\.display),
-            fandomIndex: fandoms.map { FandomIndexEntry(fandom: $0.display, works: refs($0.workIDs)) })
+            fandomIndex: fandoms.map { FandomIndexEntry(fandom: $0.display, works: refs($0.workIDs)) },
+            tags: tags.map(\.display),
+            tagIndex: tags.map { TagIndexEntry(tag: $0.display, works: refs($0.workIDs)) })
         try Self.encoder.encode(file).write(to: libraryFile, options: .atomic)
     }
 
@@ -190,7 +203,8 @@ public final class Library {
         loadedVersion.map { root.appendingPathComponent("library-v\($0)-backup.json") }
     }
 
-    /// Re-reads an older library once so every work gets its fandoms (version 1) and summary (version 2).
+    /// Re-reads an older library once so every work gets its fandoms (version 1), summary (version 2) and tags
+    /// (version 3).
     /// IDs do not change. The old library.json is copied to `library-v<N>-backup.json` first (an existing backup is
     /// kept); if that copy can't be made, nothing is changed.
     public func upgradeIfNeeded() async {
@@ -293,7 +307,8 @@ public final class Library {
             firstPageSource: prepared.firstPageSource,
             title: prepared.title, author: prepared.author, sha256: prepared.sha256,
             importedAt: Date(timeIntervalSince1970: Date().timeIntervalSince1970.rounded(.down)),  // library.json keeps whole seconds
-            relationships: prepared.relationships, fandoms: prepared.fandoms, summary: prepared.summary)
+            relationships: prepared.relationships, fandoms: prepared.fandoms, summary: prepared.summary,
+            tags: prepared.tags)
         let workURL = url(of: record.storedFile)
         let pageURL = url(of: record.firstPageFile)
         do {
@@ -347,8 +362,8 @@ public final class Library {
         try? FileManager.default.removeItem(at: url(of: record.firstPageFile))
     }
 
-    /// Reads every stored work again with the current rules. IDs stay; first pages, pairings, fandoms and summaries
-    /// are replaced.
+    /// Reads every stored work again with the current rules. IDs stay; first pages, pairings, fandoms, summaries and
+    /// tags are replaced.
     public func rereadAll() async -> (updated: Int, failed: [String]) {
         isBusy = true
         defer { isBusy = false }
@@ -363,6 +378,7 @@ public final class Library {
                 works[i].relationships = prepared.relationships
                 works[i].fandoms = prepared.fandoms
                 works[i].summary = prepared.summary
+                works[i].tags = prepared.tags
                 works[i].firstPageSource = prepared.firstPageSource
                 updated += 1
             } catch {

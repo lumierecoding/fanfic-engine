@@ -96,6 +96,17 @@ struct WorkDetailView: View {
                     .textSelection(.enabled)
                 }
             }
+            // One wrapping line: a fic can have twenty or more tags (ui-spec U58).
+            GridRow {
+                label("Tags")
+                if work.tags.isEmpty {
+                    Text("No tags found").italic().foregroundStyle(.secondary)
+                } else {
+                    Text(work.tags.joined(separator: ", "))
+                        .fixedSize(horizontal: false, vertical: true)
+                        .textSelection(.enabled)
+                }
+            }
             GridRow {
                 label("File")
                 Text(work.originalFileName).textSelection(.enabled)

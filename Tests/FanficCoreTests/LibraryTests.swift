@@ -20,6 +20,7 @@ struct LibraryTests {
             #expect(work.firstPageSource == e.firstPageSource, "\(e.file)")
             #expect(work.relationships == e.relationships, "\(e.file)")
             #expect(work.fandoms == e.fandoms, "\(e.file)")
+            #expect(work.tags == (e.tags ?? []), "\(e.file)")
             #expect(work.originalFileName == e.file)
         }
     }
@@ -47,7 +48,7 @@ struct LibraryTests {
     func libraryFileLists() async throws {
         let (library, _, _) = try await importedLibrary()
         let file = try JSONDecoder.iso.decode(LibraryFile.self, from: Data(contentsOf: library.libraryFile))
-        #expect(file.version == 3)
+        #expect(file.version == LibraryFile.currentVersion)
         #expect(file.works.map(\.workID) == library.works.map(\.workID))
         #expect(file.pairings.count == 16)
         #expect(file.characters.count == 25)
@@ -128,7 +129,7 @@ struct LibraryTests {
         #expect(library.works == before)
     }
 
-    @Test("A version 1 library is upgraded once: fandoms filled in, IDs unchanged, saved as version 3")
+    @Test("A version 1 library is upgraded once: fandoms filled in, IDs unchanged, saved as the current version")
     func upgradeFromVersion1() async throws {
         let (library, _, _) = try await importedLibrary()
         let before = library.works
@@ -148,7 +149,7 @@ struct LibraryTests {
         #expect(!old.needsUpgrade)
         #expect(old.works == before)
         let file = try JSONDecoder.iso.decode(LibraryFile.self, from: Data(contentsOf: library.libraryFile))
-        #expect(file.version == 3)
+        #expect(file.version == LibraryFile.currentVersion)
         #expect(file.fandoms.count == 6)
         #expect(!Library(root: library.root).needsUpgrade)
     }

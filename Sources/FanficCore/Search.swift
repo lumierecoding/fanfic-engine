@@ -78,13 +78,15 @@ public enum NameMatcher {
     }
 }
 
-/// A search typed by the user: "A/B", "B / A", "A & B", "A", or empty.
+/// A search typed by the user: "A/B", "B / A", "A & B", "A", "#tag" (SPEC section 5b), or empty.
 public struct PairingQuery: Sendable, Equatable {
     public enum Mode: Sendable, Equatable {
         case everything
         case pairing([String])
         case friendship([String])
         case name(String)
+        /// "#Text": a tag whose words match Text by the word-start rule. Relationships are not searched.
+        case tag(String)
     }
 
     public let mode: Mode
@@ -98,7 +100,10 @@ public struct PairingQuery: Sendable, Equatable {
                 .map { $0.trimmingCharacters(in: .whitespaces) }
                 .filter { !NameMatcher.key($0).isEmpty }
         }
-        if text.contains("/") {
+        if text.hasPrefix("#") {
+            let rest = String(text.dropFirst()).trimmingCharacters(in: .whitespaces)
+            mode = NameMatcher.key(rest).isEmpty ? .everything : .tag(rest)
+        } else if text.contains("/") {
             let n = names("/")
             mode = n.isEmpty ? .everything : .pairing(n)
         } else if text.contains("&") {
@@ -112,11 +117,22 @@ public struct PairingQuery: Sendable, Equatable {
         switch mode {
         case .everything: keys = []
         case .pairing(let n), .friendship(let n): keys = n.map(NameMatcher.key)
-        case .name(let n): keys = [NameMatcher.key(n)]
+        case .name(let n), .tag(let n): keys = [NameMatcher.key(n)]
         }
     }
 
     public var isEverything: Bool { mode == .everything }
+
+    public var isTagQuery: Bool {
+        if case .tag = mode { return true }
+        return false
+    }
+
+    /// Whether one Additional Tag matches a "#" query (word-start rule; false for every other kind of query).
+    public func matchesTag(_ tag: String) -> Bool {
+        guard isTagQuery else { return false }
+        return NameMatcher.matches(queryKey: keys[0], member: tag)
+    }
 
     /// Whether one relationship matches. (An empty query matches no single relationship;
     /// it lists every work instead, see `Search.run`.)
@@ -130,6 +146,8 @@ public struct PairingQuery: Sendable, Equatable {
             return r.kind == .friendship && Self.assign(keys, to: r.members)
         case .name:
             return r.members.contains { NameMatcher.matches(queryKey: keys[0], member: $0) }
+        case .tag:
+            return false
         }
     }
 
@@ -164,21 +182,30 @@ public struct SearchHit: Identifiable, Hashable, Sendable {
     public let work: WorkRecord
     /// The work's relationship tags that matched the query (empty for an empty query).
     public let matched: Set<String>
+    /// The work's Additional Tags that matched a "#" query (empty for every other query).
+    public let matchedTags: Set<String>
 
-    public init(work: WorkRecord, matched: Set<String>) {
+    public init(work: WorkRecord, matched: Set<String>, matchedTags: Set<String> = []) {
         self.work = work
         self.matched = matched
+        self.matchedTags = matchedTags
     }
 }
 
 public enum Search {
-    /// Works whose relationships match the query, sorted by title then author. An empty query lists every work.
+    /// Works whose relationships match the query (or whose tags match a "#" query), sorted by title then author.
+    /// An empty query lists every work.
     public static func run(_ query: String, in works: [WorkRecord]) -> [SearchHit] {
         let q = PairingQuery(query)
         var hits: [SearchHit] = []
         for work in works {
             if q.isEverything {
                 hits.append(SearchHit(work: work, matched: []))
+                continue
+            }
+            if q.isTagQuery {
+                let tags = work.tags.filter(q.matchesTag)
+                if !tags.isEmpty { hits.append(SearchHit(work: work, matched: [], matchedTags: Set(tags))) }
                 continue
             }
             let matched = work.relationships.filter { q.matches(Relationship.parsed($0)) }

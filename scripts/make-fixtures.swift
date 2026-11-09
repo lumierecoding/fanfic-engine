@@ -29,6 +29,7 @@ struct Expected: Codable {
     var relationships: [String]
     var fandoms: [String] = []
     var summary: String? = nil     // SPEC section 5a; left out when the file has none
+    var tags: [String]? = nil      // SPEC section 5b (Additional Tags); left out when the file has none
 }
 var expected: [Expected] = []
 
@@ -103,7 +104,8 @@ try writePDF("The Quiet Winter.pdf", title: "The Quiet Winter", author: "example
 expected.append(Expected(file: "The Quiet Winter.pdf", outcome: "added", kind: "pdf",
     title: "The Quiet Winter", author: "example-author-1", firstPageSource: "page 1",
     relationships: ["Harry Potter/Draco Malfoy"], fandoms: ["Harry Potter - J. K. Rowling"],
-    summary: "Two former rivals, one snowed-in cottage."))
+    summary: "Two former rivals, one snowed-in cottage.",
+    tags: ["Fluff", "Hurt/Comfort", "Snow"]))
 
 // 2. Inline "Label: value" layout, plural label, a friendship tag, "Aaron" (must not match "Ron").
 try writePDF("Profilers Notes.pdf", title: "Profiler's Notes", author: "example-author-2", pages: [
@@ -119,7 +121,8 @@ try writePDF("Profilers Notes.pdf", title: "Profiler's Notes", author: "example-
 ])
 expected.append(Expected(file: "Profilers Notes.pdf", outcome: "added", kind: "pdf",
     title: "Profiler's Notes", author: "example-author-2", firstPageSource: "page 1",
-    relationships: ["Aaron Hotchner/Spencer Reid", "Derek Morgan & Spencer Reid"], fandoms: ["Criminal Minds (US TV)"]))
+    relationships: ["Aaron Hotchner/Spencer Reid", "Derek Morgan & Spencer Reid"], fandoms: ["Criminal Minds (US TV)"],
+    tags: ["Case Fic", "Slow Burn"]))
 
 // 3. Plural labels, a line break inside a name, a poly pairing, a three-person friendship.
 try writePDF("Common Room Constellations.pdf", title: "Common Room Constellations", author: "example-author-3", pages: [
@@ -139,7 +142,8 @@ try writePDF("Common Room Constellations.pdf", title: "Common Room Constellation
 expected.append(Expected(file: "Common Room Constellations.pdf", outcome: "added", kind: "pdf",
     title: "Common Room Constellations", author: "example-author-3", firstPageSource: "page 1",
     relationships: ["Harry Potter/Draco Malfoy", "Hermione Granger/Pansy Parkinson/Ginny Weasley",
-                    "Ron Weasley/Lavender Brown", "Harry Potter & Ron Weasley & Hermione Granger"], fandoms: ["Harry Potter - J. K. Rowling"]))
+                    "Ron Weasley/Lavender Brown", "Harry Potter & Ron Weasley & Hermione Granger"], fandoms: ["Harry Potter - J. K. Rowling"],
+    tags: ["Eighth Year", "Enemies to Lovers", "Polyamory"]))
 
 // 4. Accents and hyphens.
 try writePDF("Lucky Charm.pdf", title: "Lucky Charm", author: "example-author-4", pages: [
@@ -188,7 +192,8 @@ try writePDF("Field Notes.pdf", title: "Field Notes", author: "example-author-7"
      label("Additional Tags:"), value("Friendship, Found Family")],
 ])
 expected.append(Expected(file: "Field Notes.pdf", outcome: "addedNoPairing", kind: "pdf",
-    title: "Field Notes", author: "example-author-7", firstPageSource: "page 1", relationships: [], fandoms: ["Criminal Minds (US TV)"]))
+    title: "Field Notes", author: "example-author-7", firstPageSource: "page 1", relationships: [], fandoms: ["Criminal Minds (US TV)"],
+    tags: ["Friendship", "Found Family"]))
 
 // 8. A "scanned" PDF without text.
 try writePDF("Scanned Without Text.pdf", title: nil, author: nil, pages: [[]], drawTextless: true)
@@ -211,7 +216,8 @@ try writePDF("Crossroads.pdf", title: "Crossroads", author: "example-author-10",
 expected.append(Expected(file: "Crossroads.pdf", outcome: "added", kind: "pdf",
     title: "Crossroads", author: "example-author-10", firstPageSource: "page 1",
     relationships: ["Draco Malfoy/Percy Jackson", "Nico di Angelo & Harry Potter"],
-    fandoms: ["Harry Potter - J. K. Rowling", "Percy Jackson and the Olympians - Rick Riordan"]))
+    fandoms: ["Harry Potter - J. K. Rowling", "Percy Jackson and the Olympians - Rick Riordan"],
+    tags: ["Crossover", "Demigods"]))
 
 // MARK: - EPUB
 
@@ -306,7 +312,8 @@ try writeEPUB("Untamed Hearts.epub", title: "Untamed Hearts", author: "example-a
 expected.append(Expected(file: "Untamed Hearts.epub", outcome: "added", kind: "epub",
     title: "Untamed Hearts", author: "example-author-8", firstPageSource: "OEBPS/preface.xhtml",
     relationships: ["Lan Zhan | Lan Wangji/Wei Ying | Wei Wuxian", "Jiang Cheng & Wei Ying | Wei Wuxian",
-                    "Nie Huaisang/Jiang Cheng"], fandoms: ["魔道祖师 - 墨香铜臭 | Mo Dao Zu Shi - Mo Xiang Tong Xiu"]))
+                    "Nie Huaisang/Jiang Cheng"], fandoms: ["魔道祖师 - 墨香铜臭 | Mo Dao Zu Shi - Mo Xiang Tong Xiu"],
+    tags: ["Canon Divergence", "Mutual Pining"]))
 
 // 11. Image-only cover, then a title page with text but no field, then the preface. Stored (uncompressed) zip.
 try writeEPUB("Starlight Over Grimmauld.epub", title: "Starlight Over Grimmauld", author: "example-author-9", docs: [
