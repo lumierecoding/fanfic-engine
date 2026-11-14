@@ -6,7 +6,6 @@ import SwiftUI
 struct ContentView: View {
     @Bindable var model: AppModel
     @State private var isDropTargeted = false
-    @State private var band = TitleBandMetrics()
     @FocusState private var searchFocused: Bool
     @Environment(\.openSettings) private var openSettings
 
@@ -15,16 +14,16 @@ struct ContentView: View {
             SidebarView(model: model)
                 .navigationSplitViewColumnWidth(min: 200, ideal: 240, max: 320)
         } content: {
+            // Fill the column (empty states are only as tall as their text). The system draws the band above the
+            // columns: the app's own band (ui-spec change 4) was only needed in compatibility mode (change 13).
             WorkListView(model: model)
-                .titleBandColumn { band = TitleBandMetrics(leadingX: $0.minX, bottomY: $0.minY) }
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
                 .navigationSplitViewColumnWidth(min: 320, ideal: Self.listWidth)
         } detail: {
             WorkDetailView(model: model)
-                .titleBandColumn()
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
                 .frame(minWidth: 340)
         }
-        .titleBand(band)
-        .hidingSystemTitleBand()
         .navigationTitle("Fanfic Engine")
         .navigationSubtitle(subtitle)
         .searchable(text: $model.searchText, placement: .toolbar,
@@ -37,10 +36,10 @@ struct ContentView: View {
         }
         .searchTextFollowsAppearance()
         .toolbar {
+            if model.library.isBusy {
+                busyWheel
+            }
             ToolbarItemGroup(placement: .primaryAction) {
-                if model.library.isBusy {
-                    ProgressView().controlSize(.small)
-                }
                 Button { model.addFilesWithPanel() } label: {
                     Label("Add Files…", systemImage: "plus")
                 }
@@ -60,9 +59,13 @@ struct ContentView: View {
             return true
         } isTargeted: { isDropTargeted = $0 }
         .overlay {
-            if isDropTargeted || model.previewDropHighlight { DropHighlight() }
+            if isDropTargeted || model.previewDropHighlight {
+                DropHighlight().transition(.opacity)
+            }
         }
+        .animation(Motion.fade(duration: 0.15), value: isDropTargeted)
         .frame(minWidth: 900, minHeight: 560)
+        .auraWindowBackground()  // the Fanfiction website's aura behind everything (ui-spec change 16)
         .onAppear {
             // Developer option `-openSettings YES` (screenshots).
             // Developer option `-focusSearch YES` (screenshots of the Pairings / Tags scope bar).
@@ -96,6 +99,18 @@ struct ContentView: View {
         }
     }
 
+    /// The progress wheel during an import, in its own toolbar item without the glass the buttons share, so the
+    /// button group keeps its size (ui-spec change 13).
+    @ToolbarContentBuilder
+    private var busyWheel: some ToolbarContent {
+        if #available(macOS 26, *) {
+            ToolbarItem(placement: .primaryAction) { ProgressView().controlSize(.small) }
+                .sharedBackgroundVisibility(.hidden)
+        } else {
+            ToolbarItem(placement: .primaryAction) { ProgressView().controlSize(.small) }
+        }
+    }
+
     /// 420 pt. Developer option `-listWidth 520` (screenshots with a narrow details column).
     private static var listWidth: CGFloat {
         let width = UserDefaults.standard.double(forKey: "listWidth")
@@ -110,17 +125,23 @@ struct ContentView: View {
     }
 }
 
-/// Shown while files are dragged over the window (ui-spec U11).
+/// Shown while files are dragged over the window (ui-spec U11, U73): an accent outline whose corners follow the
+/// window's, and the label on glass.
 struct DropHighlight: View {
+    /// The window corners are larger from macOS 26 on; the outline sits 8 pt inside them.
+    private static var cornerRadius: CGFloat {
+        if #available(macOS 26, *) { 18 } else { 10 }
+    }
+
     var body: some View {
-        RoundedRectangle(cornerRadius: 10)
+        RoundedRectangle(cornerRadius: Self.cornerRadius, style: .continuous)
             .strokeBorder(Color.accentColor, lineWidth: 3)
             .overlay {
                 Text("Drop PDFs or EPUBs to add them")
                     .font(.title3.weight(.semibold))
                     .padding(.horizontal, 16)
                     .padding(.vertical, 10)
-                    .background(.regularMaterial, in: Capsule())
+                    .appGlass(in: Capsule())
             }
             .padding(8)
             .allowsHitTesting(false)

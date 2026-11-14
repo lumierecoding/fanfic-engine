@@ -3,7 +3,8 @@
 #   Fanfic-Engine-<version>.dmg  — "Fanfic Engine.app" (Apple Silicon + Intel), an Applications shortcut, "Read Me First.txt"
 #   fanfic_engine-<version>-py3-none-any.whl — the Windows/Linux alpha (needs Python; built with uv if installed)
 #   appcast.xml                  — the update feed for Sparkle (SPEC section 10): version, download address, size,
-#                                  EdDSA signature of the disk image, notes from CHANGELOG.md
+#                                  EdDSA signature of the disk image, notes from CHANGELOG.md; the feed itself is signed
+#                                  too (the app requires it since the scan of 13 November: SURequireSignedFeed)
 #   SHA256SUMS                   — checksums of the files
 # Everything happens in ~/Library/Developer/FanficEngine (outside iCloud Drive); /Applications is never touched.
 # Signing is ad-hoc ("-"): no certificate, no Keychain, no password dialog. The app is not notarized, so on another
@@ -22,14 +23,24 @@ DMG="$DIST/Fanfic-Engine-$VERSION.dmg"
 ARCHS=(--arch arm64 --arch x86_64)
 
 echo "→ Building $VERSION (release, Apple Silicon + Intel)…"
-swift build -c release --package-path "$ROOT" --scratch-path "$BUILD" --product FanficEngine "${ARCHS[@]}"
-BIN_DIR="$(swift build -c release --package-path "$ROOT" --scratch-path "$BUILD" "${ARCHS[@]}" --show-bin-path)"
+# The linker writes the SDK version into the app, and macOS uses it to choose the design: an app that says SDK 15 runs
+# in compatibility mode with the pre-glass look on macOS 26 and later. SwiftPM links without the SDK path, so it wrote
+# the deployment target (15.0) instead (ui-spec change 13, U70). Handing the SDK to the linker fixes that.
+SDK_PATH="$(xcrun --sdk macosx --show-sdk-path)"
+SDK_VERSION="$(xcrun --sdk macosx --show-sdk-version)"
+SDK_FLAGS=(-Xswiftc -Xclang-linker -Xswiftc -isysroot -Xswiftc -Xclang-linker -Xswiftc "$SDK_PATH")
+swift build -c release --package-path "$ROOT" --scratch-path "$BUILD" --product FanficEngine "${ARCHS[@]}" "${SDK_FLAGS[@]}"
+BIN_DIR="$(swift build -c release --package-path "$ROOT" --scratch-path "$BUILD" "${ARCHS[@]}" "${SDK_FLAGS[@]}" --show-bin-path)"
 lipo -info "$BIN_DIR/FanficEngine"
 
 echo "→ Assembling ${APP_NAME}…"
 rm -rf "$FOLDER" "$DMG" "$DIST"/*.whl(N) "$DIST/SHA256SUMS" "$DIST/appcast.xml"
 mkdir -p "$APP/Contents/MacOS" "$APP/Contents/Resources"
 cp "$BIN_DIR/FanficEngine" "$APP/Contents/MacOS/FanficEngine"
+# Stop if the app doesn't carry the SDK version (it would silently fall back to the old look).
+if vtool -show-build "$APP/Contents/MacOS/FanficEngine" | awk -v want="$SDK_VERSION" '$1 == "sdk" && $2 != want { bad = 1 } END { exit !bad }'; then
+  echo "✗ The app does not say it was built with SDK $SDK_VERSION:"; vtool -show-build "$APP/Contents/MacOS/FanficEngine" | grep -E 'sdk|minos'; exit 1
+fi
 cp "$ROOT/Resources/Info.plist" "$APP/Contents/Info.plist"
 cp "$ROOT/Resources/AppIcon.icns" "$APP/Contents/Resources/AppIcon.icns"
 # Sparkle, the updater (SPEC section 10): the framework next to the app's code, found through the run path.
@@ -107,6 +118,10 @@ $NOTES
   </channel>
 </rss>
 APPCAST
+xmllint --noout "$DIST/appcast.xml"
+# Sign the feed as written (its exact bytes; nothing may change it afterwards), then check it the way the app will.
+swift "$ROOT/scripts/update-key.swift" sign-feed "$KEY" "$DIST/appcast.xml"
+swift "$ROOT/scripts/update-key.swift" verify-feed "$PUBLIC" "$DIST/appcast.xml" >/dev/null
 xmllint --noout "$DIST/appcast.xml"
 
 (cd "$DIST" && shasum -a 256 "$(basename "$DMG")" *.whl(N) appcast.xml > SHA256SUMS)

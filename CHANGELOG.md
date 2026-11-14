@@ -1,5 +1,13 @@
 # Changelog
 
+## 1.3 — unreleased
+
+- **Filter page:** click **Filter** in the sidebar to combine up to **5 tags** (a fic is shown only when it has all of them) and to **leave out** pairings, fandoms, characters and tags you don't want to see. Type the start of a word in an *Add…* field and pick a match; each choice becomes a capsule you can remove. The search field searches inside the result, and **Clear Filter** removes every choice. The filter doesn't change your library.
+- **A new look:** the window uses macOS's Liquid Glass. The sidebar's rows, the works and the filter's choices sit on glass, and behind them a soft arc of shade drifts slowly under frosted glass while the app is in front. It stands still with *Reduce Motion* or in Low Power Mode. On macOS 15, where Liquid Glass doesn't exist, the app uses frosted materials instead.
+- **Security fixes** (found with a Codex Security scan, 13 November 2026): a deliberately crafted EPUB could fill the memory or slow an import down, and the update feed was not signed. Now only the part of an EPUB's reading order that is read is kept, the summary is found in time proportional to the document's length, the update feed is signed with the project's key, and release notes are never loaded from anywhere else. Results for real files are unchanged (checked on a library of 729 AO3 EPUBs).
+- `library.json` stays version 4: nothing is read again on the first start.
+- Windows/Linux alpha **0.1.0a3**: the same EPUB fix. It doesn't have the Filter page or the new look.
+
 ## 1.2 — 2026-11-09
 
 - **Tags:** Fanfic Engine now also reads each fic's *Additional Tags* (AO3's tropes, moods and content notes, such as Fluff, Slow Burn or Hurt/Comfort). The sidebar has a fourth list, **Tags**, with a **Search tags** field at its top to find a tag quickly among thousands; click a tag to see its fics.

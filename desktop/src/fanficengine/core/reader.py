@@ -25,6 +25,7 @@ PAGES_CHECKED = 3  # pages (PDF) or text documents (EPUB) checked for the Relati
 # EPUBs was 0.27 MB), and at most this many documents from the start of the reading order are read.
 MAX_MEMBER_SIZE = 16 * 1024 * 1024
 MAX_DOCUMENTS_TRIED = 50
+MAX_PATH_LENGTH = 65_535  # a ZIP entry name has at most 65,535 bytes, so a longer href can never name a part
 
 
 class ReadError(Exception):
@@ -177,7 +178,19 @@ class EPUBBook:
             elif name == "itemref" and element.get("idref"):
                 spine.append(element.get("idref"))
         base = posixpath.dirname(opf_path)
-        self.spine_paths = [_resolve(base, manifest[idref]) for idref in spine if idref in manifest]
+        # Only as much of the reading order as read_epub uses, and each manifest entry checked and resolved once
+        # (security scan of 13 November: one long path repeated many times in the spine could fill the memory).
+        resolved: dict[str, str | None] = {}
+        self.spine_paths: list[str] = []
+        for idref in spine:
+            if len(self.spine_paths) == MAX_DOCUMENTS_TRIED:
+                break
+            if idref not in resolved:
+                href = manifest.get(idref)
+                usable = href is not None and len(href) <= MAX_PATH_LENGTH and len(href.encode("utf-8")) <= MAX_PATH_LENGTH
+                resolved[idref] = _resolve(base, href) if usable else None
+            if resolved[idref] is not None:
+                self.spine_paths.append(resolved[idref])
         if not self.spine_paths:
             raise ReadError("the EPUB has no pages in its reading order")
 

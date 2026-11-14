@@ -78,11 +78,13 @@ Click **OK** to close it.
 
 The window has three columns:
 
-- **Sidebar (left)**: **All Works** and **No Pairing Found**, with counts, and below them four lists — **Fandoms**, **Characters**, **Pairings** and **Tags** — that start folded.
+- **Sidebar (left)**: **All Works**, **No Pairing Found** and **Filter** (section 5), with counts, and below them four lists — **Fandoms**, **Characters**, **Pairings** and **Tags** — that start folded.
 - **Works list (middle)**: every work that matches the current search or sidebar choice, sorted by title. Each row shows the title, the file type, the author, the fandom and the relationships. Relationships that match your search are highlighted; a work found by a tag gets one more line with its matching tags.
 - **Details (right)**: the selected work's summary and first page, its fandom(s), relationships, tags, file name and IDs, with buttons to open it.
 
 The toolbar has **+** (add files), the **folder** button (show the library in Finder), the **gear** (Settings) and the **search field**. The line under the window title says how many fanfics are listed.
+
+From version 1.3 the window's background is a soft picture behind frosted glass: a gentle arc of shade across the window (grey on the light look, a pale glow on the dark look), with a fine grain. It drifts slowly while Fanfic Engine is in front. It stands still when **Reduce Motion** is on (System Settings → Accessibility → Display) or in Low Power Mode, and it pauses while the window is hidden or you work in another app.
 
 ## 4. Searching
 
@@ -116,6 +118,19 @@ The four lists in the sidebar start folded. **Click a list's name** (or the smal
 - **Tags** (from version 1.2) — every *Additional Tag* once (`Fluff`, `Slow Burn`, `Hurt/Comfort` …), with the number of fanfics. A big library can have thousands of tags, so when the list is open its first row is a **Search tags** field: type the start of a word (`fam` for *Found Family*) to narrow the list, and click ✕ to see all tags again. **Click a tag** to see only its works, like a fandom: the line under the title shows the tag, and the search field searches inside it. `/` and `&` mean nothing in a tag: `Hurt/Comfort` is one tag, not a pairing.
 
 ![A fandom selected, with a search inside it](images/fandom-search-dark.png)
+
+### The Filter page (from version 1.3)
+
+Click **Filter** in the sidebar (under No Pairing Found) to combine several choices at once. The middle column then shows the choices at the top and the fanfics that pass below them; its count is also the number next to **Filter** in the sidebar.
+
+![The Filter page: Fluff and Slow Burn wanted, Sherlock (TV) and Angst left out; four fanfics pass](images/filter-page.png)
+
+- **With all of these tags** — up to **5** tags. A fanfic is shown only when it has **all** of them, so *Fluff* and *Slow Burn* together show only the fics that have both.
+- **Leave out** — **Pairings**, **Fandoms**, **Characters** and **Tags** you don't want to see, as many as you like. A fanfic with **any** of them is hidden. Leaving something out hides exactly the fics counted next to it in its sidebar list: `A/B` and `B/A` are one pairing, a crossover is hidden when one of its fandoms is left out, and a character is anyone in a relationship tag (friendship tags too, unless you switched them off in Settings).
+- **Adding** — type the start of a word in an **Add…** field (`fam` for *Found Family*). Up to six matches appear under it, most fanfics first; press Return for the first one or click the one you want. Escape empties the field. Each choice becomes a small capsule; click its ✕ to remove it. A tag can't be wanted and left out at the same time: choosing it on one side takes it off the other.
+- **Clear Filter** (top right, next to the number of tags) removes every choice.
+
+The search field searches inside the filter's result, as it does inside a fandom. Each fic shows the chosen tags it has on its tag line. The filter stays while the app is open and starts empty the next time you open the app; it doesn't change your library.
 
 ## 6. The details column
 

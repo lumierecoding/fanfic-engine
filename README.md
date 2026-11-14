@@ -8,7 +8,7 @@ A small Mac app that works offline and sorts your downloaded fanfiction by **pai
 
 Give it the EPUB or PDF files you downloaded (for example from AO3). It reads the *Relationship* and *Fandom* fields on each work's first page, keeps a copy of the work and of its first page, and lets you find everything again by pairing — `Harry/Draco`, `Draco/Harry`, `harry / draco` or just `Draco` all work.
 
-![The Fanfic Engine window, half in light mode and half in dark mode: fandoms and characters in the sidebar, the works list in the middle, the first page and details on the right](docs/images/main-window-light-dark.png)
+![The Fanfic Engine window in Liquid Glass, half in light mode and half in dark mode: fandoms and characters on glass in the sidebar, the works as glass cards in the middle, a fic's summary and first page on the right, over a soft background](docs/images/main-window-light-dark.png)
 
 <p align="center">
   <a href="https://github.com/lumierecoding/fanfic-engine/releases/latest"><b>Download for Mac</b></a> · free and open source · works offline
@@ -30,7 +30,7 @@ If you share or receive fics while AO3 is down, please respect the authors' wish
 
 If it helps you, a ⭐ on this page helps other fans find it.
 
-![A short demo: a folder of fanfics is dragged onto Fanfic Engine and imported, with a duplicate skipped; typing Draco/Harry finds the Harry/Draco fics; one fic's first page opens; a fandom is picked in the sidebar](docs/images/demo.gif)
+![A short demo: a folder of fanfics is dropped onto Fanfic Engine and imported, with a duplicate skipped; typing draco/harry narrows the list to the Draco/Harry fics; one fic's first page shows; a fandom is picked in the sidebar; the Filter page shows the fics that have both Fluff and Slow Burn](docs/images/demo.gif)
 
 ## How it works
 
@@ -45,6 +45,8 @@ If it helps you, a ⭐ on this page helps other fans find it.
 - **Search by pairing**: order, spacing, upper/lower case and accents don't matter; part of a name works if it is the start of a word (`Hotch/Reid` finds *Aaron Hotchner/Spencer Reid*, and `Ron` does not find *Aaron*). Poly pairings and friendship tags (`A & B`) are understood.
 - **Browse** by fandom (crossovers count in every fandom they list), by character or by pairing in the sidebar.
 - **Tags** (from 1.2): AO3's Additional Tags (`Fluff`, `Slow Burn`, `Hurt/Comfort` …) are read too. The sidebar's **Tags** list has its own search field; click a tag to see its fics, or search tags with `#` (`#slow burn`).
+- **Filter page** (from 1.3): combine up to 5 tags (`Fluff` *and* `Slow Burn`) and leave out pairings, fandoms, characters or tags you don't want to see.
+- **Liquid Glass** (from 1.3): the window is made of macOS's glass, over a soft background that drifts slowly while the app is in front and stands still with *Reduce Motion*.
 - **Settings** to show, hide and sort the sidebar lists and to leave friendship tags out.
 - **Fast with big libraries**: about a second to open and a few hundredths of a second per search at 10,000 fanfics.
 - **Updates inside the app** (from 1.1): it can check for a new version and install it itself, but only if you allow it.
@@ -104,7 +106,7 @@ Install it with `uv tool install "git+https://github.com/lumierecoding/fanfic-en
 
 Fanfic Engine reads only the files you give it and writes only into its own library folder (`~/Library/Application Support/Fanfic Engine`) and its preferences. Nothing is uploaded or shared. Importing, reading and searching work fully offline.
 
-The one exception is the **update check** (from 1.1; [Sparkle](https://sparkle-project.org), the only third-party code in the Mac app). It asks GitHub whether there is a newer version: when you choose **Check for Updates…**, or once a day if you said yes to automatic checks (the app asks on its second start). GitHub sees your IP address and the app's version; nothing about your library is sent. Updates are installed only if they are signed with the project's key.
+The one exception is the **update check** (from 1.1; [Sparkle](https://sparkle-project.org), the only third-party code in the Mac app). It asks GitHub whether there is a newer version: when you choose **Check for Updates…**, or once a day if you said yes to automatic checks (the app asks on its second start). GitHub sees your IP address and the app's version; nothing about your library is sent. Updates are installed only if they are signed with the project's key; the list of updates it reads is signed too, and the release notes it shows come only from that list.
 
 ## Not affiliated
 

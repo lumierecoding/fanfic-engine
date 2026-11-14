@@ -4,9 +4,15 @@ import Foundation
 public struct EPUBBook: Sendable {
     public let title: String?
     public let author: String?
-    /// Paths inside the ZIP of the spine documents, in reading order.
+    /// Paths inside the ZIP of the spine documents, in reading order: only the first `maxSpinePaths`, as far as the
+    /// reader goes (`WorkReader.maxDocumentsTried`).
     public let spinePaths: [String]
     private let archive: ZipArchive
+
+    /// The reading order is kept only as far as `WorkReader` reads it.
+    static let maxSpinePaths = WorkReader.maxDocumentsTried
+    /// A ZIP entry name has at most 65,535 bytes, so a longer `href` can never name a part of the EPUB.
+    static let maxPathLength = 65_535
 
     public enum EPUBError: LocalizedError {
         case noPackageFile
@@ -27,9 +33,25 @@ public struct EPUBBook: Sendable {
         let package = PackageReader.read(try archive.contents(of: opfPath))
         let base = (opfPath as NSString).deletingLastPathComponent
 
-        let paths = package.spine.compactMap { idref -> String? in
-            guard let item = package.manifest[idref] else { return nil }
-            return Self.resolve(base: base, href: item)
+        // Only as much of the reading order as the reader uses, and each manifest entry checked and resolved once
+        // (security scan of 13 November: one long path repeated many times in the spine could fill the memory).
+        var resolved: [String: String] = [:]
+        var unusable: Set<String> = []
+        var paths: [String] = []
+        for idref in package.spine {
+            if paths.count == Self.maxSpinePaths { break }
+            if let path = resolved[idref] {
+                paths.append(path)
+                continue
+            }
+            guard !unusable.contains(idref) else { continue }
+            guard let href = package.manifest[idref], href.utf8.count <= Self.maxPathLength else {
+                unusable.insert(idref)
+                continue
+            }
+            let path = Self.resolve(base: base, href: href)
+            resolved[idref] = path
+            paths.append(path)
         }
         guard !paths.isEmpty else { throw EPUBError.emptyReadingOrder }
 

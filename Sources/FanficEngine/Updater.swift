@@ -6,9 +6,13 @@ import SwiftUI
 /// Updates inside the app with Sparkle (SPEC section 10, ui-spec change 8).
 ///
 /// Sparkle is the app's only network code, and it only talks to GitHub: the feed is `SUFeedURL` in Info.plist, and an
-/// update is installed only if it is signed with the key whose public half is `SUPublicEDKey`. Info.plist has no
-/// `SUEnableAutomaticChecks`, so Sparkle asks on the second start whether to check automatically; until then it never
-/// checks on its own (U44).
+/// update is installed only if it is signed with the key whose public half is `SUPublicEDKey`. The feed itself must be
+/// signed with the same key (`SURequireSignedFeed`, which Sparkle allows only together with
+/// `SUVerifyUpdateBeforeExtraction`), and release notes are only ever the ones written into the feed (security scan of
+/// 13 November: a replaced feed could otherwise make the app fetch notes or pictures from another server).
+///
+/// Info.plist has no `SUEnableAutomaticChecks`, so Sparkle asks on the second start whether to check automatically; until
+/// then it never checks on its own (U44).
 @MainActor
 @Observable
 final class AppUpdater: NSObject {
@@ -88,6 +92,12 @@ extension AppUpdater: SPUUpdaterDelegate {
 
     func updater(_ updater: SPUUpdater, didFinishUpdateCycleFor updateCheck: SPUUpdateCheck, error: (any Error)?) {
         refresh()
+    }
+
+    /// Never follows a feed's `<sparkle:releaseNotesLink>`: the app's notes are inside the feed (`make-release.sh`), so a
+    /// link to notes elsewhere would only come from a feed that isn't ours.
+    func updater(_ updater: SPUUpdater, shouldDownloadReleaseNotesForUpdate updateItem: SUAppcastItem) -> Bool {
+        false
     }
 }
 

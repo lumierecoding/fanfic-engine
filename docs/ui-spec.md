@@ -1,5 +1,174 @@
 # Fanfic Engine — UI spec
 
+## Change 17 (13 November 2026, the owner: "lets make the Veil one the standard please."; built along this spec): Veil as the standard aura
+
+- **What changes:** the window's aura (change 16) shows **Veil** instead of Ridge, in light and dark: a soft arc of the appearance's ink colour across its ground colour (dark grey on light, a pale glow on dark), behind the same matte glass and grain. It drifts, stands still and pauses exactly as Ridge did.
+- **Ridge** stays in the app as a developer option (`-aura ridge`); `-aura off` still shows the window background as before change 16. No Settings choice (the owner OK'd change 16 without one).
+- **Stays the same:** everything else in change 16: the shaders, the glass, the motion rules, where the aura is drawn.
+- **Files:** `Aura.swift` (the default), `docs/USER_MANUAL.md` §3, `docs/DEVELOPMENT.md`.
+
+| # | Rule | How it is checked |
+| --- | --- | --- |
+| U98 | Without a developer option the window shows Veil, light and dark; `-aura ridge` shows Ridge; `-aura off` the background as before | Captures |
+| U99 | Text on cards, panels and empty states stays readable over the Veil arc, light and dark; it drifts while the window is in front | Captures, zoomed; two captures 8 s apart |
+
+---
+
+## Change 16 (13 November 2026, the owner: "look at the fanfiction website and how it does its background. can you implement it in the app?"; built along this spec; OK'd as built by the owner 13 November): the website's aura behind the window
+
+- **The website's background** (`Fanfiction Website/startseite`): a WebGL2 "aura" drawn in two passes, a soft colour field at a reduced resolution and then film grain. The start page shows it clear; every content page (`data-aura="matt"`, `aura.js`) puts it behind a layer of matte glass: blurred, each pixel scattered a little, tinted toward the ground colour, a faint milky haze and a fixed frost texture. Two variants: **Ridge** (default; an amber ridge under an ultramarine sky, a night picture that stays dark in the light theme) and **Veil** (a soft ink arc on the ground). It drifts slowly; the grain flickers 12 times a second; it stands still with reduced motion.
+- **What changes:** the app's window background is that aura, as on the site's content pages (matte glass), ported to Metal with the site's formulas and colour tokens. It runs unbroken behind the sidebar, the works list (between the glass cards) and the details column; the toolbar, sidebar, cards and panels are glass over it.
+  - **Ridge** in both appearances; in light appearance the matte glass is tinted toward the light ground (as on the site). Since change 17 the standard is Veil, and Ridge a developer option.
+  - **Motion:** drifts slowly, 15 frames a second; stands still with Reduce Motion or Low Power Mode; pauses while the window is hidden or another app is in front, and goes on from where it stopped.
+  - **No Metal:** the system's window colour, as before (the site keeps its page colour without WebGL2).
+- **Not built (the owner OK'd it as built without them, 13 November):** a choice in Settings (Ridge / Veil / Off), the site's *Step* motion, the aura in the Settings window and sheets. `-aura veil|off` (developer option) shows the other variant or the old background.
+- **Stays the same:** every control, text, layout and glass shape of changes 13–15; Settings, sheets and alerts keep the system's background.
+- **Files:** `Aura.swift` (new), `ContentView.swift` (`auraWindowBackground`), `WorkListView.swift` and `SidebarView.swift` (lists without their own background while the aura is on).
+- **Checked (13 November):** test copy, light and dark, Ridge and Veil, next to the site; still and moving; 10,000 works with an idle window. Then with 10,000 works and the window in front, the aura moving (two captures 10 s apart differ): scrolling the list by scroll-bar steps and opening Fandoms, 10 s each, app CPU 8.3 % on average with the aura and 6.4 % without (GPU 45.0 % and 43.3 %), about the same 2 points as with an idle window; a selected fanfic in the active window; the title over scrolled rows readable in light and dark; a live resize by the window corner from 1300 × 820 down to the smallest window (900 × 612 with the toolbar), drawn at the new size and still drifting; a large window (2400 × 1340). A first scrolling run with the window behind Claude's had the aura paused (the captures were identical) and was not counted. **Open:** the system's Reduce Motion and Low Power Mode (the owner's settings); macOS 15.
+
+| # | Rule | How it is checked |
+| --- | --- | --- |
+| U92 | The aura fills the window behind the sidebar, the works list and the details column, unbroken across the columns; glass shapes show it through | Captures, light and dark |
+| U93 | Colours, band and grain match the site's content pages side by side, light and dark | Captures next to `works-search.html` from a scratch copy |
+| U94 | `-aura veil` shows the Veil variant; `-aura off` the window background as before | Captures |
+| U95 | Drifts while the window is in front; stands still with Reduce Motion and Low Power Mode; pauses while hidden or in the background | Two captures 8 s apart; app CPU with `-reduceMotion YES`; occluded test copy |
+| U96 | With 10,000 works and the window in front, the moving aura costs at most about 2 % of one core and adds no visible GPU load; nothing when still | `ps` and the GPU's utilisation over 20 s, aura off vs on |
+| U97 | Text on cards, panels and empty states stays readable over the aura, also over the amber band; `-noGlass` shows frosted panels over it | Captures, zoomed |
+
+---
+
+## Change 15 (12 November 2026, the owner after change 14: "everywhere"; built along this spec; OK'd and installed 13 November): glass on everything
+
+- **What changes:** after change 14 some places still had no glass of the app's own; now they do:
+  - **Sidebar:** every row (All Works, No Pairing Found, Filter and every fandom, character, pairing and tag) on a glass pill as wide, tall and round as the sidebar's selection; the selected row keeps the system's selection.
+  - **Details column:** the title, author and buttons on their own glass panel, above the summary, first page and details panels.
+  - **Filter page:** the choices on a glass panel.
+  - **Settings:** each group (Sidebar, Relationships, Library, Updates) on a glass panel with the same switches (compact, as before), picker, buttons (now glass buttons) and notes; the window is no longer the system's form.
+  - **Import summary:** each result group on a glass panel, OK as a prominent glass button.
+- **Stays the same:** what every control does, texts, the layout of the three columns, the toolbar, sheets and alerts (system).
+- **Rule changed:** U19 (Settings: the system's form → glass panels with the same contents).
+- **Files:** `Glass.swift` (`glassRowBackground`), `SidebarView.swift`, `WorkDetailView.swift`, `WorkListView.swift`, `SettingsView.swift`, `ImportSummaryView.swift`.
+
+| # | Rule | How it is checked |
+| --- | --- | --- |
+| U87 | Sidebar rows on glass pills inside the whole row: 10 pt in from the sides like the selection, 4 pt between every two pills, one-line or two-line (fixed 13 November after the owner's report: pills sized from the text had 8 pt gaps between one-line rows and almost none beside two-line rows) | Captures with one- and two-line rows, light and dark |
+| U88 | Details header (title, author, buttons) on a glass panel | Captures |
+| U89 | Filter choices on a glass panel; the result list and the half-height limit (U69) unchanged | Captures |
+| U90 | Settings groups on glass panels; compact switches; every setting works as before | Captures, light and dark |
+| U91 | Import summary groups on glass panels, none cut off at the scroll view's edges; OK prominent | Capture after an import |
+
+---
+
+## Change 14 (12 November 2026, the owner after change 13: "I'm not happy. I wanted liquid glass elements everywhere, not just in the filter section..."; built along this spec; installed with change 15): glass on the content too
+
+- **What changes:** change 13 kept glass on the controls only (Apple's guidance, U74). The owner wants glass everywhere, so the content gets it too:
+  - **Works list:** every fanfic on its own glass card, as wide and as round as the system's selection; no separator lines; the selected fanfic keeps the system's blue selection; the cards light up under the pointer.
+  - **Details column:** the summary, the first page (now with rounded corners) and the details grid each on a glass panel; the title, author and glass buttons stay above them.
+  - **Empty states** ("Select a fanfic", "No fanfics found for …", "No fanfics yet", "Every fanfic has a pairing", "No fanfics match this filter") on a glass card in the middle of their column.
+  - **Sidebar:** the Search tags field is a glass pill like the Filter page's fields.
+- **Stays the same:** layouts, columns, text, the toolbar and sidebar (system glass), the Filter page, animations, Settings and sheets.
+- **Rule replaced:** U74 ("content stays plain").
+- **Files:** `Glass.swift` (`glassPanel`, `glassEmptyState`), `WorkListView.swift`, `WorkDetailView.swift`, `PDFPreview.swift`, `SidebarView.swift`.
+- **Checked:** test copy, light and dark, demo library and 10,000 made-up works.
+
+| # | Rule | How it is checked |
+| --- | --- | --- |
+| U82 | Works list: each fanfic on a glass card with the selection's width and corner radius; no separator lines; the selected fanfic in the system's blue | Captures, light and dark, a selected row |
+| U83 | Details: summary, first page (rounded corners) and details grid on glass panels, as wide as the button row | Captures, also scrolled to the grid |
+| U84 | Every empty state on a glass card in the middle of its column | Captures with no result and no selection |
+| U85 | The sidebar's Search tags field is a glass pill | Capture with the Tags list open |
+| U86 | With 10,000 works the glass cards keep scrolling, switching and searching smooth | Test copy on the 10,000-work library |
+
+---
+
+## Change 13 (12 November 2026, the owner's goal; advice from Fable 5.2; built along this spec; inspected and fixed in round 2; gallery OK'd by the owner on 12 November): the whole app in Liquid Glass
+
+- **Owner request:** "make the whole app in liquid glass, with smooth transitions and animations."
+- **Why the app looked old on macOS 27:** it is built with SwiftPM, which linked it without the SDK path, so the app said it was made with SDK 15.0 and macOS ran it in compatibility mode with the pre-glass look. Only the Filter page's own glass was glass.
+- **What changes:**
+  - **Build:** `build-app.sh` and `make-release.sh` give the linker the SDK, so the app carries the real SDK version, and stop with an error if it doesn't. On macOS 26 and later the system then draws its Liquid Glass by itself: the floating glass sidebar, toolbar buttons in a glass group, the glass search field, the new buttons, sheets, Settings, alerts and window corners.
+  - **Title band:** the app's own band (change 4) and the hidden system band go; the system's glass toolbar and its scroll-edge effect take their place. The step at the sidebar divider and the line through the toolbar buttons (changes 4 and 6) were seen in compatibility mode only; checked again with the band gone.
+  - **Toolbar:** the progress wheel during an import sits in its own toolbar item without the shared glass background, so the button group doesn't change size.
+  - **Details column:** **Open Fanfic** is a prominent glass button, **Open First Page** and **Show in Finder** are glass buttons, all three in one glass group.
+  - **Drop highlight:** the "Drop PDFs or EPUBs to add them" label sits on glass; the outline's corners follow the larger window corners.
+  - **Filter page:** unchanged look; its glass helpers become shared by the whole app (`Glass.swift`).
+  - **Content stays plain:** rows, titles, summaries, the details grid and the first-page picture are never glass, and there is no glass inside glass.
+  - **Transitions and animations** (at most 0.35 s, no bounce; with *Reduce Motion* they become plain fades or nothing):
+    - The details column cross-fades when another fanfic is selected; each fanfic opens at the top of its details; the first-page picture fades in when it is ready.
+    - The works list cross-fades when the sidebar selection changes; typing in the search field updates it at once, without animation.
+    - Sidebar lists open and fold smoothly.
+    - Filter page: the suggestion panel fades and grows in from its field, "N of 5" rolls to the new number, suggestions light up under the pointer; capsules keep flowing (change 12).
+    - The drop highlight fades in and out.
+  - **macOS 15:** the same shapes in a frosted material and bordered buttons; the developer option `-noGlass YES` shows that look on a newer Mac.
+  - **Thin scroll bars (changes 9 and 10):** in the new design the scroll views reach under the floating sidebar and the toolbar, so the fix found none of them by its left edge any more and the strips came back with *Always*; it now matches the right edge and takes the smallest scroll view that fits (U81).
+- **Round 2 (owner, 12 November: "please inspect all UI details for inconsistencies or bugs and fix them"):** every screen captured in light and dark, also at the smallest window (900 × 560), with the sidebar hidden, with an empty library, with no results and with a search. Fixed:
+  - In a narrow details column the glass buttons were cut short ("Open First P…", "Show in Find…"): they now go onto a second line (U72).
+  - In a narrow works column the Filter heading broke onto two lines: Clear Filter then shows only its × symbol (U67).
+  - Suggestions were cut in the middle in a narrow column: they now use up to two lines (U65).
+  - A long capsule could stick out of a narrow column: its name is now shortened in the middle (U63, U64).
+  - Checked and left as they are: the toolbar group sitting over the list/details divider (placed by the system), the drop label over an empty state (only while dragging, readable), no highlighted sidebar row during a search (as in 1.2).
+- **Stays the same:** the three columns and their widths, every list, the search, the Filter page's rules, Settings' contents, the menus.
+- **Rules replaced or changed:** U9 (system glass, and the app's own glass on controls only), U11 (corner radius), U22–U24 and U33 (the system's band instead of the app's), U47–U52 (checked again on the new look: still no scroll bar strips), U69 (the height of the Filter choices measured again on the new look).
+- **Files:** `scripts/build-app.sh`, `scripts/make-release.sh`; Mac: `Glass.swift` (new), `ContentView.swift`, `TitleBand.swift` (removed: the check was clean), `OverlayScroller.swift`, `WorkDetailView.swift`, `WorkListView.swift`, `SidebarView.swift`, `FilterView.swift`, `PDFPreview.swift`, `FanficEngineApp.swift`.
+- **Checked:** a test copy with its own bundle ID on a scratch demo library and on a scratch library of 10,000 made-up works (speed); real window captures, light and dark; *Reduce Motion*, *Reduce Transparency* and `-noGlass YES`.
+
+| # | Rule | How it is checked |
+| --- | --- | --- |
+| U70 | The app carries the SDK version of the Xcode it was built with; the build stops with an error if it doesn't | `vtool -show-build` on the built app; the scripts' check |
+| U71 | On macOS 26 and later the window shows the system's Liquid Glass: floating glass sidebar, toolbar buttons in a glass group, glass search field; no band drawn by the app; the title stays readable over scrolled rows; no step at the sidebar divider and no line through the toolbar buttons | Captures with the list scrolled and a narrow details column, light and dark |
+| U72 | Details: Open Fanfic prominent glass, Open First Page and Show in Finder glass, one group, going onto a second line in a narrow column instead of being cut short; bordered buttons on macOS 15 | Captures, also with `-noGlass YES` |
+| U73 | Drop highlight: label on glass, outline corners matching the window corners | Capture with `-previewDrop YES` |
+| U74 | ~~Rows, text, the details grid and the first-page picture are plain; no glass inside glass~~ Replaced by change 14 (the owner wants glass on the content too) | Captures |
+| U75 | Selecting another fanfic cross-fades the details (about 0.2 s) and shows them from the top; the first-page picture fades in | Seen in the test copy; Reduce Motion on: no movement |
+| U76 | Changing the sidebar selection cross-fades the works list; typing a search updates it at once; with 10,000 works typing and scrolling stay smooth | Test copy on the 10,000-work library |
+| U77 | Sidebar lists open and fold smoothly (about 0.25 s) | Seen in the test copy |
+| U78 | Filter page: suggestion panel fades and grows in from its field; "N of 5" rolls; suggestions light up under the pointer; capsules flow as in change 12 | Seen in the test copy |
+| U79 | *Reduce Motion*: no movement, only fades or nothing; *Reduce Transparency* and *Increase Contrast*: everything readable | The app's part with the developer option `-reduceMotion YES` (system setting untouched); the system settings themselves by the owner |
+| U80 | macOS 15 look: frosted material and bordered buttons in the same places | Captures with `-noGlass YES` |
+| U81 | With *Show scroll bars: Always* no scroll bar strip in sidebar, works list, details or Filter choices; the Filter choices take only their own height (at most half the column) | Captures with *Always* |
+
+---
+
+## Change 12 (12 November 2026, the owner's goal; built along this spec; Liquid Glass look added at the owner's request the same day; gallery OK'd by the owner on 12 November): the Filter page
+
+Rules: `SPEC.md` section 6, **Filter**.
+
+- **Owner request:** "new features for mac app: search for multiple (max 5) tags simultaneously. Exclude option for pairings, fandoms, characters and tags. Realise this with a dedicated filter page."
+- **What changes:**
+  - **Sidebar:** a third row in the first group, **Filter** (funnel symbol), under No Pairing Found. Its badge shows how many fanfics the filter lets through.
+  - **Filter page:** selecting Filter turns the middle column into the filter page. The choices are at the top, with the matching fanfics in the usual list below them. The title band says "Filter · N fanfics", and the details column works as before.
+    - **With all of these tags:** the chosen tags as small removable capsules, then an **Add tag…** field and "N of 5". With 5 tags the field is greyed out and says "5 tags at most".
+    - **Leave out:** four rows, **Pairings**, **Fandoms**, **Characters** and **Tags**, each with its removable capsules and an **Add …** field. These capsules have a minus symbol, so they read as left out.
+    - **Adding:** typing in an Add field shows up to 6 matching entries right under it, inside the page: name and number of fanfics, most fanfics first, by the word-start rule (SPEC section 6). Return adds the first entry, a click adds the one clicked, and Escape empties the field. Entries already chosen on that row are not offered. If nothing matches: "No tags match “…”" (pairings, fandoms, characters likewise).
+    - **Clear Filter** button at the end of the choices; greyed out when nothing is chosen.
+  - **Results:** rows as in All Works. The chosen tags a fanfic has go on its tag line (U57). With no match, "No fanfics match this filter" shows under the choices, which stay visible.
+  - **Search field:** on the Filter page it searches inside the result, like a fandom. Typing doesn't leave the page.
+- **Look (owner, 12 November, after the first gallery: "make the interface of the filter more modern and liquid glass please"):** the choices use macOS's Liquid Glass (macOS 26 and later; on macOS 15 the same shapes in a frosted material).
+  - The two headings get a symbol: a tag for **With all of these tags**, a minus for **Leave out**.
+  - Capsules are glass pills: a tag capsule is tinted in the accent colour, a left-out capsule is clear glass with a red minus symbol.
+  - The Add fields are glass pills with a plus symbol instead of a boxed text field; the field with the keyboard gets an accent outline.
+  - The suggestions sit on a rounded glass panel; the first one (what Return adds) is marked with an accent tint.
+  - **Clear Filter** is a small glass button with an × symbol, and it moves with "N of 5" into the heading line ("With all of these tags  2 of 5 … Clear Filter"), so neither takes a line of its own and Clear Filter stays in sight when the choices scroll.
+  - Adding or removing a capsule animates: the new capsule flows out of the field, a removed one melts away.
+- **Stays the same:** All Works, No Pairing Found, the four lists, the search field and its Pairings | Tags scope, the details column, the toolbar, Settings, the window size and column widths.
+- **Not in this change (possible later):** keeping the filter after the app is closed; "any of these tags" instead of "all"; choosing pairings, fandoms or characters that must be present (only tags for now); "Add to Filter" in the sidebar lists' right-click menu; the Windows/Linux alpha.
+- **Files:** `Sources/FanficCore/Filter.swift` (the rules), `Tests/FanficCoreTests/FilterTests.swift`; Mac: `FilterView.swift` (new), `AppModel.swift`, `ContentView.swift`, `SidebarView.swift`, `WorkListView.swift`, `FanficEngineApp.swift` (developer options for pictures).
+- **Checked:** a test copy with its own bundle ID (`build-app.sh --no-install`, opened with `-libraryPath` on a scratch demo library), never the installed app or the owner's library; light and dark. The first pictures were drawn by the test copy itself (developer option `-snapshotPath`), because this Mac has no Screen Recording permission for the tools; the Liquid Glass pictures are window captures made through the owner-approved control of the test copy, because glass is drawn by the system and a self-drawn picture can't show it.
+
+| # | Rule | How it is checked |
+| --- | --- | --- |
+| U61 | Sidebar: **Filter** row with a funnel symbol directly under No Pairing Found in the first group, badge = number of fanfics the filter shows (all fanfics while nothing is chosen) | Screenshots with and without a filter |
+| U62 | Selecting Filter shows the filter page in the middle column: the choices on top, a divider, then the result list; title band subtitle "Filter · N fanfic(s)"; details column unchanged | Screenshots, light and dark |
+| U63 | **With all of these tags** row (heading with a tag symbol): accent-tinted glass capsules (tag symbol, name, × button with the label "Remove <name>"), then the Add tag… field; "N of 5" in the heading line; with 5 tags the field is disabled with "5 tags at most"; capsules wrap onto more lines instead of widening the column | Screenshots with 0, 2 and 5 tags; core test of the limit |
+| U64 | **Leave out** group with four labelled rows (Pairings, Fandoms, Characters, Tags), labels right-aligned in one column, each row with clear glass capsules (red minus symbol, name, × button) and a glass Add field with a plus symbol ("Add pairing…", "Add fandom…", "Add character…", "Add tag…"); the field with the keyboard has an accent outline | Screenshot with entries in all four rows |
+| U65 | Typing in an Add field shows up to 6 matching entries directly under that field on a rounded glass panel, inside the page (name and count, the first one accent-tinted, most fanfics first, word-start rule); Return adds the first, a click adds that one, Escape empties the field; already-chosen entries are not offered; no match: "No tags match “…”" (pairings, fandoms, characters likewise) | Screenshots with "fam", a pairing typed and "zzz"; core test of the ordering |
+| U66 | Results as in All Works (U5, U6). The chosen tags a fanfic has are on its tag line, in the U57 colours, including on the selected row; no match: "No fanfics match this filter" under the choices, which stay visible | Screenshots, including a selected row and an empty result |
+| U67 | **Clear Filter** (small glass button with an × symbol) at the right end of the first heading line removes everything; disabled when nothing is chosen | Screenshots before and after |
+| U68 | On the Filter page the search field searches inside the result (like a fandom, U55), and typing keeps Filter selected | Screenshot with a search inside a filter |
+| U69 | The choices take at most half the column's height and scroll inside when they need more, so the result list always shows; nothing in the other columns moves | Screenshot with many left-out entries in a 1100 × 700 window |
+
+---
+
 ## Change 11 (9 November 2026, owner's "yes" to tags in the Mac app; built along this spec; gallery OK'd by the owner on 9 November): tags
 
 Reading rules: `SPEC.md` section 5b.

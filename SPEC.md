@@ -31,10 +31,11 @@ A small Mac app that works offline and helps find fanfictions by pairing. It imp
 5. **Title and author.** PDF document info or EPUB `dc:title` / `dc:creator`; if missing, the file name.
 6. **Saving.** The original is copied to `Works/`, the first page to `First Pages/`, and `library.json` is rewritten in one atomic write. If any step fails, the files written for this work are removed again and the work is reported as "could not read".
 
-**Limits for crafted files** (security scan, 4 November 2026). A file can be made on purpose to keep the import busy or fill the memory; these limits stop that without changing anything for real files:
+**Limits for crafted files** (security scans, 4 and 13 November 2026). A file can be made on purpose to keep the import busy or fill the memory; these limits stop that without changing anything for real files:
 
 - A part of an EPUB that is larger than **16 MB** (packed or unpacked) is not read. The size is checked before anything is unpacked, so a part that claims to unpack to gigabytes is refused. The largest text document in a real library of 809 AO3 EPUBs was 0.27 MB. If the container or package file is too large, the work is reported as "could not read"; a too-large reading-order document is skipped like an unreadable one.
-- At most the first **50 documents** of an EPUB's reading order are read.
+- At most the first **50 documents** of an EPUB's reading order are read, and only those 50 entries are taken from the package file: each entry's path is worked out once, however often the reading order repeats it, and a path longer than a ZIP entry name can be (65,535 bytes) is left out.
+- The `Summary` label in an EPUB's markup is found in time that grows with the length of the document, however many spaces follow the word.
 - Only the first **50,000 characters** of the first page are laid out for its PDF copy; a page shows about 10,000 at most.
 - Text is taken out of the markup, and pairings are matched, in time that grows with the length of the text (a single pass over each document; names matched to members as a matching rather than by trying every order). Results are the same as before: checked on all 18,508 documents of a real library of 809 AO3 EPUBs.
 
@@ -184,10 +185,19 @@ and `Ron` does not match `Aaron Hotchner` or `Veronica`.
 
 Results are sorted by title. In each result the relationships that matched are highlighted.
 
-**Sidebar** (order: All Works and No Pairing Found, then Fandoms, Characters, Pairings; the three lists start folded):
+**Sidebar** (order: All Works and No Pairing Found (and Filter on the Mac), then Fandoms, Characters, Pairings, Tags; the lists start folded):
 - clicking a **pairing** or a **character** puts it into the search field (so a character click also finds names that start with it, e.g. `Tom Riddle` finds `Tom Riddle | Voldemort` too);
 - clicking a **fandom** shows only that fandom's works; the search field then searches inside it;
 - clicking a **tag** (the **Tags** list, after Pairings) shows only the works with that tag; the search field then searches inside it, like a fandom. The open Tags list starts with its own **Search tags** field, which narrows the list to the tags that match by the word-start rule above (`burn` finds `Slow Burn`); it only filters the list and doesn't change the fanfic search.
+
+**Filter** (added 12 November 2026; Mac app: the **Filter** page, opened from the sidebar under No Pairing Found):
+
+1. **Tags:** up to **5** tags. A fanfic is shown only when it has **all** of them. A tag counts the same way as in the Tags list: spellings that differ only in case, accents or spacing are one tag. A sixth tag is refused, and so is a tag that is already chosen.
+2. **Leave out:** pairings, fandoms, characters and tags, as many as wanted. A fanfic is hidden when it has **any** of them. Leaving out an entry hides exactly the fanfics counted beside it in its sidebar list, so `A/B` and `B/A` are one pairing, a crossover is hidden when any of its fandoms is left out, and a character is a person named in a relationship tag (friendship tags too, unless Settings leaves them out).
+3. A tag can be in only one of the two places: choosing it on one side takes it off the other.
+4. **Together:** a fanfic is shown when it has every chosen tag and none of the left-out entries. With nothing chosen, every fanfic is shown.
+5. The search field then searches inside the result, like a fandom. Results are sorted by title, and each one shows the chosen tags it has.
+6. The filter is kept while the app is open. It is not saved, and `library.json` doesn't change.
 
 **Settings** (⌘, or the gear button; stored in the app's preferences on this Mac): show or hide Fandoms, Characters, Pairings and Tags; sort them by name or by number of fanfics (largest first, ties A–Z); include or leave out friendship tags (`A & B`) in Pairings and Characters; the library folder with Show in Finder and Re-read Library.
 
@@ -326,10 +336,12 @@ Fanfic Engine can update itself with **Sparkle** (open source, MIT licence, [spa
 
 **What it sends.** One ordinary web request for a small file, `appcast.xml`, attached to the newest published release on GitHub: `https://github.com/lumierecoding/fanfic-engine/releases/latest/download/appcast.xml`. GitHub sees your IP address and the app's name and version (in the request header). Nothing about your library or your files is sent; Sparkle's optional system profile stays off.
 
+**The feed is signed** (since the security scan of 13 November 2026). `appcast.xml` itself is signed with the same key as the updates, and the app refuses a feed that is unsigned or was changed after signing (*The update feed is improperly signed*), so a replaced feed can't make the app contact any other server. The notes are only ever the ones written into the feed: a link to notes elsewhere is never followed, and pictures or other files referred to in the notes are not loaded. The download is checked before it is unpacked (Sparkle's `SURequireSignedFeed` needs `SUVerifyUpdateBeforeExtraction`). If the feed failed the check for 20 days in a row, Sparkle shows an offered update again without its notes, so that installs can recover if the key ever has to change; the update itself must still be signed with the project's key.
+
 **When a new version is there.** Sparkle's window shows the new version and short notes (plain text inside `appcast.xml`; nothing is loaded from anywhere else). **Install Update** downloads the disk image from the GitHub release and checks its EdDSA signature with the public key built into the app (`SUPublicEDKey` in `Info.plist`); an update that is not signed with the project's key is refused. Then it replaces the app where it is and starts it again. **Skip This Version** skips it; closing the window means later (this Sparkle version has no separate Remind Me Later button). Sparkle's question on the second start also has a box *Automatically download and install updates* (off unless ticked): when ticked, updates are installed without asking when the app quits. The library folder is not touched by the update itself; if the new version uses a newer `library.json`, it updates the file on its first start (as in 5a, with a backup).
 
 **Gatekeeper.** Because the app downloads the update itself, macOS should not ask for *Open Anyway* again after an update (to be confirmed by the end-to-end test before release).
 
-**Releases.** Every release carries its own `appcast.xml` (version, `CFBundleVersion`, minimum macOS, download address, size, signature). A version is offered only once its release is published; drafts are never offered. The private signing key is a file on the developer's Mac, outside the repository and iCloud Drive and not in the Keychain. If it were lost, existing installs could no longer be updated in the app (they would need one update by hand), so it is backed up.
+**Releases.** Every release carries its own `appcast.xml` (version, `CFBundleVersion`, minimum macOS, download address, size, signature), signed with the update key by `make-release.sh`; a feed must not be changed after signing. A version is offered only once its release is published; drafts are never offered. The private signing key is a file on the developer's Mac, outside the repository and iCloud Drive and not in the Keychain. If it were lost, existing installs could no longer be updated in the app (they would need one update by hand), so it is backed up.
 
-**Versions.** 1.0 has no updater, so going from 1.0 to 1.1 is by hand, once; from 1.1 on, updates come through the app. The Windows/Linux alpha has no updater (it is updated with `uv tool upgrade` or `pipx upgrade`).
+**Versions.** 1.0 has no updater, so going from 1.0 to 1.1 is by hand, once; from 1.1 on, updates come through the app. Versions up to 1.2 don't require a signed feed but read one normally, so they update to the first version that requires it as usual. The Windows/Linux alpha has no updater (it is updated with `uv tool upgrade` or `pipx upgrade`).

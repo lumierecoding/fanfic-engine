@@ -15,16 +15,19 @@ struct FirstPagePreview: View {
                 Image(nsImage: image)
                     .resizable()
                     .aspectRatio(contentMode: .fit)
-                    .overlay(Rectangle().strokeBorder(.separator))
+                    .clipShape(RoundedRectangle(cornerRadius: 8, style: .continuous))
+                    .overlay(RoundedRectangle(cornerRadius: 8, style: .continuous).strokeBorder(.separator))
                     .accessibilityLabel("First page")
+                    .transition(.opacity)  // fades in when it is ready (ui-spec U75)
             } else {
-                Rectangle()
+                RoundedRectangle(cornerRadius: 8, style: .continuous)
                     .fill(.quaternary)
                     .aspectRatio(595.0 / 842.0, contentMode: .fit)
                     .overlay(ProgressView().controlSize(.small))
             }
         }
         .frame(maxWidth: .infinity, minHeight: 300)
+        .animation(Motion.fade(duration: 0.2), value: image != nil)
         .task(id: id) {
             let url = url
             image = await Task.detached(priority: .userInitiated) { Self.render(url) }.value

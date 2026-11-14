@@ -2,8 +2,8 @@ import Foundation
 import Testing
 @testable import FanficCore
 
-/// Crafted files from the security scan of 4 November 2026 (SPEC section 3): each must be refused or read quickly,
-/// and the faster code must give exactly the same results as the code it replaced.
+/// Crafted files from the security scans of 4 and 13 November 2026 (SPEC section 3): each must be refused or read
+/// quickly, and the faster code must give exactly the same results as the code it replaced.
 @Suite("Security")
 struct SecurityTests {
     // MARK: Limits
@@ -56,6 +56,83 @@ struct SecurityTests {
         let time = try seconds { work = try WorkReader.readEPUB(epubData([doc]), fallbackTitle: "x") }
         #expect(work?.relationships == ["Harry Potter/Draco Malfoy"])
         #expect(time < 5, "\(count) × \(piece): \(time) s")
+    }
+
+    // MARK: Crafted files from the scan of 13 November
+
+    @Test("An EPUB that repeats one long path in its reading order is read quickly, keeping only what the reader uses")
+    func repeatedSpinePath() throws {
+        // The scan's case, larger: one manifest entry with a 60,000-byte path of many parts and its id 200,000 times in
+        // the spine. The old code resolved and kept every copy (about 12 GB) before the 50-document limit applied.
+        let longPath = Array(repeating: "abcdefghi", count: 6_000).joined(separator: "/") + ".xhtml"
+        let data = epubData(manifest: "<item id=\"long\" href=\"\(longPath)\"/>",
+                            spine: String(repeating: "<itemref idref=\"long\"/>", count: 200_000))
+        var book: EPUBBook?
+        let time = try seconds { book = try EPUBBook(data: data) }
+        #expect(book?.spinePaths.count == EPUBBook.maxSpinePaths)
+        #expect(book?.spinePaths.allSatisfy { $0 == longPath } == true)
+        #expect(time < 5, "\(time) s")
+        // The document doesn't exist, so the work has no text.
+        #expect(throws: ReadError.self) { try WorkReader.readEPUB(data, fallbackTitle: "x") }
+    }
+
+    @Test("A path longer than a ZIP entry name can be is left out of the reading order")
+    func overlongSpinePath() throws {
+        let long = String(repeating: "a", count: 70_000) + ".xhtml"
+        let data = epubData(manifest: "<item id=\"long\" href=\"\(long)\"/><item id=\"d0\" href=\"d0.xhtml\"/>",
+                            spine: "<itemref idref=\"long\"/><itemref idref=\"d0\"/><itemref idref=\"long\"/>",
+                            documents: ["<p>Relationship: Harry Potter/Draco Malfoy</p>"])
+        #expect(try EPUBBook(data: data).spinePaths == ["d0.xhtml"])
+        #expect(try WorkReader.readEPUB(data, fallbackTitle: "x").relationships == ["Harry Potter/Draco Malfoy"])
+    }
+
+    @Test("Repeated and unknown ids give the same reading order as before")
+    func spineOrder() throws {
+        let data = epubData(manifest: "<item id=\"d0\" href=\"d0.xhtml\"/><item id=\"d1\" href=\"sub/../d1.xhtml#top\"/>",
+                            spine: "<itemref idref=\"d0\"/><itemref idref=\"x\"/><itemref idref=\"d0\"/><itemref idref=\"d1\"/>",
+                            documents: ["<p>a</p>", "<p>b</p>"])
+        #expect(try EPUBBook(data: data).spinePaths == ["d0.xhtml", "d0.xhtml", "d1.xhtml"])
+        // 60 entries: the first 50 are kept, in order.
+        let many = (0..<60).map { "<itemref idref=\"d\($0 % 2)\"/>" }.joined()
+        let book = try EPUBBook(data: epubData(manifest: "<item id=\"d0\" href=\"d0.xhtml\"/><item id=\"d1\" href=\"d1.xhtml\"/>",
+                                               spine: many, documents: ["<p>a</p>", "<p>b</p>"]))
+        #expect(book.spinePaths == (0..<50).map { "d\($0 % 2).xhtml" })
+    }
+
+    @Test("A Summary label followed by a long run of spaces is read in a moment", arguments: ["", ":"])
+    func craftedSummaryLabel(colon: String) {
+        // The scan's case, larger: "Summary", spaces and no "<" after them. With the old label expression 8,000 spaces
+        // took 5 s and the time grew with the square of the run.
+        let spaces = String(repeating: " ", count: 200_000)
+        let html = "<html><body><p>Relationship: A/B</p><p>Summary\(colon)\(spaces)X</p></body></html>"
+        var result = SummaryReader.Result.noLabel
+        let time = seconds { result = SummaryReader.read(html: html) }
+        #expect(result == (colon.isEmpty ? .noLabel : .found("X")))
+        #expect(time < 2, "\(time) s")
+
+        // A failed label before a real one: the real one is still found.
+        let both = "<p>Summary\(colon)\(spaces)X</p><p>Summary:</p><blockquote class=\"userstuff\"><p>The real one.</p></blockquote>"
+        let bothTime = seconds { result = SummaryReader.read(html: both) }
+        #expect(result == .found("The real one."))
+        #expect(bothTime < 2, "\(bothTime) s")
+    }
+
+    @Test("The Summary label is found exactly where the old expression found it (5,000 random documents)")
+    func sameSummaryLabel() throws {
+        let old = try NSRegularExpression(pattern: ">\\s*Summary\\s*:?\\s*<", options: [.caseInsensitive])
+        let new = try NSRegularExpression(pattern: ">\\s*Summary\\s*(?::\\s*)?<", options: [.caseInsensitive])
+        let pieces = [">", "<", " ", "  ", "\n", "\t", "Summary", "summary", "SUMMARY", "Summ", ":", "::", "x", "<p>", "</p>",
+                      "\u{00A0}", "\u{2003}", "é"]
+        var random = SplitMix(seed: 20261113)
+        var found = 0
+        for _ in 0..<5_000 {
+            let doc = (0..<Int.random(in: 0...30, using: &random)).map { _ in pieces.randomElement(using: &random)! }.joined()
+            let range = NSRange(location: 0, length: (doc as NSString).length)
+            let a = old.firstMatch(in: doc, range: range)?.range, b = new.firstMatch(in: doc, range: range)?.range
+            #expect(a == b, "\(doc.debugDescription)")
+            if a != nil { found += 1 }
+        }
+        #expect(found > 100)
     }
 
     @Test("Crafted pairing tags with many equal names are searched instantly")
@@ -238,12 +315,17 @@ private func zipData(_ entries: [(String, Data)], crafted: (name: String, method
 
 /// An EPUB with the given (X)HTML documents in its reading order.
 private func epubData(_ docs: [String]) -> Data {
+    let manifest = docs.indices.map { "<item id=\"d\($0)\" href=\"d\($0).xhtml\" media-type=\"application/xhtml+xml\"/>" }.joined()
+    let spine = docs.indices.map { "<itemref idref=\"d\($0)\"/>" }.joined()
+    return epubData(manifest: manifest, spine: spine, documents: docs)
+}
+
+/// An EPUB with the given manifest and spine (the elements inside them) and the documents `d0.xhtml`, `d1.xhtml`, …
+private func epubData(manifest: String, spine: String, documents docs: [String] = []) -> Data {
     let container = """
         <?xml version="1.0"?><container version="1.0" xmlns="urn:oasis:names:tc:opendocument:xmlns:container"><rootfiles>\
         <rootfile full-path="content.opf" media-type="application/oebps-package+xml"/></rootfiles></container>
         """
-    let manifest = docs.indices.map { "<item id=\"d\($0)\" href=\"d\($0).xhtml\" media-type=\"application/xhtml+xml\"/>" }.joined()
-    let spine = docs.indices.map { "<itemref idref=\"d\($0)\"/>" }.joined()
     let package = """
         <?xml version="1.0"?><package xmlns="http://www.idpf.org/2007/opf" version="2.0">\
         <metadata xmlns:dc="http://purl.org/dc/elements/1.1/"><dc:title>Crafted</dc:title></metadata>\

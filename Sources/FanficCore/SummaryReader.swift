@@ -25,8 +25,10 @@ public enum SummaryReader {
 
     // MARK: EPUB (HTML)
 
-    /// A "Summary" element on its own, e.g. `<p>Summary</p>` or `<h2>Summary:</h2>`.
-    private static let htmlLabel = try! NSRegularExpression(pattern: ">\\s*Summary\\s*:?\\s*<", options: [.caseInsensitive])
+    /// A "Summary" element on its own, e.g. `<p>Summary</p>` or `<h2>Summary:</h2>`. The spaces after the colon belong
+    /// to the colon, so a run of spaces can be matched only one way (security scan of 13 November: `\s*:?\s*` tried
+    /// every split of a long run, quadratic time).
+    private static let htmlLabel = try! NSRegularExpression(pattern: ">\\s*Summary\\s*(?::\\s*)?<", options: [.caseInsensitive])
     /// Closing tags and spaces, then a `<blockquote …>` (checked right after the label).
     private static let blockquoteStart = try! NSRegularExpression(
         pattern: "(?:\\s|</[a-zA-Z0-9]+\\s*>)*<blockquote\\b[^>]*>", options: [.caseInsensitive])

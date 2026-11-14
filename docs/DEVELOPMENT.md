@@ -23,18 +23,19 @@ swift build
 ./scripts/build-app.sh
 ```
 
-`build-app.sh` builds in `~/Library/Developer/FanficEngine` (outside the source folder, which helps when the source lives in iCloud Drive), assembles `Fanfic Engine.app` with `Resources/Info.plist` and the icon, signs it ad-hoc (`codesign -s -`, no certificate or Keychain needed) and copies it to `/Applications`. Pass `--scratch-path` to `swift test`/`swift build` if you want the same build folder.
+`build-app.sh` builds in `~/Library/Developer/FanficEngine` (outside the source folder, which helps when the source lives in iCloud Drive), hands the linker the macOS SDK (SwiftPM leaves it out, and the app then says it was built with SDK 15, so macOS shows it in the old pre-glass look; the script stops if the built app doesn't carry the SDK version, and `make-release.sh` does the same), assembles `Fanfic Engine.app` with `Resources/Info.plist` and the icon, signs it ad-hoc (`codesign -s -`, no certificate or Keychain needed) and copies it to `/Applications`. Pass `--scratch-path` to `swift test`/`swift build` if you want the same build folder.
 
 ## Project layout
 
 ```
 Package.swift
 Sources/FanficCore/        ZipArchive, EPUBBook, HTMLText, WorkReader (first pages), Relationships (field
-                           reading), SummaryReader, Search (name matching, queries), Models (records, lists),
-                           Library (store)
-Sources/FanficEngine/      App, AppModel, ContentView, SidebarView, WorkListView, WorkDetailView,
-                           PDFPreview, ImportSummaryView, SettingsView
-Tests/FanficCoreTests/     Reading, Summary, Library, Search and library-folder-move tests
+                           reading), SummaryReader, Search (name matching, queries), Filter (the Filter page's
+                           rules), Models (records, lists), Library (store)
+Sources/FanficEngine/      App, AppModel, ContentView, SidebarView, WorkListView, FilterView, WorkDetailView,
+                           PDFPreview, ImportSummaryView, SettingsView, Glass (the app's own Liquid Glass and
+                           animation helpers)
+Tests/FanficCoreTests/     Reading, Summary, Library, Search, Tag, Filter, Security and library-folder-move tests
 Fixtures/                  AO3-style test files + expected.json (generated); Summaries/ for the summary cases
 Resources/                 Info.plist, AppIcon.icns
 scripts/                   build-app.sh, make-release.sh, make-fixtures.swift, make-icon.swift, sync-repo.sh
@@ -46,7 +47,7 @@ docs/                      user manual, this file, UI rules, screenshots
 
 [SPEC.md](../SPEC.md) describes exactly how files are read and searched. Code comments refer to its sections. If you change a rule, change SPEC.md and add or update a test.
 
-The UI layout rules are in [docs/ui-spec.md](ui-spec.md) (numbered U1–U40). Describe visual changes there before changing the views.
+The UI layout rules are in [docs/ui-spec.md](ui-spec.md) (numbered U1–U69). Describe visual changes there before changing the views.
 
 ## Test files
 
@@ -71,7 +72,23 @@ open -n "/Applications/Fanfic Engine.app" --args \
   -importOnLaunch /path/to/files       # import into that library at start
   -appearance light|dark               # force an appearance
   -search "harry/draco"                # prefill the search field
-  -sidebar "fandom:<name>"             # select a fandom (or "character:<name>", "pairing:<name>")
+  -sidebar "fandom:<name>"             # select a fandom (or "character:<name>", "pairing:<name>", "tag:<name>",
+                                       # or "filter" for the Filter page)
+  -filterTags "Fluff|Slow Burn"        # Filter page: tags that must be present (at most 5)
+  -filterLeaveOut "fandom:<name>|tag:<name>"  # Filter page: entries to leave out (pairing:, fandom:, character:, tag:);
+                                       # "|" separates entries, so names that contain "|" can't be passed
+  -filterTyping "tags:fam"             # Filter page: text in one Add field, to show its suggestions
+                                       # (tags, or pairing, fandom, character, tag for the Leave out rows)
+  -focusFilter tags                    # Filter page: keyboard in that Add field at start (same row names)
+  -snapshotPath /path/window.png       # draw the window into a PNG after -snapshotDelay seconds (default 3) and quit;
+                                       # pictures without Screen Recording permission (can't show glass)
+  -noGlass YES                         # the app's own glass as on macOS 15 (frosted material, bordered buttons)
+  -reduceMotion YES                    # the app's own animations as with Reduce Motion on (system setting untouched)
+  -aura ridge|veil|off                 # the window background: the website's Ridge variant, Veil, or off (as before
+                                       # change 16); default Veil (change 17)
+  -auraKeepMoving YES                  # the aura moves while another app is in front too (cost measurements);
+                                       # it still pauses while the window is hidden. Real captures only: -snapshotPath
+                                       # can't draw the Metal background
   -selectTitle "<title>"               # select a work
   -openSettings YES                    # open the Settings window
   -previewDrop YES                     # show the drag-and-drop outline
@@ -108,6 +125,7 @@ Rules the updater adds:
 
 - **Raise `CFBundleVersion`** in `Info.plist` with every release (with `CFBundleShortVersionString`): Sparkle compares it.
 - **Every release carries its `appcast.xml`.** The app's feed is `https://github.com/lumierecoding/fanfic-engine/releases/latest/download/appcast.xml`, so the newest published release must have one, and its disk image must be the exact file that was signed. Drafts are never offered.
+- **The feed is signed, and never edited afterwards.** Since the security scan of 13 November 2026 the app requires a signed feed (`SURequireSignedFeed` and `SUVerifyUpdateBeforeExtraction` in `Info.plist`). `make-release.sh` signs `appcast.xml` right after writing it (`update-key.swift sign-feed`: Sparkle's signing block appended at the end), checks it the way the app will (`verify-feed`), and only then writes `SHA256SUMS`. Any change to the file after that, even a space, makes every installed copy refuse it with *The update feed is improperly signed*; to change it, run `make-release.sh` again. Release notes stay inside the feed: the app never follows a `<sparkle:releaseNotesLink>`.
 - **The update key** is a file outside the repository and iCloud (`~/Library/Developer/FanficEngine/keys/fanfic-engine-update.key`, or `FANFIC_UPDATE_KEY`), made once with `swift scripts/update-key.swift new <file>`; its public half is `SUPublicEDKey` in `Info.plist`. Keep a backup: without it, installed copies can't be updated in the app.
 
 Attach the disk image, `appcast.xml`, `SHA256SUMS` and the Windows/Linux wheel to a GitHub release, with the tag `v<version>` (for example `v1.1.0`) that the feed's download address uses. The app is not notarized (that needs a Developer ID certificate from a paid Apple Developer account), so downloaded copies need the one-time "Open Anyway" step described in the README. The Intel half is built but can't be tested on macOS 27, which no longer runs Intel code.
@@ -118,7 +136,7 @@ A Python + Qt (PySide6) port, labelled alpha because it is only tested on macOS.
 
 ```sh
 cd desktop
-uv run pytest                        # 53 tests on ../Fixtures and crafted files, same expected results as the Swift tests
+uv run pytest                        # 56 tests on ../Fixtures and crafted files, same expected results as the Swift tests
 uv run fanfic-engine --library-path /tmp/test-library --import ../Fixtures
 ```
 

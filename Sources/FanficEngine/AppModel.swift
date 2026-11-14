@@ -11,6 +11,7 @@ enum SidebarItem: Hashable {
     case character(String)  // NameGroup.key — fills the search field
     case pairing(String)    // PairingGroup.key — fills the search field
     case tag(String)        // NameGroup.key — a filter like a fandom (SPEC section 5b)
+    case filter             // the Filter page (SPEC section 6, Filter; ui-spec change 12)
 }
 
 /// What the search field searches (ui-spec change 11, U56): relationships, or the Additional Tags.
@@ -44,11 +45,18 @@ final class AppModel {
     var reportSheet: ReportSheet?
     var message: AppMessage?
     var workPendingRemoval: WorkRecord?
+    /// The Filter page's choices (ui-spec change 12); kept while the app is open, not saved.
+    var filter = WorkFilter()
     /// Developer option `-previewDrop YES`: shows the drop highlight for screenshots.
     var previewDropHighlight = false
     private var importChain: Task<Void, Never>?
     /// The last search result, reused until the search, the sidebar selection or the library changes.
-    @ObservationIgnored private var hitsCache: (search: String, selection: SidebarItem?, revision: Int, hits: [SearchHit])?
+    @ObservationIgnored private var hitsCache: (search: String, selection: SidebarItem?, revision: Int, filter: WorkFilter,
+                                                friendships: Bool, hits: [SearchHit])?
+
+    /// Settings → include friendship tags (stored by the sidebar's `@AppStorage`); characters left out on the Filter
+    /// page follow it, as the Characters list does.
+    var includeFriendships: Bool { UserDefaults.standard.object(forKey: "includeFriendships") as? Bool ?? true }
 
     /// The query the core searches: in the Tags scope a "#" is put in front (SPEC section 6), unless typed already.
     var effectiveQuery: String {
@@ -72,6 +80,7 @@ final class AppModel {
             sidebarSelection = nil
         }
         // Developer option `-sidebar "fandom:<name>"`, `"character:<name>"` or `"pairing:<name>"` (screenshots).
+        if defaults.string(forKey: "sidebar") == "filter" { sidebarSelection = .filter }
         if let item = defaults.string(forKey: "sidebar"), let colon = item.firstIndex(of: ":") {
             let name = String(item[item.index(after: colon)...])
             switch item[..<colon] {
@@ -97,13 +106,36 @@ final class AppModel {
             selectedWorkID = library.works.first { $0.title == title }?.workID
         }
         previewDropHighlight = defaults.bool(forKey: "previewDrop")
+        // Developer options for pictures of the Filter page: `-filterTags "Fluff|Slow Burn"` and
+        // `-filterLeaveOut "fandom:<name>|pairing:<name>|character:<name>|tag:<name>"`.
+        for name in (defaults.string(forKey: "filterTags") ?? "").split(separator: "|") {
+            filter.addTag(entry(.tag, String(name)))
+        }
+        for item in (defaults.string(forKey: "filterLeaveOut") ?? "").split(separator: "|") {
+            guard let colon = item.firstIndex(of: ":"), let kind = WorkFilter.Kind(rawValue: String(item[..<colon])) else { continue }
+            filter.leaveOut(kind, entry(kind, String(item[item.index(after: colon)...])))
+        }
+    }
+
+    /// The entry for a name, with the spelling its sidebar list shows when the library has it.
+    private func entry(_ kind: WorkFilter.Kind, _ name: String) -> WorkFilter.Entry {
+        let typed = WorkFilter.Entry(kind, name: name)
+        let display: String? = switch kind {
+        case .pairing: library.pairingList().first { $0.key == typed.key }?.display
+        case .fandom: library.fandomList().first { $0.key == typed.key }?.display
+        case .character: library.characterList().first { $0.key == typed.key }?.display
+        case .tag: library.tagList().first { $0.key == typed.key }?.display
+        }
+        return WorkFilter.Entry(key: typed.key, display: display ?? typed.display)
     }
 
     // MARK: What the window shows
 
     var hits: [SearchHit] {
         let search = effectiveQuery, selection = sidebarSelection, revision = library.revision
-        if let cache = hitsCache, cache.search == search, cache.selection == selection, cache.revision == revision {
+        let filter = filter, friendships = includeFriendships
+        if let cache = hitsCache, cache.search == search, cache.selection == selection, cache.revision == revision,
+           cache.filter == filter, cache.friendships == friendships {
             return cache.hits
         }
         let hits: [SearchHit]
@@ -114,18 +146,25 @@ final class AppModel {
             hits = Search.run(search, in: library.works.filter { $0.fandoms.contains { NameMatcher.key($0) == key } })
         case .tag(let key):
             hits = Search.run(search, in: library.works.filter { $0.tags.contains { NameMatcher.key($0) == key } })
+        case .filter:
+            // The search runs inside the filter's result; the chosen tags go on each row's tag line (ui-spec U66).
+            hits = Search.run(search, in: filter.apply(to: library.works, includeFriendships: friendships)).map { hit in
+                let chosen = filter.chosenTags(in: hit.work)
+                return chosen.isEmpty ? hit : SearchHit(work: hit.work, matched: hit.matched, matchedTags: hit.matchedTags.union(chosen))
+            }
         default:
             hits = Search.run(search, in: library.works)
         }
-        hitsCache = (search, selection, revision, hits)
+        hitsCache = (search, selection, revision, filter, friendships, hits)
         return hits
     }
 
-    /// The selected fandom's or tag's name, when a fandom or a tag is selected (shown in the title band).
+    /// The selected fandom's or tag's name, when a fandom or a tag is selected (shown in the window's subtitle).
     var selectedFandomName: String? {
         switch sidebarSelection {
         case .fandom(let key): library.fandomList().first { $0.key == key }?.display
         case .tag(let key): library.tagList().first { $0.key == key }?.display
+        case .filter: "Filter"
         default: nil
         }
     }
@@ -140,6 +179,11 @@ final class AppModel {
 
     var selectedWork: WorkRecord? { selectedWorkID.flatMap(library.work) }
 
+    /// The Filter row's badge: how many fanfics the filter lets through, before any search (ui-spec U61).
+    func filterCount(includeFriendships: Bool) -> Int {
+        filter.isEmpty ? library.works.count : filter.apply(to: library.works, includeFriendships: includeFriendships).count
+    }
+
     /// A pairing clicked in the sidebar goes into the search field.
     func sidebarChanged() {
         switch sidebarSelection {
@@ -149,7 +193,7 @@ final class AppModel {
         case .character(let key):
             searchScope = .pairings
             if let name = characterName(key) { searchText = name }
-        case .all, .noPairing, .fandom, .tag:
+        case .all, .noPairing, .fandom, .tag, .filter:
             searchText = ""
         case nil:
             break
@@ -162,7 +206,7 @@ final class AppModel {
         switch sidebarSelection {
         case .pairing(let key): if pairingName(key) == searchText { return }
         case .character(let key): if characterName(key) == searchText { return }
-        case .fandom, .tag: return
+        case .fandom, .tag, .filter: return  // the search runs inside the selection
         default: break
         }
         if searchText.trimmingCharacters(in: .whitespaces).isEmpty {

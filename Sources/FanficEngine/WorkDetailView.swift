@@ -2,39 +2,69 @@ import FanficCore
 import SwiftUI
 
 /// Right column: buttons, the summary, the first-page copy, and the work's details with both IDs
-/// (ui-spec U7, U8; summary: change 7, U35–U40).
+/// (ui-spec U7, U8; summary: change 7, U35–U40). Another fanfic cross-fades in and opens at the top (change 13, U75).
 struct WorkDetailView: View {
     @Bindable var model: AppModel
 
     var body: some View {
-        if let work = model.selectedWork {
+        ZStack {
+            if let work = model.selectedWork {
+                details(of: work)
+                    .id(work.workID)
+                    .transition(.opacity)
+            } else {
+                ContentUnavailableView("Select a fanfic", systemImage: "doc.text.magnifyingglass")
+                    .glassEmptyState()
+                    .transition(.opacity)
+            }
+        }
+        .animation(Motion.fade(duration: 0.2), value: model.selectedWorkID)
+    }
+
+    private func details(of work: WorkRecord) -> some View {
             ScrollView {
                 VStack(alignment: .leading, spacing: 14) {
-                    VStack(alignment: .leading, spacing: 4) {
-                        Text(work.title)
-                            .font(.title2.weight(.semibold))
-                            .textSelection(.enabled)
-                        if let author = work.author {
-                            Text("by \(author)")
-                                .foregroundStyle(.secondary)
+                    // Title, author and buttons on their own glass panel (ui-spec change 15).
+                    VStack(alignment: .leading, spacing: 12) {
+                        VStack(alignment: .leading, spacing: 4) {
+                            Text(work.title)
+                                .font(.title2.weight(.semibold))
+                                .textSelection(.enabled)
+                            if let author = work.author {
+                                Text("by \(author)")
+                                    .foregroundStyle(.secondary)
+                            }
+                        }
+                        // One glass group; Open Fanfic is the main action (ui-spec U72). In a narrow column the buttons go
+                        // onto a second line instead of being cut short (glass buttons are wider than the old ones).
+                        GlassGroup(spacing: 8) {
+                            FlowLayout(spacing: 8) {
+                                Button("Open Fanfic") { model.open(work) }
+                                    .glassButton(prominent: true)
+                                    .fixedSize()
+                                Button("Open First Page") { model.openFirstPage(work) }
+                                    .glassButton()
+                                    .fixedSize()
+                                Button("Show in Finder") { model.showInFinder(work) }
+                                    .glassButton()
+                                    .fixedSize()
+                            }
                         }
                     }
-                    HStack {
-                        Button("Open Fanfic") { model.open(work) }
-                        Button("Open First Page") { model.openFirstPage(work) }
-                        Button("Show in Finder") { model.showInFinder(work) }
-                    }
+                    .glassPanel()
+                    // Summary, first page and details each on a glass panel (ui-spec change 14).
                     summary(work)
+                        .glassPanel()
                     FirstPagePreview(url: model.library.url(of: work.firstPageFile), id: work.firstPageID)
+                        .glassPanel(padding: 10)
                     details(work)
+                        .glassPanel()
                 }
                 .padding(16)
                 .frame(maxWidth: .infinity, alignment: .leading)
             }
             .background(OverlayScroller())  // no scroll bar strip with a mouse (ui-spec change 10)
-        } else {
-            ContentUnavailableView("Select a fanfic", systemImage: "doc.text.magnifyingglass")
-        }
+            .hardTopScrollEdge()
     }
 
     /// "Summary" in the details labels' style, then the summary in the body font (U36), or "No summary found" (U37).

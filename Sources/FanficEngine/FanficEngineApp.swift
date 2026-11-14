@@ -97,6 +97,27 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
                 menu.popUp(positioning: nil, at: NSPoint(x: 12, y: view.bounds.height - 12), in: view)
             }
         }
+        // Developer option `-snapshotPath <file.png>` (with `-snapshotDelay <seconds>`, default 3): the app draws its
+        // own window, title bar and toolbar included, into a PNG and quits. For pictures on a Mac where the tools have no
+        // Screen Recording permission; nothing outside the app's own window is read.
+        if let path = UserDefaults.standard.string(forKey: "snapshotPath") {
+            let delay = UserDefaults.standard.double(forKey: "snapshotDelay")
+            DispatchQueue.main.asyncAfter(deadline: .now() + (delay > 0 ? delay : 3)) {
+                Self.writeSnapshot(to: URL(fileURLWithPath: (path as NSString).expandingTildeInPath))
+                NSApp.terminate(nil)
+            }
+        }
+    }
+
+    @MainActor
+    private static func writeSnapshot(to url: URL) {
+        guard let window = NSApp.windows.first(where: { $0.isVisible && $0.title == "Fanfic Engine" }),
+              let frameView = window.contentView?.superview else { return }
+        frameView.layoutSubtreeIfNeeded()
+        frameView.display()
+        guard let rep = frameView.bitmapImageRepForCachingDisplay(in: frameView.bounds) else { return }
+        frameView.cacheDisplay(in: frameView.bounds, to: rep)
+        try? rep.representation(using: .png, properties: [:])?.write(to: url)
     }
 
     func applicationShouldTerminateAfterLastWindowClosed(_ sender: NSApplication) -> Bool { true }

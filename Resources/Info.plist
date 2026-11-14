@@ -46,9 +46,9 @@
 	<key>CFBundlePackageType</key>
 	<string>APPL</string>
 	<key>CFBundleShortVersionString</key>
-	<string>1.2</string>
+	<string>1.3</string>
 	<key>CFBundleVersion</key>
-	<string>6</string>
+	<string>7</string>
 	<key>LSApplicationCategoryType</key>
 	<string>public.app-category.productivity</string>
 	<key>LSMinimumSystemVersion</key>
@@ -63,5 +63,9 @@
 	<string>https://github.com/lumierecoding/fanfic-engine/releases/latest/download/appcast.xml</string>
 	<key>SUPublicEDKey</key>
 	<string>vgA0Ez2oDbMFCryI69T96eVyyfhQ+eh4/vP8PwlHGI0=</string>
+	<key>SURequireSignedFeed</key>
+	<true/>
+	<key>SUVerifyUpdateBeforeExtraction</key>
+	<true/>
 </dict>
 </plist>

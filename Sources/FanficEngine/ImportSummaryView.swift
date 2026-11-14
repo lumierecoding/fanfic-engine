@@ -1,7 +1,7 @@
 import FanficCore
 import SwiftUI
 
-/// Sheet after an import: counts and file names per result.
+/// Sheet after an import: counts and file names per result, each result group on a glass panel (ui-spec change 15).
 struct ImportSummaryView: View {
     let report: ImportReport
     let done: () -> Void
@@ -29,9 +29,13 @@ struct ImportSummaryView: View {
                                     }
                                 }
                             }
+                            .glassPanel(padding: 10, cornerRadius: 12)
                         }
                     }
                 }
+                // Room for the panels' glass edges, which the scroll view would otherwise cut off.
+                .padding(.vertical, 6)
+                .padding(.horizontal, 3)
                 .frame(maxWidth: .infinity, alignment: .leading)
             }
             .frame(maxHeight: 380)
@@ -39,6 +43,7 @@ struct ImportSummaryView: View {
                 Spacer()
                 Button("OK", action: done)
                     .keyboardShortcut(.defaultAction)
+                    .glassButton(prominent: true)
             }
         }
         .padding(20)

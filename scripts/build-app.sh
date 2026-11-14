@@ -14,9 +14,15 @@ INSTALL_DIR="/Applications"
 INSTALL=1
 [[ "${1:-}" == "--no-install" ]] && INSTALL=0
 
+# The linker writes the SDK version into the app, and macOS uses it to choose the design: an app that says SDK 15 runs
+# in compatibility mode with the pre-glass look on macOS 26 and later. SwiftPM links without the SDK path, so it wrote
+# the deployment target (15.0) instead (ui-spec change 13, U70). Handing the SDK to the linker fixes that.
+SDK_PATH="$(xcrun --sdk macosx --show-sdk-path)"
+SDK_VERSION="$(xcrun --sdk macosx --show-sdk-version)"
+SDK_FLAGS=(-Xswiftc -Xclang-linker -Xswiftc -isysroot -Xswiftc -Xclang-linker -Xswiftc "$SDK_PATH")
 echo "→ Building (release)…"
-swift build -c release --package-path "$ROOT" --scratch-path "$BUILD" --product FanficEngine
-BIN_DIR="$(swift build -c release --package-path "$ROOT" --scratch-path "$BUILD" --show-bin-path)"
+swift build -c release --package-path "$ROOT" --scratch-path "$BUILD" --product FanficEngine "${SDK_FLAGS[@]}"
+BIN_DIR="$(swift build -c release --package-path "$ROOT" --scratch-path "$BUILD" "${SDK_FLAGS[@]}" --show-bin-path)"
 
 if [[ ! -f "$ROOT/Resources/AppIcon.icns" ]]; then
   echo "→ Drawing the app icon…"
@@ -27,6 +33,10 @@ echo "→ Assembling ${APP_NAME}…"
 rm -rf "$APP"
 mkdir -p "$APP/Contents/MacOS" "$APP/Contents/Resources"
 cp "$BIN_DIR/FanficEngine" "$APP/Contents/MacOS/FanficEngine"
+# Stop if the app doesn't carry the SDK version (it would silently fall back to the old look).
+if vtool -show-build "$APP/Contents/MacOS/FanficEngine" | awk -v want="$SDK_VERSION" '$1 == "sdk" && $2 != want { bad = 1 } END { exit !bad }'; then
+  echo "✗ The app does not say it was built with SDK $SDK_VERSION:"; vtool -show-build "$APP/Contents/MacOS/FanficEngine" | grep -E 'sdk|minos'; exit 1
+fi
 cp "$ROOT/Resources/Info.plist" "$APP/Contents/Info.plist"
 cp "$ROOT/Resources/AppIcon.icns" "$APP/Contents/Resources/AppIcon.icns"
 # Sparkle, the updater (SPEC section 10): the framework next to the app's code, found through the run path.

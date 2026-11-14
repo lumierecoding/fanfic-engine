@@ -1,4 +1,4 @@
-"""Crafted files from the security scan of 4 November 2026 (SPEC section 3) — the same cases as
+"""Crafted files from the security scans of 4 and 13 November 2026 (SPEC section 3) — the same cases as
 Tests/FanficCoreTests/SecurityTests.swift: each must be refused or read quickly, and the faster code must give exactly
 the same results as the code it replaced."""
 
@@ -21,12 +21,16 @@ from fanficengine.core.models import WorkRecord
 from fanficengine.core.reader import EPUBBook, ReadError, read_epub
 
 
-def epub_data(docs: list[str], extra: dict[str, bytes] | None = None) -> bytes:
-    """An EPUB with the given (X)HTML documents in its reading order."""
+def epub_data(docs: list[str], extra: dict[str, bytes] | None = None, *, manifest: str | None = None,
+              spine: str | None = None) -> bytes:
+    """An EPUB with the given (X)HTML documents (d0.xhtml, d1.xhtml, …) in its reading order, or with its own manifest
+    and spine (the elements inside them)."""
     container = ('<?xml version="1.0"?><container version="1.0" xmlns="urn:oasis:names:tc:opendocument:xmlns:container">'
                  '<rootfiles><rootfile full-path="content.opf" media-type="application/oebps-package+xml"/></rootfiles></container>')
-    manifest = "".join(f'<item id="d{i}" href="d{i}.xhtml" media-type="application/xhtml+xml"/>' for i in range(len(docs)))
-    spine = "".join(f'<itemref idref="d{i}"/>' for i in range(len(docs)))
+    if manifest is None:
+        manifest = "".join(f'<item id="d{i}" href="d{i}.xhtml" media-type="application/xhtml+xml"/>' for i in range(len(docs)))
+    if spine is None:
+        spine = "".join(f'<itemref idref="d{i}"/>' for i in range(len(docs)))
     package = ('<?xml version="1.0"?><package xmlns="http://www.idpf.org/2007/opf" version="2.0">'
                '<metadata xmlns:dc="http://purl.org/dc/elements/1.1/"><dc:title>Crafted</dc:title></metadata>'
                f"<manifest>{manifest}</manifest><spine>{spine}</spine></package>")
@@ -72,6 +76,44 @@ def test_part_that_unpacks_to_more_than_it_claims_stays_small():
     finally:
         tracemalloc.stop()
     assert peak < 64 * 1024 * 1024, f"{peak / 1e6:.0f} MB"
+
+
+def test_repeated_long_spine_path_stays_small():
+    """The scan of 13 November, larger: one manifest entry with a 60,000-byte path of many parts and its id 200,000 times
+    in the spine. The old code resolved and kept every copy (about 12 GB) before the 50-document limit applied."""
+    long_path = "/".join(["abcdefghi"] * 6_000) + ".xhtml"
+    data = epub_data([], manifest=f'<item id="long" href="{long_path}"/>', spine='<itemref idref="long"/>' * 200_000)
+    tracemalloc.start()
+    try:
+        start = time.perf_counter()
+        book = EPUBBook(data)
+        elapsed = time.perf_counter() - start
+        peak = tracemalloc.get_traced_memory()[1]
+    finally:
+        tracemalloc.stop()
+    assert book.spine_paths == [long_path] * reader.MAX_DOCUMENTS_TRIED
+    assert peak < 256 * 1024 * 1024, f"{peak / 1e6:.0f} MB"
+    assert elapsed < 30, f"{elapsed:.1f} s"
+    with pytest.raises(ReadError):
+        read_epub(data, "x")  # the document doesn't exist, so the work has no text
+
+
+def test_overlong_spine_path_is_left_out():
+    long = "a" * 70_000 + ".xhtml"
+    data = epub_data(["<p>Relationship: Harry Potter/Draco Malfoy</p>"],
+                     manifest=f'<item id="long" href="{long}"/><item id="d0" href="d0.xhtml"/>',
+                     spine='<itemref idref="long"/><itemref idref="d0"/><itemref idref="long"/>')
+    assert EPUBBook(data).spine_paths == ["d0.xhtml"]
+    assert read_epub(data, "x").relationships == ["Harry Potter/Draco Malfoy"]
+
+
+def test_spine_order_is_the_same_as_before():
+    data = epub_data(["<p>a</p>", "<p>b</p>"], manifest='<item id="d0" href="d0.xhtml"/><item id="d1" href="sub/../d1.xhtml#top"/>',
+                     spine='<itemref idref="d0"/><itemref idref="x"/><itemref idref="d0"/><itemref idref="d1"/>')
+    assert EPUBBook(data).spine_paths == ["d0.xhtml", "d0.xhtml", "d1.xhtml"]
+    many = "".join(f'<itemref idref="d{i % 2}"/>' for i in range(60))
+    book = EPUBBook(epub_data(["<p>a</p>", "<p>b</p>"], spine=many))
+    assert book.spine_paths == [f"d{i % 2}.xhtml" for i in range(50)]
 
 
 def test_at_most_50_documents_are_read():

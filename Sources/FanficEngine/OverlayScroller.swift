@@ -48,24 +48,27 @@ struct OverlayScroller: NSViewRepresentable {
             scrollView.scrollerStyle = .overlay
         }
 
-        /// The scroll view whose frame in the window matches this view's frame (the list's), searched from the top.
+        /// The scroll view behind this view (the list's): it ends at the same right edge and covers this view's middle.
+        /// With the Liquid Glass design scroll views reach under the floating sidebar and the toolbar, so their left
+        /// edge and height no longer match the visible column (ui-spec change 13); when several fit (the Filter page's
+        /// choices above its result list), the smallest wins.
         private func findScrollView() -> NSScrollView? {
             guard let root = window?.contentView, bounds.width > 0 else { return nil }
             let mine = convert(bounds, to: nil)
-            func search(_ view: NSView) -> NSScrollView? {
+            let middle = CGPoint(x: mine.midX, y: mine.midY)
+            var best: (scroll: NSScrollView, area: CGFloat)?
+            func search(_ view: NSView) {
                 if let scroll = view as? NSScrollView {
                     let frame = scroll.convert(scroll.bounds, to: nil)
-                    if abs(frame.minX - mine.minX) <= 2, abs(frame.width - mine.width) <= 2,
-                       frame.contains(CGPoint(x: mine.midX, y: mine.midY)) {
-                        return scroll
+                    if abs(frame.maxX - mine.maxX) <= 2, frame.minX <= mine.minX + 2, frame.contains(middle) {
+                        let area = frame.width * frame.height
+                        if best == nil || area < best!.area { best = (scroll, area) }
                     }
                 }
-                for subview in view.subviews {
-                    if let found = search(subview) { return found }
-                }
-                return nil
+                for subview in view.subviews { search(subview) }
             }
-            return search(root)
+            search(root)
+            return best?.scroll
         }
     }
 }
