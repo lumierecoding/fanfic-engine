@@ -1,6 +1,6 @@
 # Changelog
 
-## 1.3 — unreleased
+## 1.3 — 2026-11-14
 
 - **Filter page:** click **Filter** in the sidebar to combine up to **5 tags** (a fic is shown only when it has all of them) and to **leave out** pairings, fandoms, characters and tags you don't want to see. Type the start of a word in an *Add…* field and pick a match; each choice becomes a capsule you can remove. The search field searches inside the result, and **Clear Filter** removes every choice. The filter doesn't change your library.
 - **A new look:** the window uses macOS's Liquid Glass. The sidebar's rows, the works and the filter's choices sit on glass, and behind them a soft arc of shade drifts slowly under frosted glass while the app is in front. It stands still with *Reduce Motion* or in Low Power Mode. On macOS 15, where Liquid Glass doesn't exist, the app uses frosted materials instead.

@@ -80,7 +80,7 @@ if command -v uv >/dev/null; then
   (cd "$ROOT/desktop" && uv build --wheel --out-dir "$DIST" >/dev/null 2>&1)
 fi
 echo "→ Update feed (appcast.xml)…"
-# The private update key never goes into the repository or iCloud Drive (scripts/update-key.swift).
+# The private update key never goes into the repository (scripts/update-key.swift).
 KEY="${FANFIC_UPDATE_KEY:-$WORK/keys/fanfic-engine-update.key}"
 [[ -f "$KEY" ]] || { echo "✗ No update key at $KEY (see scripts/update-key.swift)"; exit 1; }
 PUBLIC="$(/usr/libexec/PlistBuddy -c 'Print SUPublicEDKey' "$ROOT/Resources/Info.plist")"

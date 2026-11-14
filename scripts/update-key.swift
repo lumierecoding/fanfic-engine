@@ -1,6 +1,6 @@
 #!/usr/bin/env swift
 // The EdDSA (Ed25519) key that signs Fanfic Engine's updates for Sparkle (SPEC section 10).
-// The private key is a file (base64 of the 32-byte key), kept outside the repository and iCloud Drive and never in
+// The private key is a file (base64 of the 32-byte key), kept outside the repository and never in
 // the Keychain; the public key goes into Resources/Info.plist as SUPublicEDKey. Back the private key up: without it,
 // installed copies can't be updated in the app any more.
 //
